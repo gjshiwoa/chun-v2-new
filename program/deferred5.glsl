@@ -34,7 +34,7 @@ const bool shadowcolor1Nearest = false;
 
 #include "/lib/common/gbufferData.glsl"
 #include "/lib/common/materialIdMapper.glsl"
-#include "/lib/atmosphere/octahedralMapping.glsl"
+#include "/lib/common/octahedralMapping.glsl"
 
 void main() {
 	vec4 CT7 = vec4(0.0, 0.0, 0.0, 1.0);
@@ -55,6 +55,7 @@ void main() {
 	mat2x3 atmosphericScattering = AtmosphericScattering(worldDir * d_p2a, worldDirO, sunWorldDir, IncomingLight * (1.0 - 0.3 * rainStrength), 1.0, int(ATMOSPHERE_SCATTERING_SAMPLES * 0.5));
 	atmosphericScattering += AtmosphericScattering(worldDir * d_p2a, worldDirO, moonWorldDir, IncomingLight * getLuminance(IncomingLight), 1.0, int(ATMOSPHERE_SCATTERING_SAMPLES * 0.5)) * 0.0002 * SKY_BASE_COLOR_BRIGHTNESS_N;
 	vec3 skyBaseColor = atmosphericScattering[0] + atmosphericScattering[1];
+	skyBaseColor *= SKY_BASE_COLOR_BRIGHTNESS;
 
 	float cloudTransmittance = 1.0;
 	vec3 cloudScattering = vec3(0.0);
@@ -64,11 +65,10 @@ void main() {
 		cloudRayMarching(color, camera, worldDir * d, cloudTransmittance, cloudScattering, cloudHitLength);
 	#endif
 
-	skyBaseColor *= SKY_BASE_COLOR_BRIGHTNESS;
 	vec3 celestial = drawCelestial(worldDir, cloudTransmittance, false);
 
 	color.rgb = skyBaseColor;	
-	color.rgb += celestial;
+	// color.rgb += celestial;
 	cloudTransmittance = max(cloudTransmittance, 0.0);
 	cloudScattering = max(cloudScattering, vec3(0.0));
 	color.rgb = color.rgb * cloudTransmittance + cloudScattering * CLOUD_BRIGHTNESS;

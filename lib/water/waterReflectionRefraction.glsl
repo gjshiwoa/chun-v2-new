@@ -10,7 +10,7 @@ vec2 waterRefractionCoord(vec3 normalTex, vec3 worldNormal, float worldDis0){
 
     return refractCoord;
 }
-#include "/lib/atmosphere/octahedralMapping.glsl"
+#include "/lib/common/octahedralMapping.glsl"
 
 vec3 skyReflection(vec3 reflectWorldDir, vec3 worldPos){
     #ifndef GBF

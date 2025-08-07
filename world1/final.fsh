@@ -2,4 +2,4 @@
 
 #define FSH
 
-#include "/program/composite27.glsl"
+#include "/program/final.glsl"

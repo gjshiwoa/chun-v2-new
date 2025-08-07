@@ -280,7 +280,8 @@ void main() {
 			float upDirFactor = smoothstep(-1.0, 0.0, NdotU);
 			int ssrTargetSampled = 0;	
 			vec3 reflectColor = reflection(gaux1, vViewPos.xyz, reflectWorldDir, reflectViewDir, 
-											lightmap.y * upDirFactor, normalTexV, COLOR_UI_SCALE, ssrTargetSampled);
+											lightmap.y * upDirFactor, normalTexV, COLOR_UI_SCALE, ssrTargetSampled)
+											+ drawCelestial(reflectWorldDir, 1.0, false) * shade;
 			float NdotV = saturate(dot(normalTexV, -viewDir));
 
 			vec3 F0 = mix(vec3(0.04), albedo, materialParams.metalness); 

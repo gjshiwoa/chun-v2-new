@@ -29,7 +29,7 @@ varying float isNoon, isNight, sunRiseSet;
 
 #include "/lib/water/waterReflectionRefraction.glsl"
 #include "/lib/surface/PBR.glsl"
-#include "/lib/atmosphere/octahedralMapping.glsl"
+#include "/lib/common/octahedralMapping.glsl"
 
 
 void main() {
