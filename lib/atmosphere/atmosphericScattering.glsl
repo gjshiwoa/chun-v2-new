@@ -145,14 +145,11 @@ vec3 TransmittanceToAtmosphere(vec3 p, vec3 dir){
     vec2 uv = GetTransmittanceLutUv(bottomRadius, topRadius, cos_theta, r);
     if(outScreen(uv)) return BLACK;
 
-    uv = uv * T1_RES + T1_UV;
-    uv *= invViewSize;
+    uv = vec2(remap(uv.x, 0.0, 1.0, T1_I.x, T1_I.z),
+              remap(uv.y, 0.0, 1.0, T1_I.y, T1_I.w));
+    uv /= 512.0;
 
-#ifdef GBF
-    return textureORB(gaux2, uv).rgb;
-#endif
-
-    return textureORB(colortex1, uv).rgb;
+    return texture(colortex7, uv).rgb;
 }
 
 vec3 IntegralMultiScattering(vec3 samplePoint, vec3 lightDir){
@@ -279,16 +276,13 @@ vec3 DrawMultiScatteringLut(){
 vec3 GetMultiScattering(float h, vec3 p, vec3 lightDir){
     float cosSunZenithAngle = dot(normalize(p), lightDir);
     vec2 uv = vec2(cosSunZenithAngle * 0.5 + 0.5, mix(1.0, h / atmosphere_h, 1.0));
-    // if(outScreen(uv)) return vec3(0.0);
+    if(outScreen(uv)) return vec3(0.0);
 
-    uv = uv * MS_RES + MS_UV;
-    uv *= invViewSize;
+    uv = vec2(remap(uv.x, 0.0, 1.0, MS_I.x, MS_I.z),
+              remap(uv.y, 0.0, 1.0, MS_I.y, MS_I.w));
+    uv /= 512.0;
 
-#ifdef GBF
-    return textureORB(gaux2, uv).rgb * 0.02;
-#endif
-
-    return textureORB(colortex1, uv).rgb * 0.02;
+    return texture(colortex7, uv).rgb * 0.02;
 }
 
 void getDensity(float h, out float dRayleigh_c, out float dMie_c){
@@ -404,32 +398,14 @@ vec3 Transmittance1(vec3 startPos, vec3 endPos, float stepCount){
     return t;
 }
 
-
-
-#define SUN_COLOR_UV ivec2(1, viewSize.y - 1)
-#define SKY_COLOR_UV ivec2(3, viewSize.y - 1)
-
 vec3 getSunColor(){
-    vec3 sunColor = texelFetch(colortex1, SUN_COLOR_UV, 0).rgb;
+    vec3 sunColor = texelFetch(colortex7, sunColorUV, 0).rgb;
     return sunColor;
 }
 
 vec3 getSkyColor(){
-    vec3 skyColor = texelFetch(colortex1, SKY_COLOR_UV, 0).rgb;
+    vec3 skyColor = texelFetch(colortex7, skyColorUV, 0).rgb;
     return skyColor;
-}
-
-#define ZENITH_COLOR_UV ivec2(5, viewSize.y - 1)
-#define HORIZON_COLOR_UV ivec2(7, viewSize.y - 1)
-
-vec3 getZenithColor(){
-    vec3 zenithColor = texelFetch(colortex1, ZENITH_COLOR_UV, 0).rgb;
-    return zenithColor;
-}
-
-vec3 getHorizonColor(){
-    vec3 horizonColor = texelFetch(colortex1, HORIZON_COLOR_UV, 0).rgb;
-    return horizonColor;
 }
 
 /*

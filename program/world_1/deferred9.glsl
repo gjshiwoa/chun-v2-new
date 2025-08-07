@@ -102,8 +102,8 @@ void main() {
 
 	sunColor = getSunColor();
 	skyColor = getSkyColor();
-	zenithColor = getZenithColor();
-	horizonColor = getHorizonColor();
+	// zenithColor = getZenithColor();
+	// horizonColor = getHorizonColor();
 
 	gl_Position = ftransform();
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;

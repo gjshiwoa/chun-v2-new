@@ -290,7 +290,7 @@ void cloudRayMarching(vec3 oriColor, vec3 startPos, vec3 worldPos, inout float t
 
     float verticalness = abs(dot(worldDir, upWorldDir));
     int N_SAMPLES = int(remap(verticalness, 0.0, 1.0, VOLUMETRIC_CLOUDS_MAX_SAMPLES, VOLUMETRIC_CLOUDS_MIN_SAMPLES));
-    #ifdef DF5
+    #ifdef SKY_BOX
         N_SAMPLES = 6;
     #endif
 

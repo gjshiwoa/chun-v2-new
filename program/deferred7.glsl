@@ -1,0 +1,117 @@
+varying vec2 texcoord;
+
+varying vec3 sunWorldDir, moonWorldDir, lightWorldDir;
+varying vec3 sunViewDir, moonViewDir, lightViewDir;
+
+varying vec3 sunColor, skyColor;
+
+varying float isNoon, isNight, sunRiseSet;
+varying float isNoonS, isNightS, sunRiseSetS;
+
+
+
+#include "/lib/uniform.glsl"
+#include "/lib/settings.glsl"
+#include "/lib/common/utils.glsl"
+#include "/lib/camera/colorToolkit.glsl"
+#include "/lib/camera/filter.glsl"
+#include "/lib/common/position.glsl"
+#include "/lib/common/normal.glsl"
+#include "/lib/common/noise.glsl"
+#include "/lib/atmosphere/atmosphericScattering.glsl"
+#include "/lib/atmosphere/celestial.glsl"
+#include "/lib/atmosphere/volumetricClouds.glsl"
+
+#ifdef FSH
+const bool shadowtex1Mipmap = true;
+const bool shadowtex1Nearest = false;
+
+const bool shadowcolor0Mipmap = true;
+const bool shadowcolor0Nearest = false;
+const bool shadowcolor1Mipmap = true;
+const bool shadowcolor1Nearest = false;
+
+#include "/lib/common/gbufferData.glsl"
+#include "/lib/common/materialIdMapper.glsl"
+#include "/lib/common/octahedralMapping.glsl"
+
+void main() {
+	vec4 CT7 = texture(colortex7, texcoord);
+
+	vec2 uv = texcoord * 2.0;
+	if(!outScreen(uv)){
+
+		vec3 worldDirO = octahedralToDirection(uv);
+		vec3 worldDir = normalize(vec3(worldDirO.x, max(worldDirO.y, 0.0), worldDirO.z));
+
+		float d_p2a = RaySphereIntersection(earthPos, worldDir, vec3(0.0), earth_r + atmosphere_h).y;
+		float d_p2e = RaySphereIntersection(earthPos, worldDir, vec3(0.0), earth_r).x;
+		float d = d_p2e > 0.0 ? d_p2e : d_p2a;
+		d = max(d, 0.0);
+
+		mat2x3 atmosphericScattering = AtmosphericScattering(worldDir * d_p2a, worldDirO, sunWorldDir, IncomingLight * (1.0 - 0.3 * rainStrength), 1.0, int(ATMOSPHERE_SCATTERING_SAMPLES * 0.5));
+		atmosphericScattering += AtmosphericScattering(worldDir * d_p2a, worldDirO, moonWorldDir, IncomingLight * getLuminance(IncomingLight), 1.0, int(ATMOSPHERE_SCATTERING_SAMPLES * 0.5)) * 0.0002 * SKY_BASE_COLOR_BRIGHTNESS_N;
+		vec3 skyBaseColor = atmosphericScattering[0] + atmosphericScattering[1];
+		skyBaseColor *= SKY_BASE_COLOR_BRIGHTNESS;
+
+		float cloudTransmittance = 1.0;
+		vec3 cloudScattering = vec3(0.0);
+		float cloudHitLength = 0.0;
+		vec3 color = vec3(0.0);
+		#ifdef VOLUMETRIC_CLOUDS
+			cloudRayMarching(color, camera, worldDir * d, cloudTransmittance, cloudScattering, cloudHitLength);
+		#endif
+
+		vec3 celestial = drawCelestial(worldDir, cloudTransmittance, false);
+
+		color.rgb = skyBaseColor;	
+		// color.rgb += celestial;
+		cloudTransmittance = max(cloudTransmittance, 0.0);
+		cloudScattering = max(cloudScattering, vec3(0.0));
+		color.rgb = color.rgb * cloudTransmittance + cloudScattering * CLOUD_BRIGHTNESS;
+
+		if(cloudTransmittance < 1.0){
+			color.rgb = mix(skyBaseColor + celestial, color.rgb, 
+					mix(saturate(1.0 * pow(getLuminance(cloudScattering), 1.0)), exp(-cloudHitLength / (CLOUD_SKY_MIX * (1.0 + 1.0 * sunRiseSetS))) * 0.90, 0.60));
+		}
+		
+		CT7.rgb = max(color.rgb, vec3(0.0));
+
+		CT7.rgb = mix(texture(colortex7, texcoord).rgb, CT7.rgb, 0.05);
+	}
+
+/* DRAWBUFFERS:7 */
+	gl_FragData[0] = CT7;
+}
+
+#endif
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef VSH
+
+void main() {
+	sunViewDir = normalize(sunPosition);
+	moonViewDir = normalize(moonPosition);
+	lightViewDir = normalize(shadowLightPosition);
+
+	sunWorldDir = normalize(viewPosToWorldPos(vec4(sunPosition, 0.0)).xyz);
+    moonWorldDir = normalize(viewPosToWorldPos(vec4(moonPosition, 0.0)).xyz);
+    lightWorldDir = normalize(viewPosToWorldPos(vec4(shadowLightPosition, 0.0)).xyz);
+
+	isNoon = saturate(dot(sunWorldDir, upWorldDir) * NOON_DURATION);
+	isNight = saturate(dot(moonWorldDir, upWorldDir) * NIGHT_DURATION);
+	sunRiseSet = saturate(1 - isNoon - isNight);
+
+	float isNoonS = saturate(dot(sunWorldDir, upWorldDir) * NOON_DURATION_SLOW);
+	float isNightS = saturate(dot(moonWorldDir, upWorldDir) * NIGHT_DURATION_SLOW);
+	float sunRiseSetS = saturate(1 - isNoonS - isNightS);
+
+	sunColor = getSunColor();
+	skyColor = getSkyColor();
+
+	gl_Position = ftransform();
+	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+}
+
+#endif

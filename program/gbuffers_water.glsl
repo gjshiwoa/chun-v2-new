@@ -13,7 +13,6 @@ varying vec3 sunWorldDir, moonWorldDir, lightWorldDir;
 varying vec3 sunViewDir, moonViewDir, lightViewDir;
 
 varying vec3 sunColor, skyColor;
-varying vec3 zenithColor, horizonColor;
 
 varying mat3 tbnMatrix;
 
@@ -26,7 +25,6 @@ varying mat3 tbnMatrix;
 #include "/lib/common/noise.glsl"
 #include "/lib/common/normal.glsl"
 
-#include "/lib/atmosphere/atmosphericScattering.glsl"
 #include "/lib/atmosphere/celestial.glsl"
 
 #include "/lib/lighting/lightmap.glsl"
@@ -369,10 +367,8 @@ void main() {
 	isNightS = saturate(dot(moonWorldDir, upWorldDir) * NIGHT_DURATION_SLOW);
 	sunRiseSetS = saturate(1 - isNoonS - isNightS);
 
-	sunColor = texelFetch(gaux2, SUN_COLOR_UV, 0).rgb;
-	skyColor = texelFetch(gaux2, SKY_COLOR_UV, 0).rgb;
-	zenithColor = texelFetch(gaux2, ZENITH_COLOR_UV, 0).rgb;
-	horizonColor = texelFetch(gaux2, HORIZON_COLOR_UV, 0).rgb;
+	sunColor = texelFetch(gaux4, sunColorUV, 0).rgb;
+	skyColor = texelFetch(gaux4, skyColorUV, 0).rgb;
 
 	lmcoord  = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;

@@ -4,7 +4,7 @@ varying vec3 sunWorldDir, moonWorldDir, lightWorldDir;
 varying vec3 sunViewDir, moonViewDir, lightViewDir;
 
 varying vec3 sunColor, skyColor;
-varying vec3 zenithColor, horizonColor;
+// varying vec3 zenithColor, horizonColor;
 
 varying float isNoon, isNight, sunRiseSet;
 
@@ -102,8 +102,8 @@ void main() {
 
 	sunColor = getSunColor();
 	skyColor = getSkyColor();
-	zenithColor = getZenithColor();
-	horizonColor = getHorizonColor();
+	// zenithColor = getZenithColor();
+	// horizonColor = getHorizonColor();
 
 	gl_Position = ftransform();
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;

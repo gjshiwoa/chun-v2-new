@@ -8,7 +8,7 @@ uniform sampler2D depthtex1;
 
 // 感谢 樱雪 大佬在兼容性方面提供的帮助
 
-#if defined DF4 || defined DF8 || defined DF5
+#if defined CLOUD3D || defined SKY_BOX
 uniform sampler3D depthtex2;
 uniform sampler3D colortex2;
 #else

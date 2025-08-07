@@ -3,11 +3,6 @@ varying vec2 texcoord;
 varying vec3 sunWorldDir, moonWorldDir, lightWorldDir;
 varying vec3 sunViewDir, moonViewDir, lightViewDir;
 
-// varying vec3 sunColor, skyColor;
-varying vec3 horizonColor;
-
-varying float isNoon, isNight, sunRiseSet;
-
 
 #include "/lib/uniform.glsl"
 #include "/lib/settings.glsl"
@@ -82,7 +77,10 @@ void main() {
 		CT6 = texelFetch(colortex6, ivec2(gl_FragCoord.xy - 0.5 * viewSize), 0);;
 	}
 
-	// color.rgb = texture(colortex7, directionToOctahedral(normalize(mat3(gbufferModelViewInverse) * viewPos1.xyz))).rgb;
+	// vec3 worldDir = normalize(mat3(gbufferModelViewInverse) * viewPos1.xyz);
+	// color.rgb = texture(colortex7, clamp(0.5 * directionToOctahedral(worldDir), 0.0, 0.5 - 1.0 / 512.0)).rgb;
+	// color.rgb = texture(colortex7, texcoord).rgb;
+
 
 /* DRAWBUFFERS:0456 */
 	gl_FragData[0] = color;
@@ -105,14 +103,6 @@ void main() {
 	sunWorldDir = normalize(viewPosToWorldPos(vec4(sunPosition, 0.0)).xyz);
     moonWorldDir = normalize(viewPosToWorldPos(vec4(moonPosition, 0.0)).xyz);
     lightWorldDir = normalize(viewPosToWorldPos(vec4(shadowLightPosition, 0.0)).xyz);
-
-	isNoon = saturate(dot(sunWorldDir, upWorldDir) * NOON_DURATION);
-	isNight = saturate(dot(moonWorldDir, upWorldDir) * NIGHT_DURATION);
-	sunRiseSet = saturate(1 - isNoon - isNight);
-
-	// sunColor = getSunColor();
-	// skyColor = getSkyColor();
-	horizonColor = texelFetch(colortex1, HORIZON_COLOR_UV, 0).rgb;
 
 	gl_Position = ftransform();
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;

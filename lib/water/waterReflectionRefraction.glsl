@@ -12,11 +12,12 @@ vec2 waterRefractionCoord(vec3 normalTex, vec3 worldNormal, float worldDis0){
 }
 #include "/lib/common/octahedralMapping.glsl"
 
-vec3 skyReflection(vec3 reflectWorldDir, vec3 worldPos){
+vec3 skyReflection(vec3 reflectWorldDir){
     #ifndef GBF
-        vec3 reflectSkyColor = texture(colortex7, directionToOctahedral(reflectWorldDir)).rgb;
+        vec3 reflectSkyColor = texture(colortex7, clamp(directionToOctahedral(reflectWorldDir) * 0.5, 0.0, 0.5 - 1.0 / 512.0)).rgb;
+
     #else
-        vec3 reflectSkyColor = texture(gaux4, directionToOctahedral(reflectWorldDir)).rgb;
+        vec3 reflectSkyColor = texture(gaux4, clamp(directionToOctahedral(reflectWorldDir) * 0.5, 0.0, 0.5 - 1.0 / 512.0)).rgb;
     #endif
 
     return max(reflectSkyColor, vec3(0.0));
@@ -26,7 +27,7 @@ vec3 reflection(sampler2D tex, vec3 ViewPos, vec3 reflectWorldDir, vec3 reflectV
                 float lightmap, vec3 normalTex, float colorScale, inout int ssrTargetSampled){
     vec3 reflectColor = vec3(0.0);
     if(isEyeInWater == 0){
-        reflectColor = skyReflection(reflectWorldDir, viewPosToWorldPos(vec4(ViewPos, 1.0)).xyz);
+        reflectColor = skyReflection(reflectWorldDir);
 
         reflectColor = reflectColor * lightmap;
         // reflectColor += drawCelestial(reflectWorldDir, 1.0);

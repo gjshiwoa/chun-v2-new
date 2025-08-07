@@ -144,10 +144,14 @@ const vec3 OzoneAbsorptionSigma = vec3(0.650, 1.881, 0.085) * 1e-6;
 const float H_R = 8500.0;
 const float H_M = 1200.0;
 
-#define T1_RES ivec2(128, 64)
-#define MS_RES ivec2(64, 64)
-#define T1_UV ivec2(viewWidth * 0.5 + 2, viewHeight * 0.5 - T1_RES.y - 2)
-#define MS_UV ivec2(viewWidth * 0.5 - MS_RES.x - 2, viewHeight * 0.5 + 2)
+const ivec4 T1_I = ivec4(0, 511 - 64, 127, 511);
+const ivec4 T1_O = ivec4(0, 0, 127, 63);
+const ivec4 MS_I = ivec4(127 + 10, 511 - 64, 127 + 10 + 64, 511);
+const ivec4 MS_O = ivec4(0, 0, 63, 63);
+
+const ivec2 sunColorUV = ivec2(1, 256 + 10);
+const ivec2 skyColorUV = ivec2(1 + 10, 256 + 10);
+
 
 #define ATMOSPHERE_SCATTERING_SAMPLES 16    // [8 16 24 32 48 64 86 128]
 

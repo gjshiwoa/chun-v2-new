@@ -1,7 +1,6 @@
 #version 450 compatibility  
 
 #define FSH
-#define END
 #define CLOUD3D
 
-#include "/program/world_1/deferred4.glsl"
+#include "/program/deferred6.glsl"

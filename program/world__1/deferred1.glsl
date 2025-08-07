@@ -4,7 +4,7 @@ varying vec3 sunWorldDir, moonWorldDir, lightWorldDir;
 varying vec3 sunViewDir, moonViewDir, lightViewDir;
 
 varying vec3 sunColor, skyColor;
-varying vec3 zenithColor, horizonColor;
+// varying vec3 zenithColor, horizonColor;
 
 varying float isNoon, isNight, sunRiseSet;
 
@@ -63,21 +63,21 @@ void main() {
 		#endif
 	}
 
-	if(ivec2(gl_FragCoord.xy) == SUN_COLOR_UV){
-		CT1.rgb = sunColor;
-	}
+	// if(ivec2(gl_FragCoord.xy) == SUN_COLOR_UV){
+	// 	CT1.rgb = sunColor;
+	// }
 
-	if(ivec2(gl_FragCoord.xy) == SKY_COLOR_UV){
-		CT1.rgb = skyColor;
-	}
+	// if(ivec2(gl_FragCoord.xy) == SKY_COLOR_UV){
+	// 	CT1.rgb = skyColor;
+	// }
 
-	if(ivec2(gl_FragCoord.xy) == ZENITH_COLOR_UV){
-		CT1.rgb = zenithColor;
-	}
+	// if(ivec2(gl_FragCoord.xy) == ZENITH_COLOR_UV){
+	// 	CT1.rgb = zenithColor;
+	// }
 
-	if(ivec2(gl_FragCoord.xy) == HORIZON_COLOR_UV){
-		CT1.rgb = horizonColor;
-	}
+	// if(ivec2(gl_FragCoord.xy) == HORIZON_COLOR_UV){
+	// 	CT1.rgb = horizonColor;
+	// }
 
 
 /* DRAWBUFFERS:13 */

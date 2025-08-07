@@ -14,7 +14,6 @@ varying vec3 sunColor, skyColor;
 
 #include "/lib/lighting/lightmap.glsl"
 
-#include "/lib/atmosphere/atmosphericScattering.glsl"
 
 #ifdef FSH
 
@@ -54,8 +53,8 @@ void main() {
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
 	glcolor = gl_Color;
 
-	sunColor = texelFetch(gaux2, SUN_COLOR_UV, 0).rgb;
-	skyColor = texelFetch(gaux2, SKY_COLOR_UV, 0).rgb;
+	sunColor = texelFetch(gaux4, sunColorUV, 0).rgb;
+	skyColor = texelFetch(gaux4, skyColorUV, 0).rgb;
 }
 
 #endif

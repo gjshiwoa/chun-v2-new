@@ -3,12 +3,6 @@ varying vec2 texcoord;
 varying vec3 sunWorldDir, moonWorldDir, lightWorldDir;
 varying vec3 sunViewDir, moonViewDir, lightViewDir;
 
-varying vec3 sunColor, skyColor;
-varying vec3 zenithColor, horizonColor;
-
-varying float isNoon, isNight, sunRiseSet;
-
-
 #include "/lib/uniform.glsl"
 #include "/lib/settings.glsl"
 #include "/lib/common/utils.glsl"
@@ -22,10 +16,7 @@ varying float isNoon, isNight, sunRiseSet;
 #include "/lib/atmosphere/atmosphericScattering.glsl"
 
 #ifdef FSH
-// #include "/lib/common/gbufferData.glsl"
-// #include "/lib/common/materialIdMapper.glsl"
 #include "/lib/lighting/lightmap.glsl"
-// #include "/lib/atmosphere/celestial.glsl"
 #include "/lib/water/waterReflectionRefraction.glsl"
 #include "/lib/surface/PBR.glsl"
 
@@ -97,15 +88,6 @@ void main() {
 	sunWorldDir = normalize(viewPosToWorldPos(vec4(sunPosition, 0.0)).xyz);
     moonWorldDir = normalize(viewPosToWorldPos(vec4(moonPosition, 0.0)).xyz);
     lightWorldDir = normalize(viewPosToWorldPos(vec4(shadowLightPosition, 0.0)).xyz);
-
-	isNoon = saturate(dot(sunWorldDir, upWorldDir) * NOON_DURATION);
-	isNight = saturate(dot(moonWorldDir, upWorldDir) * NIGHT_DURATION);
-	sunRiseSet = saturate(1 - isNoon - isNight);
-
-	sunColor = getSunColor();
-	skyColor = getSkyColor();
-	zenithColor = getZenithColor();
-	horizonColor = getHorizonColor();
 
 	gl_Position = ftransform();
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;

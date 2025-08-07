@@ -3,4 +3,4 @@
 #define VSH
 #define CLOUD3D
 
-#include "/program/world__1/deferred8.glsl"
+#include "/program/deferred6.glsl"

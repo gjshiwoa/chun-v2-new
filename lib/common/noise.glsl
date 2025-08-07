@@ -81,7 +81,7 @@ vec3 temporalBayer64_3D(vec2 fragCoord){
     return vec3(noiseX, noiseY, noiseZ);
 }
 
-// #ifndef DF8
+// #ifndef CLOUD3D
 // float temporalBlueNoise(vec2 fragCoord) {
 //     float blueNoise = texelFetch(noisetex, ivec2(fragCoord) % noiseTextureResolution, 0).r;
 //     return fract(blueNoise + float(frameCounter) * GOLDEN_RATIO);
