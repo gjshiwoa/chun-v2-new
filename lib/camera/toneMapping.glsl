@@ -24,7 +24,7 @@ const mat3 ACESToLinear = mat3(
     -0.07367, -0.00605, 1.07602
 );
 
-vec3 rtt_and_odt_fit(vec3 col){
+vec3 rrt_and_odt_fit(vec3 col){
     vec3 a = col * (col + 0.0245786) - 0.000090537;
     vec3 b = col * (0.983729 * col + 0.4329510) + 0.238081;
     return a / b;
@@ -33,7 +33,7 @@ vec3 rtt_and_odt_fit(vec3 col){
 vec3 ACESFull(vec3 col){
     col *= ACES_FULL_ADDITIVE;
     vec3 aces = LinearToACES * col;
-    aces = rtt_and_odt_fit(aces);
+    aces = rrt_and_odt_fit(aces);
     return ACESToLinear * aces;
 }
 
@@ -140,7 +140,7 @@ vec3 simpleFilter(vec3 color, vec3 slope, vec3 offset, vec3 power, float sat) {
 vec3 AgX(vec3 color) {
     color *= AGX_ADDITIVE;
 
-    color = LINEAR_SRGB_TO_LINEAR_REC2020 * color;
+    // color = LINEAR_SRGB_TO_LINEAR_REC2020 * color;
     color = AgXInsetMatrix * color;
 
     // log曲线来自 iterationT 
@@ -151,7 +151,7 @@ vec3 AgX(vec3 color) {
     color = agxDefaultContrastApprox7(color);
 
     color = AgXOutsetMatrix * color;
-    color = LINEAR_REC2020_TO_LINEAR_SRGB * color;
+    // color = LINEAR_REC2020_TO_LINEAR_SRGB * color;
     toLinear(color);
     
     return color;

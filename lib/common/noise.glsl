@@ -112,13 +112,22 @@ vec3 rand3_3(vec3 p) {
 
 
 
-vec3 textureN( sampler2D sam, vec2 uv ){
-    uv = uv*noiseTextureResolution + 0.5;
+vec3 textureN( sampler2D sam, vec2 uv, float resolution ){
+    uv = uv*resolution + 0.5;
     vec2 iuv = floor( uv );
     vec2 fuv = fract( uv );
     uv = iuv + fuv*fuv*(3.0-2.0*fuv);
-    uv = (uv - 0.5)/noiseTextureResolution;
+    uv = (uv - 0.5)/resolution;
     return texture( sam, uv ).rgb;
+}
+
+vec3 textureN(sampler3D sam, vec3 uv, float resolution) {
+    uv = uv * resolution + 0.5;
+    vec3 iuv = floor(uv);
+    vec3 fuv = fract(uv);
+    uv = iuv + fuv * fuv * (3.0 - 2.0 * fuv);
+    uv = (uv - 0.5) / resolution;
+    return texture(sam, uv).rgb;
 }
 
 
@@ -133,8 +142,8 @@ float get3DNoise(sampler2D tex, float resolution, vec3 pos) {
 
 	vec2 coord =  (uv  + 0.5f) / resolution;
 	vec2 coord2 = (uv2 + 0.5f) / resolution;
-	float xy1 = textureN(tex, coord).x;
-	float xy2 = textureN(tex, coord2).x;
+	float xy1 = textureN(tex, coord, resolution).x;
+	float xy2 = textureN(tex, coord2, resolution).x;
 	float n = mix(xy1, xy2, f.z);
     
     return n;

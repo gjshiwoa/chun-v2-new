@@ -5,15 +5,16 @@ uniform sampler2D specular;
 
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
+uniform sampler2D depthtex2;
 
 // 感谢 樱雪 大佬在兼容性方面提供的帮助
 
 #if defined CLOUD3D || defined SKY_BOX
-uniform sampler3D depthtex2;
 uniform sampler3D colortex2;
+uniform sampler3D colortex8;
 #else
-uniform sampler2D depthtex2;
 uniform sampler2D colortex2;
+uniform sampler2D colortex8;
 #endif
 
 uniform sampler2D noisetex;
@@ -37,6 +38,8 @@ uniform sampler2D colortex5;
 uniform sampler2D colortex6;
 uniform sampler2D colortex7;
 #endif
+
+uniform sampler2D colortex9;
 
 uniform sampler2DShadow shadowtex0;
 uniform sampler2D shadowtex1;
@@ -91,6 +94,7 @@ uniform mat4 shadowProjectionInverse;
 uniform mat4 shadowModelView;
 uniform mat4 shadowModelViewInverse;
 mat4 shadowMVP = shadowProjection * shadowModelView;
+mat4 shadowMVPInverse = shadowModelViewInverse * shadowProjectionInverse;
 
 #ifdef DISTANT_HORIZONS
     uniform sampler2D dhDepthTex0;

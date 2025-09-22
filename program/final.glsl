@@ -45,8 +45,8 @@ void main() {
 	// color.rgb = getNormal(texcoord);
 	// color.rgb = normalize(viewPosToWorldPos(vec4(color.rgb, 0.0)).xyz);
 	// color.rgb = texture(colortex7, texcoord).rgb;
-	// color.rgb = textureLod(shadowcolor1, texcoord, 0.0).rgb;
-	// color.rgb = vec3(textureLod(shadowcolor1, texcoord, 0.0).a);
+	// color.rgb = textureLod(shadowcolor0, texcoord, 0.0).rgb;
+	// color.rgb = vec3(textureLod(shadowcolor1, texcoord, 0.0));
 	// color.rgb = normalize((shadowProjection * vec4(color.rgb, 0.0)).xyz);
 	
 	// color.rgb = getSpecularTex(texcoord).rgb;

@@ -20,6 +20,35 @@ vec3 normalDecode(vec2 encN) {
     return n;
 }
 
+float packNormal(vec3 normal){
+    ivec3 q = ivec3(round(normal * 500.0));
+
+    q = clamp(q, ivec3(-512), ivec3(511));
+
+    uint xBits = uint(q.x & 0x3FF);
+    uint yBits = uint(q.y & 0x3FF);
+    uint zBits = uint(q.z & 0x3FF);
+
+    uint packedN = (xBits << 22) | (yBits << 12) | (zBits << 2);
+
+    return uintBitsToFloat(packedN);
+}
+
+vec3 unpackNormal(float packedFloat){
+    uint packedN = floatBitsToUint(packedFloat);
+
+    int x = int(packedN        ) >> 22;
+    int y = int(packedN << 10 ) >> 22;
+    int z = int(packedN << 20 ) >> 22;
+
+    vec3 normal;
+    normal.x = float(x) * 0.002;
+    normal.y = float(y) * 0.002;
+    normal.z = float(z) * 0.002;
+
+    return normal;
+}
+
 #if defined FSH && !defined GBF && !defined SHD
 vec3 getNormal(vec2 uv){
     return normalize(normalDecode(texture(colortex5, uv).rg));

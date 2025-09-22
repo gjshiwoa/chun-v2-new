@@ -21,13 +21,13 @@ varying vec3 sunColor, skyColor;
 #include "/lib/atmosphere/atmosphericScattering.glsl"
 
 #ifdef FSH
-const bool shadowtex1Mipmap = true;
-const bool shadowtex1Nearest = false;
+// const bool shadowtex1Mipmap = true;
+// const bool shadowtex1Nearest = false;
 
-const bool shadowcolor0Mipmap = true;
-const bool shadowcolor0Nearest = false;
-const bool shadowcolor1Mipmap = true;
-const bool shadowcolor1Nearest = false;
+// const bool shadowcolor0Mipmap = true;
+// const bool shadowcolor0Nearest = false;
+// const bool shadowcolor1Mipmap = true;
+// const bool shadowcolor1Nearest = false;
 
 
 
@@ -43,11 +43,12 @@ const bool shadowcolor1Nearest = false;
 
 #include "/lib/atmosphere/fog.glsl"
 #include "/lib/atmosphere/celestial.glsl"
-#include "/lib/atmosphere/volumetricClouds.glsl"
+// #include "/lib/atmosphere/volumetricClouds.glsl"
 
 
 
 void main() {
+	vec4 CT2 = texelFetch(colortex2, ivec2(gl_FragCoord.xy), 0);
 	vec4 color = texture(colortex0, texcoord);	// albedo
 	vec3 texColor = color.rgb;
 	vec3 albedo = toLinearR(texColor);
@@ -84,6 +85,11 @@ void main() {
 	vec3 shadowPos = getShadowPos(worldPos1).xyz;
 	float worldDis1 = length(worldPos1);
 
+	vec4 viewPos1R = screenPosToViewPos(vec4(texcoord.st, depth1, 1.0));
+	vec4 worldPos1R = viewPosToWorldPos(viewPos1R);
+	vec2 prePos = getPrePos(worldPos1R).xy;
+	vec2 velocity = texcoord - prePos;
+
 	if(isTerrain){	
 		vec2 lightmap = AdjustLightmap(mcLightmap);
 
@@ -118,12 +124,15 @@ void main() {
 		
 
 		vec4 gi = getGI(depth1, normalW);
+		gi.a = 1.0 - gi.a;
 		if(noRSM < 0.5) {
 			L2 = sunColor * BRDF_D * gi.rgb;
-			#ifdef AO_MULTI_BOUNCE
-				ao = AOMultiBounce(albedo, saturate(1.0 - gi.a));
-			#else 
-				ao = vec3(saturate(1.0 - gi.a));
+			#ifdef AO_ENABLED
+				#ifdef AO_MULTI_BOUNCE
+					ao = AOMultiBounce(albedo, saturate(gi.a));
+				#else 
+					ao = vec3(saturate(gi.a));
+				#endif
 			#endif
 		}
 
@@ -173,7 +182,7 @@ void main() {
 		
 		color.rgb += artificial;
 		// color.rgb = gi.rgb;
-		// color.rgb = vec3(1.0 - gi.a);
+		// color.rgb = vec3(gi.a);
 
 
 
@@ -219,22 +228,24 @@ void main() {
 		float VoL = saturate(dot(worldDir, sunWorldDir));
 		float phase = saturate(hgPhase1(VoL, 0.76 - 0.66 * rainStrength));
 		float crepuscularLight = 0.0;
-		if(phase > 0.01 && sunRiseSetS + rainStrength > 0.001) crepuscularLight = computeCrepuscularLight(viewPos1) * phase;
+		if(phase > 0.01 && sunRiseSetS + rainStrength * isNoon > 0.001) crepuscularLight = computeCrepuscularLight(viewPos1) * phase;
 
 		if(cloudTransmittance < 1.0){
 
 			color.rgb = 
 				mix((skyBaseColor + celestial), color.rgb, 
 					saturate(
-						mix(saturate(pow(getLuminance(cloudScattering), 1.0 - 0.45 * phase * sunRiseSetS)), 
-							exp(-cloudHitLength / (CLOUD_FADE_DISTANCE * (1.0 + 1.0 * phase * sunRiseSetS))) * 1.0, 
-							0.66)
-						// pow(exp(-cloudHitLength / (9000 * (1.0 + 1.0 * phase * sunRiseSetS))), mix(1.0, 1.0 - saturate(getLuminance(cloudScattering)), 0.25))
+						// mix(saturate(pow(getLuminance(cloudScattering), 1.0 - 0.45 * phase * sunRiseSetS)), 
+						// 	exp(-cloudHitLength / (CLOUD_FADE_DISTANCE * (1.0 + 1.0 * phase * sunRiseSetS))) * 1.0, 
+						// 	0.66)
+						pow(exp(-cloudHitLength / (CLOUD_FADE_DISTANCE * (1.0 + 1.0 * phase * sunRiseSetS))), 
+								remapSaturate(1.0 - saturate(getLuminance(cloudScattering - 0.5) + 0.05), 0.0, 1.0, 1.0, 2.0))
 					)
 				);
 			
 		}
-		color.rgb += pow(crepuscularLight, 1.0) * sunColor * (0.6 + 5.5 * rainStrength) * saturate(sunRiseSetS + rainStrength);
+		color.rgb += pow(crepuscularLight, 1.0) * sunColor * (0.6 + 5.5 * rainStrength) * saturate(sunRiseSetS + rainStrength)
+					* remapSaturate(camera.y, 600.0, 1000.0, 1.0, 0.0);
 		// color.rgb = vec3(computeCrepuscularLight(viewPos1));
 		// color.rgb = vec3(crepuscularLight);
 	}
@@ -245,9 +256,11 @@ void main() {
 	
 	CT4.rg = pack4x8To2x16(vec4(albedo, ao));
 
-/* DRAWBUFFERS:04 */
+/* DRAWBUFFERS:0249 */
 	gl_FragData[0] = color;
-	gl_FragData[1] = CT4;
+	gl_FragData[1] = CT2;
+	gl_FragData[2] = CT4;
+	gl_FragData[3] = vec4(velocity, 0.0, 1.0);
 }
 
 #endif

@@ -70,7 +70,7 @@ float blockerSearch(sampler2D shadowMap, vec3 shadowPos, float radius, float qua
     for (int i = 0; i < quality; i++) {
         vec2 offset = curDir * pow(radius, 0.75);
 
-        float dBlocker = textureLod(shadowMap, shadowPos.xy + offset / shadowMapResolution, log2(radiusStep)).r;
+        float dBlocker = textureLod(shadowMap, shadowPos.xy + offset / shadowMapResolution, 0).r;
         if(shadowPos.z > dBlocker){
             blocker += dBlocker;
             c++;
@@ -125,8 +125,8 @@ float shadowMapping(vec4 worldPos, vec3 normal, float sssWrap){
     vec4 shadowPos = getShadowPos(worldPos);
 
     float dReceiver = shadowPos.z;
-    float dBlocker = blockerSearch(shadowtex1, shadowPos.xyz, 2 * shadowMapScale, BLOCKER_SEARCH_SAMPLES);
-    float penumbra = max(0.0, 80 * (dReceiver - dBlocker) / dBlocker);
+    float dBlocker = blockerSearch(shadowtex1, shadowPos.xyz, 4 * shadowMapScale, BLOCKER_SEARCH_SAMPLES);
+    float penumbra = max(0.0, 100 * (dReceiver - dBlocker) / dBlocker);
 
     float disFactor = saturate(worldDis / shadowDistance);
     float dirFactor = abs(dot(normal, lightWorldDir));
@@ -140,7 +140,7 @@ float shadowMapping(vec4 worldPos, vec3 normal, float sssWrap){
 
     penumbra += 0.5 * sssWrap;
     if(plants > 0.5){
-        penumbra = 1.0;
+        penumbra = 1.5;
     }
     shadowPos.z -= 0.00005;
     penumbra *= saturate(saturate(1.0 - disFactor) + 0.1);
@@ -169,7 +169,8 @@ vec3 getColorShadow(vec3 shadowPos, float shadow){
             vec2 uv = shadowPos.xy + offset / shadowMapResolution;
 
             vec4 SC1 = textureLod(shadowcolor1, uv, 0);
-            bool isTranslucent = length(SC1.rgb) < 0.01;
+            SC1.rgb = SC1.rgb * 2.0 - 1.0;
+            bool isTranslucent = length(SC1.rgb) < 0.1;
             if(!isTranslucent) {
                 radius += radiusStep;
                 continue;
@@ -182,7 +183,7 @@ vec3 getColorShadow(vec3 shadowPos, float shadow){
             }
 
             vec4 SC0 = textureLod(shadowcolor0, uv, 0);
-            colorShadow += toLinearR(SC0.rgb * abs(SC1.a));
+            colorShadow += toLinearR(SC0.rgb);
 
             radius += radiusStep;
         }

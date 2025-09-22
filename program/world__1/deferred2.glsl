@@ -9,6 +9,7 @@ varying vec2 texcoord;
 #include "/lib/camera/filter.glsl"
 #include "/lib/common/position.glsl"
 #include "/lib/common/noise.glsl"
+#include "/lib/common/normal.glsl"
 
 #ifdef FSH
 #include "/lib/lighting/RSM.glsl"
@@ -18,11 +19,11 @@ void main() {
 
 	vec4 gi = vec4(BLACK, 1.0);
 	vec2 uv = texcoord * 2;
-	float hrrZ = texture(depthtex1, uv).r;
+	float hrrZ = texelFetch(colortex6, ivec2(gl_FragCoord.xy), 0).g;
 
 	#if defined RSM_ENABLED || defined AO_ENABLED
 		if(!outScreen(uv) && hrrZ < 1.0){
-			gi = JointBilateralFiltering_RSM();
+			gi = JointBilateralFiltering_RSM_Horizontal();
 			CT1 = gi;
 		}
 	#endif

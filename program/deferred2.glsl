@@ -11,6 +11,7 @@ varying vec3 sunColor, skyColor;
 #include "/lib/common/utils.glsl"
 
 #include "/lib/common/position.glsl"
+#include "/lib/camera/colorToolkit.glsl"
 #include "/lib/atmosphere/atmosphericScattering.glsl"
 
 #ifdef FSH

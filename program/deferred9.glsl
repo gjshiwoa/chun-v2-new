@@ -21,27 +21,26 @@ varying vec3 sunViewDir, moonViewDir, lightViewDir;
 #include "/lib/surface/PBR.glsl"
 
 void main() {
-	vec4 CT1 = texelFetch(colortex1, ivec2(gl_FragCoord.xy), 0);
-	vec4 CT6 = texelFetch(colortex6, ivec2(gl_FragCoord.xy), 0);
+	vec4 CT3 = texelFetch(colortex3, ivec2(gl_FragCoord.xy), 0);
+	vec4 CT6 = texelFetch(colortex6, ivec2(gl_FragCoord.xy - 0.5 * viewSize), 0);
 #ifdef PBR_REFLECTIVITY
-	vec2 hrrUV = texcoord * 2.0;
+	vec2 hrrUV = texcoord * 2.0 - 1.0;
 	vec3 reflectColor = BLACK;
 
 	if(!outScreen(hrrUV)){
-		CT1.rgb = BLACK;
-		vec4 hrrSpecularMap = unpack2x16To4x8(texelFetch(colortex4, ivec2(gl_FragCoord.xy * 2), 0).ba);
+		vec4 hrrSpecularMap = unpack2x16To4x8(texelFetch(colortex4, ivec2(gl_FragCoord.xy * 2 - viewSize), 0).ba);
 		MaterialParams params = MapMaterialParams(hrrSpecularMap);
 		if(hrrSpecularMap.r + rainStrength > 0.001){
-			float hrrZ = CT6.a;
+			float hrrZ = CT6.g;
 			vec4 hrrViewPos = screenPosToViewPos(vec4(unTAAJitter(hrrUV), hrrZ, 1.0));
 			vec3 hrrViewDir = normalize(hrrViewPos.xyz);
 			vec4 hrrWorldPos = viewPosToWorldPos(hrrViewPos);
 			vec3 hrrWorldDir = normalize(hrrWorldPos.xyz);
 
-			vec3 hrrNormalW = CT6.xyz;
+			vec3 hrrNormalW = unpackNormal(CT6.r);
 			vec3 hrrNormalV = normalize(gbufferModelView * vec4(hrrNormalW, 0.0)).xyz;
 
-			vec2 mcLightmap = texelFetch(colortex5, ivec2(gl_FragCoord.xy * 2), 0).ba;
+			vec2 mcLightmap = texelFetch(colortex5, ivec2(gl_FragCoord.xy * 2 - viewSize), 0).ba;
 			vec2 lightmap = AdjustLightmap(mcLightmap);
 
 			float r = saturate(1.0 * params.roughness - 0.90 * rainStrength * smoothstep(0.90, 0.95, mcLightmap.y));
@@ -52,8 +51,8 @@ void main() {
 			float NdotU = dot(upWorldDir, reflectWorldDir);
 			lightmap.y *= smoothstep(-1.0, 1.0, NdotU);
 
-			int ssrTargetSampled = 0;
-			reflectColor = reflection(colortex0, hrrViewPos.xyz, reflectWorldDir, reflectViewDir, lightmap.y, hrrNormalV, 1.0, ssrTargetSampled);
+			bool ssrTargetSampled = false;
+			reflectColor = reflection(colortex2, hrrViewPos.xyz, reflectWorldDir, reflectViewDir, lightmap.y, hrrNormalV, 1.0, ssrTargetSampled);
 			reflectColor = clamp(reflectColor, 0.001, 10.0);
 			// reflectViewDir = normalize(
 			// 					reflect(hrrViewDir, hrrNormalV) + 
@@ -63,15 +62,15 @@ void main() {
 			
 			reflectColor = temporal_Reflection(reflectColor, params.roughness);
 			
-			CT1.rgb = reflectColor;
+			CT3.rgb = reflectColor;
 		}	
 
-		CT1.rgb = max(vec3(0.0), CT1.rgb);
+		CT3.rgb = max(vec3(0.0), CT3.rgb);
 	}
 #endif
 
-/* DRAWBUFFERS:1 */
-	gl_FragData[0] = CT1;
+/* DRAWBUFFERS:3 */
+	gl_FragData[0] = CT3;
 }
 
 #endif

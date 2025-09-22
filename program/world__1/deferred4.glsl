@@ -84,6 +84,8 @@ void main() {
 		color.rgb *= ao /*+ aoMultiBounce * 0.2*/;
 		color.rgb += direct;
 		color.rgb += artificial;
+
+		// color.rgb = vec3(ao);
 	}
 
 	// color.rgb = vec3(texture(colortex1, texcoord * 0.5).rgb);
@@ -91,9 +93,15 @@ void main() {
 
 	CT4.rg = pack4x8To2x16(vec4(albedo, ao));
 
-/* DRAWBUFFERS:04 */
+	vec4 viewPos1R = screenPosToViewPos(vec4(texcoord.st, depth1, 1.0));
+	vec4 worldPos1R = viewPosToWorldPos(viewPos1R);
+	vec2 prePos = getPrePos(worldPos1R).xy;
+	vec2 velocity = texcoord - prePos;
+
+/* DRAWBUFFERS:049 */
 	gl_FragData[0] = color;
 	gl_FragData[1] = CT4;
+	gl_FragData[2] = vec4(velocity, 0.0, 0.0);
 }
 
 #endif

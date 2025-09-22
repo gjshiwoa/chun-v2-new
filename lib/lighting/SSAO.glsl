@@ -20,7 +20,7 @@ float SSAO(vec3 viewPos, vec3 normal){
 
         vec3 sampleViewPos = viewPos.xyz + offset * radius;
         vec3 sampleScreenPos = viewPosToScreenPos(vec4(sampleViewPos, 1.0)).xyz;
-        float sampleDepth = texture(depthtex1, sampleScreenPos.xy).r;
+        float sampleDepth = texture(depthtex2, sampleScreenPos.xy).r;
 
         sampleDepth = linearizeDepth(sampleDepth);
         sampleScreenPos.z = linearizeDepth(sampleScreenPos.z);
@@ -61,7 +61,7 @@ float HBAO(vec3 viewPos, vec3 normal){
 
         vec2 curUV = texcoord + offsetUV;
             
-        float z = texture(depthtex1, curUV).r;
+        float z = texture(depthtex2, curUV).r;
         vec3 curViewPos = screenPosToViewPos(vec4(curUV, z, 1.0)).xyz;
         
         vec3 vector = curViewPos - viewPos + normalize(viewPos) * 0.1;
@@ -112,14 +112,14 @@ float GTAO(vec3 viewPos, vec3 normal){
         for (int side = 0; side <= 1; side++) {
             float cHorizonCos = -1.0;
             for (int samples = 0; samples < directionSampleCount; samples++) {
-                float s = (float(samples) + rand) / float(directionSampleCount);
+                float s = (float(samples) + 0.1 + rand) / float(directionSampleCount);
                 
                 vec2 offset = (2.0 * float(side) - 1.0) * s * scaling * omega;
                 vec2 sampleUV = texcoord * 2.0 + offset;
                 if(outScreen(sampleUV))
                     continue;
                 
-                float sampleDepth = texture(depthtex1, sampleUV).r;
+                float sampleDepth = texture(depthtex2, sampleUV).r;
                 vec4 sampleScreenPos = vec4(sampleUV, sampleDepth, 1.0);
                 vec3 sPosV = screenPosToViewPos(sampleScreenPos).xyz;
                 

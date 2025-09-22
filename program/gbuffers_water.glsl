@@ -146,14 +146,14 @@ void main() {
 		vec3 reflectViewDir = reflect(viewDir, waveViewNormal);
 	
 		float underwaterFactor = isUnderwater ? 0.0 : 1.0;
-		int ssrTargetSampled = 0;
+		bool ssrTargetSampled = false;
 		
 		float cosTheta = dot(-worldDir, waveWorldNormal);
 		float fresnel = mix(pow(1.0 - saturate(cosTheta), REFLECTION_FRESNAL_POWER), 1.0, WATER_F0);
 
 		#ifdef WATER_REFLECTION
 			vec3 reflectColor = reflection(
-				gaux1, 
+				gaux2, 
 				vViewPos.xyz, 
 				reflectWorldDir, 
 				reflectViewDir, 
@@ -167,23 +167,9 @@ void main() {
 				color.rgb = mix(color.rgb, reflectColor, fresnel);
 			} else {
 				color.rgb += fogColor * 0.2 * lightmapY * TIR;
-				color.rgb = mix(color.rgb, reflectColor + vec3(0.005), saturate(float(ssrTargetSampled) * TIR));
+				color.rgb = mix(color.rgb, reflectColor, saturate(float(ssrTargetSampled) * TIR));
 			}
 		#endif
-
-		if (isUnderwater) {
-			float phase = hgPhase1(dot(sunWorldDir, worldDir), UNDERWATER_FOG_G);
-			float distanceFactor = saturate(worldDis0 / (UNDERWATER_FOG_MIST * 0.5));
-			#ifndef UNDERWATER_REFLECTION
-				distanceFactor = pow(saturate(distanceFactor + 0.1), 0.1);
-			#endif
-			float skyBrightness = eyeBrightnessSmooth.y / 240.0 + 0.1;
-			color.rgb = mix(
-				color.rgb, 
-				fogColor * 2.0 * phase * lightmapY * skyBrightness, 
-				distanceFactor
-			);
-		}
 		
 
 
@@ -217,12 +203,12 @@ void main() {
 		vec3 diffuse = albedo / PI;
 
 		MaterialParams materialParams = MapMaterialParams(specularMap);
-		if(dot(specularMap.rgb, vec3(1.0)) < 0.001){
+		// if(dot(specularMap.rgb, vec3(1.0)) < 0.001){
 			materialParams.smoothness = TRANSLUCENT_ROUGHNESS;
 			float perceptual_roughness = 1.0 - materialParams.smoothness;
     		materialParams.roughness = perceptual_roughness * perceptual_roughness;
 			materialParams.metalness = TRANSLUCENT_F0;
-		}
+		// }
 		#ifdef PBR_REFLECTIVITY
 			mat2x3 PBR = CalculatePBR(viewDir, normalTexV, lightViewDir, albedo, materialParams);
 			vec3 BRDF = PBR[0] + PBR[1];
@@ -276,7 +262,7 @@ void main() {
 			vec3 reflectViewDir = reflect(viewDir, normalTexV);
 			float NdotU = dot(upWorldDir, reflectWorldDir);
 			float upDirFactor = smoothstep(-1.0, 0.0, NdotU);
-			int ssrTargetSampled = 0;	
+			bool ssrTargetSampled = false;	
 			vec3 reflectColor = reflection(gaux1, vViewPos.xyz, reflectWorldDir, reflectViewDir, 
 											lightmap.y * upDirFactor, normalTexV, COLOR_UI_SCALE, ssrTargetSampled)
 											+ drawCelestial(reflectWorldDir, 1.0, false) * shade;
@@ -304,7 +290,7 @@ void main() {
 		#endif
 	}
 
-	// color.rgb = texture(noisetex, fragCoord.xy).rgb;
+	// color.rgb = texture(colortex8, fragCoord.xy).rgb;
 
 /* DRAWBUFFERS:0 */
 	gl_FragData[0] = color;

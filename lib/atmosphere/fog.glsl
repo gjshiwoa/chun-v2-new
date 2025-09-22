@@ -49,3 +49,36 @@ vec3 applyFog(vec3 oriColor, float worldDis, vec3 cameraPos, vec3 worldDir, floa
     // return oriColor + fogColor * fogAmount;
     return mix(oriColor, fogColor, fogAmount);
 }
+
+float computeCrepuscularLight(vec4 viewPos){
+    const float N_SAMPLES = 4.0;
+
+    vec2 uv = texcoord;
+    vec2 sunUv = viewPosToScreenPos(vec4(sunPosition, 1.0)).xy;
+
+    vec2 delta = (uv - sunUv) * (1.0 / float(N_SAMPLES));
+    vec2 sampleUv = uv;
+    sampleUv += temporalBayer64(gl_FragCoord.xy) * delta;
+
+    float sum = 0.0;
+    int c = 0;
+    float VoL = mix(1.0, dot(normalize(vec3(0.0, 0.0, -1.0)), sunViewDir), 0.5);
+    for (int i = 0; i < N_SAMPLES; ++i) {
+        sampleUv -= delta;
+        if (outScreen(sampleUv) || texture(depthtex1, sampleUv).r < 1.0)
+            break;
+
+        float transmit = texture(colortex1, sampleUv * 0.5 + vec2(0.5, 0.0)).a;
+        sum += transmit;
+        ++c;
+    }
+    sum /= N_SAMPLES;
+
+    return saturate(sum * VoL);
+}
+
+// 体积雾
+vec4 volumtricFog(vec4 worldPos){
+    
+    return vec4(0.0, 0.0, 0.0, 1.0);
+}

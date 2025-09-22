@@ -51,7 +51,7 @@ void main() {
 		vec3 hrrNormalW = normalize(viewPosToWorldPos(vec4(hrrNormal, 0.0)).xyz);
 
 		#ifdef AO_ENABLED
-			ao = SSAO(hrrViewPos.xyz, hrrNormal);
+			ao = AO_TYPE(hrrViewPos.xyz, hrrNormal);
 		#endif
 
 		vec4 gi = vec4(rsm, ao);
@@ -92,13 +92,13 @@ void main() {
 #ifdef VSH
 
 void main() {
-	sunWorldDir = normalize(vec3(0.0, 1.0, tan(-sunPathRotation * PI / 180.0)));
-    moonWorldDir = sunWorldDir;
-    lightWorldDir = sunWorldDir;
+	sunViewDir = normalize(sunPosition);
+	moonViewDir = normalize(moonPosition);
+	lightViewDir = normalize(shadowLightPosition);
 
-	sunViewDir = normalize((gbufferModelView * vec4(sunWorldDir, 0.0)).xyz);
-	moonViewDir = sunViewDir;
-	lightViewDir = sunViewDir;
+	sunWorldDir = normalize(viewPosToWorldPos(vec4(sunPosition, 0.0)).xyz);
+    moonWorldDir = normalize(viewPosToWorldPos(vec4(moonPosition, 0.0)).xyz);
+    lightWorldDir = normalize(viewPosToWorldPos(vec4(shadowLightPosition, 0.0)).xyz);
 
 	isNoon = saturate(dot(sunWorldDir, upWorldDir) * NOON_DURATION);
 	isNight = saturate(dot(moonWorldDir, upWorldDir) * NIGHT_DURATION);
@@ -109,8 +109,6 @@ void main() {
 	// sunColor *= 1.0 - 0.75 * rainStrength;
 	// skyColor = GetMultiScattering(getHeigth(earthPos), upWorldDir, sunWorldDir) * IncomingLight * 3;
 	// skyColor += GetMultiScattering(getHeigth(earthPos), upWorldDir, moonWorldDir) * IncomingLight_N * 3;
-	// sunColor = vec3(6.0);
-	// skyColor = vec3(6.0);
 
 	float d1 = RaySphereIntersection(earthPos, upWorldDir, vec3(0.0), earth_r + atmosphere_h).y;
 	

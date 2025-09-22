@@ -1,9 +1,13 @@
+#define CLOUD3D
+
+
 varying vec2 texcoord;
 
 varying vec3 sunWorldDir, moonWorldDir, lightWorldDir;
 varying vec3 sunViewDir, moonViewDir, lightViewDir;
 
 // varying vec3 sunColor, skyColor;
+
 
 
 #include "/lib/uniform.glsl"
@@ -62,7 +66,7 @@ float fakeCaustics(vec3 pos){
     }
 
     // worley 伪造焦散，最后用pow值调整曲线
-    float caustics  = texture(depthtex2, vec3(waveUV * 0.015, 0.0) + frameTimeCounter * 0.025).g;
+    float caustics  = texture(colortex8, vec3(waveUV * 0.015, 0.0) + frameTimeCounter * 0.025).g;
 
 
     return caustics;
@@ -130,9 +134,15 @@ void main() {
 
 	CT4.rg = pack4x8To2x16(vec4(texColor, ao));
 
-/* DRAWBUFFERS:04 */
+	vec4 viewPos1R = screenPosToViewPos(vec4(texcoord.st, depth1, 1.0));
+	vec4 worldPos1R = viewPosToWorldPos(viewPos1R);
+	vec2 prePos = getPrePos(worldPos1R).xy;
+	vec2 velocity = texcoord - prePos;
+
+/* DRAWBUFFERS:049 */
 	gl_FragData[0] = color;
 	gl_FragData[1] = CT4;
+	gl_FragData[2] = vec4(velocity, 0.0, 0.0);
 }
 
 #endif

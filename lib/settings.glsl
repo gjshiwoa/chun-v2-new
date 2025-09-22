@@ -139,7 +139,7 @@ const vec3 MieSigma = vec3(3.996) * 1e-6;
 const vec3 MieAbsorptionSigma = vec3(4.4) * 1e-6;
 const vec3 OzoneAbsorptionSigma = vec3(0.650, 1.881, 0.085) * 1e-6;
 
-#define Information CHUN_v2_2025_08_BY_ZY     //     [CHUN_v2_2025_08_BY_ZY]
+#define Information CHUN_v2_2025_09_BY_ZY     //     [CHUN_v2_2025_09_BY_ZY]
 
 const float H_R = 8500.0;
 const float H_M = 1200.0;
@@ -151,6 +151,7 @@ const ivec4 MS_O = ivec4(0, 0, 63, 63);
 
 const ivec2 sunColorUV = ivec2(1, 256 + 10);
 const ivec2 skyColorUV = ivec2(1 + 10, 256 + 10);
+const ivec2 averageLumUV = ivec2(0, 0);
 
 
 #define ATMOSPHERE_SCATTERING_SAMPLES 16    // [8 16 24 32 48 64 86 128]
@@ -182,8 +183,8 @@ const vec3 IncomingLight_N = vec3(INCOMING_LIGHT_N_RED, INCOMING_LIGHT_N_GREEN, 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ATMOSPHERIC_SCATTERING_FOG
-#define ATMOSPHERIC_SCATTERING_FOG_DENSITY 30.0 // [10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0 60.0 70.0 80.0 90.0 100.0 110.0 120.0 130.0 140.0 150.0 160.0 170.0 180.0 190.0 200.0]
-#define VOLUME_LIGHT_SAMPLES 3.0    // [3.0 5.0 7.0 9.0 11.0 13.0 15.0]
+#define ATMOSPHERIC_SCATTERING_FOG_DENSITY 50.0 // [10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0 60.0 70.0 80.0 90.0 100.0 110.0 120.0 130.0 140.0 150.0 160.0 170.0 180.0 190.0 200.0]
+#define VOLUME_LIGHT_SAMPLES 1.0    // [1.0 2.0 3.0 5.0 7.0 9.0 11.0 13.0 15.0]
 
 
 
@@ -208,14 +209,14 @@ const vec3 IncomingLight_N = vec3(INCOMING_LIGHT_N_RED, INCOMING_LIGHT_N_GREEN, 
 #define VOLUMETRIC_CLOUDS
 
 const float cloudHeightMin = 650.0 + CAMERA_HEIGHT;
-const float cloudThinkness = 500.0;
+const float cloudThinkness = 400.0;
 const vec2 cloudHeight = vec2(cloudHeightMin, cloudHeightMin + cloudThinkness);
 
 const float cloudSigmaS = 0.05;
 const float cloudSigmaA = 0.01;
 const float cloudSigmaE = cloudSigmaS + cloudSigmaA;
 
-#define CLOUD_FADE_DISTANCE 6000.0
+#define CLOUD_FADE_DISTANCE 9000.0
 
 const float CLOUD_LARGE_STEP = 280.0;  // 大步幅
 const float CLOUD_SMALL_STEP = 70.0;   // 小步幅
@@ -272,10 +273,10 @@ const bool shadowHardwareFiltering = true;
 const int shadowMapResolution = 2048;   // [1024 2048 3072 4096 5120 6144 7168 8192]
 const float shadowDistance = 120.0;    // [40.0 80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0]
 // const float shadowDistanceRenderMul = 1.0;
-#define BLOCKER_SEARCH_SAMPLES 5.0 // [3.0 5.0 7.0 9.0 12.0 15.0 18.0 21.0 24.0 27.0 30.0 33.0 36.0]
+#define BLOCKER_SEARCH_SAMPLES 3.0 // [3.0 5.0 7.0 9.0 12.0 15.0 18.0 21.0 24.0 27.0 30.0 33.0 36.0]
 #define SHADOW_SOFTNESS 1.0 // [0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0 2.5 3.0 3.5 4.0 4.5 5.0 6.0 7.0 8.0 9.0 10.0]
-#define SHADOW_SAMPLES 9.0    // [3.0 5.0 7.0 9.0 12.0 15.0 18.0 21.0 24.0 27.0 30.0 33.0 36.0]
-#define COLOR_SHADOW_SAMPLES 5.0 // [3.0 5.0 7.0 9.0 12.0 15.0 18.0 21.0 24.0 27.0 30.0 33.0 36.0]
+#define SHADOW_SAMPLES 6.0    // [3.0 5.0 7.0 9.0 12.0 15.0 18.0 21.0 24.0 27.0 30.0 33.0 36.0]
+#define COLOR_SHADOW_SAMPLES 3.0 // [3.0 5.0 7.0 9.0 12.0 15.0 18.0 21.0 24.0 27.0 30.0 33.0 36.0]
 #define SCREEN_SPACE_SHADOW_SAMPLES 9.0 // [3.0 5.0 7.0 9.0 12.0 15.0 18.0 21.0 24.0 27.0 30.0 33.0 36.0]
 
 float shadowMapScale = (120.0 / shadowDistance) * (shadowMapResolution / 2048.0);
@@ -288,10 +289,13 @@ float shadowMapScale = (120.0 / shadowDistance) * (shadowMapResolution / 2048.0)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define RSM_ENABLED
 #define RSM_GEOMETRY_MODE 0     // [0 1]
-#define RSM_BRIGHTNESS 1.5      // [0.025 0.05 0.075 0.1 1.25 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.75 1.0 1.25 1.5 1.75 2.0 2.25 2.5 2.75 3.0]
+#define RSM_BRIGHTNESS 1.5      // [0.025 0.05 0.075 0.1 0.125 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.75 1.0 1.25 1.5 1.75 2.0 2.25 2.5 2.75 3.0]
 #define RSM_SEARCH_RADIUS 240   // [40 80 120 160 200 240 280 320 360]
 #define RSM_MAX_SAMPLES 12      // [4 8 12 16 20 24 28 32 36]  
 #define RSM_MIN_SAMPLES 4       // [4 8 12 16 20 24 28 32 36]  
+#define RSM_LEAK_FIX
+
+
 #define DENOISER_RADIUS 12.0     // [2.0 4.0 6.0 8.0 10.0 12.0 14.0 16.0 18.0 20.0]
 #define DENOISER_QUALITY 12.0    // [2.0 4.0 6.0 8.0 10.0 12.0 14.0 16.0 18.0 20.0]
 
@@ -352,12 +356,12 @@ const vec3 waterFogColor = vec3(WATER_FOG_COLOR_RED, WATER_FOG_COLOR_GREEN, WATE
 
 #define UNDERWATER_FOG_SAMPLES 5.0  // [2.0 5.0 8.0 12.0 16.0 20.0]
 #define UNDERWATER_FOG_STEP_SIZE 4.0    // [2.0 4.0 6.0 8.0 10.0 12.0]
-#define UNDERWATER_FOG_LIGHT_BRI 14.0   // [4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 15.0 16.0 17.0 18.0 19.0 20.0]
-#define UNDERWATER_FOG_BRI 0.02     // [0.01 0.015 0.0175 0.02 0.025 0.03 0.035 0.04 0.06 0.08 0.1 0.12 0.14 0.16 0.18 0.2 0.24 0.28 0.32 0.36 0.4]
+#define UNDERWATER_FOG_LIGHT_BRI 13.0   // [4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 15.0 16.0 17.0 18.0 19.0 20.0]
+#define UNDERWATER_FOG_BRI 0.035     // [0.01 0.015 0.0175 0.02 0.0225 0.025 0.03 0.035 0.04 0.05 0.06 0.07 0.08 0.09 0.1]
 
 #define UNDERWATER_ADD_BLOOM 0.035  // [0.005 0.0075 0.01 0.0125 0.015 0.0175 0.02 0.0225 0.025 0.0275 0.03 0.035 0.04 0.045 0.05]
 #define UNDERWATER_CANTRAST 1.5     // [0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
-#define UNDERWATER_BRI 1.3          // [1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 2.25 2.5 2.75 3.0 3.25 3.5 3.75 4.0]
+#define UNDERWATER_BRI 1.5          // [1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 2.25 2.5 2.75 3.0 3.25 3.5 3.75 4.0]
 
 
 
@@ -369,7 +373,7 @@ const vec3 waterFogColor = vec3(WATER_FOG_COLOR_RED, WATER_FOG_COLOR_GREEN, WATE
 #define UNDERWATER_REFLECTION
 #define REFLECTION_STEP_SIZE 0.25   // [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 1.0 2.0 3.0]
 #define REFLECTION_SAMPLES 20       // [10 15 20 25 30 35 40 45 50]
-#define REFLECTION_STEP_POWER 1.6   // [1.0 1.2 1.4 1.6 1.8 2.0 2.2 2.4 2.6 2.8 3.0 4.0 5.0]
+#define REFLECTION_STEP_GROWTH_BASE 1.4   // [1.0 1.2 1.4 1.6 1.8 2.0 2.2 2.4 2.6 2.8 3.0 4.0 5.0]
 #define REFLECTION_FRESNAL_POWER 5.0    // [0.1 1.0 2.0 3.0 4.0 5.0]
 #define WATER_F0 0.02               // [0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 #define WATER_REFLECT_HIGH_LIGHT
@@ -429,13 +433,13 @@ const vec3 waterFogColor = vec3(WATER_FOG_COLOR_RED, WATER_FOG_COLOR_GREEN, WATE
 #define FILTER_SLOPE_RED 1.0    // [0.0 0.025 0.05 0.075 0.1 0.125 0.15 0.175 0.2 0.225 0.25 0.275 0.3 0.325 0.35 0.375 0.4 0.425 0.45 0.475 0.5 0.525 0.55 0.575 0.6 0.625 0.65 0.675 0.7 0.725 0.75 0.775 0.8 0.825 0.85 0.875 0.9 0.925 0.95 0.975 1.0]
 #define FILTER_SLOPE_GREEN 1.0  // [0.0 0.025 0.05 0.075 0.1 0.125 0.15 0.175 0.2 0.225 0.25 0.275 0.3 0.325 0.35 0.375 0.4 0.425 0.45 0.475 0.5 0.525 0.55 0.575 0.6 0.625 0.65 0.675 0.7 0.725 0.75 0.775 0.8 0.825 0.85 0.875 0.9 0.925 0.95 0.975 1.0]
 #define FILTER_SLOPE_BLUE 1.0   // [0.0 0.025 0.05 0.075 0.1 0.125 0.15 0.175 0.2 0.225 0.25 0.275 0.3 0.325 0.35 0.375 0.4 0.425 0.45 0.475 0.5 0.525 0.55 0.575 0.6 0.625 0.65 0.675 0.7 0.725 0.75 0.775 0.8 0.825 0.85 0.875 0.9 0.925 0.95 0.975 1.0]
-#define FILTER_SLOPE_ALPHA 1.2  // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.55 1.6 1.65 1.7 1.75 1.8 1.85 1.9 1.95 2.0]
+#define FILTER_SLOPE_ALPHA 1.0  // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.55 1.6 1.65 1.7 1.75 1.8 1.85 1.9 1.95 2.0]
 const vec3 filterSlope = vec3(FILTER_SLOPE_RED, FILTER_SLOPE_GREEN, FILTER_SLOPE_BLUE) * FILTER_SLOPE_ALPHA;
 #define FILTER_WHITE 0.0        // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0]
 const vec3 filterOffset = vec3(1.0, 1.0, 1.0) * FILTER_WHITE;
-#define FILTER_CONTRAST 1.1     // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.55 1.6 1.65 1.7 1.75 1.8 1.85 1.9 1.95 2.0]
+#define FILTER_CONTRAST 1.0     // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.55 1.6 1.65 1.7 1.75 1.8 1.85 1.9 1.95 2.0]
 const vec3 filterPower = vec3(1.0, 1.0, 1.0) * FILTER_CONTRAST;
-#define FLITER_SATURATE 1.05     // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.55 1.6 1.65 1.7 1.75 1.8 1.85 1.9 1.95 2.0]
+#define FLITER_SATURATE 1.0     // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.55 1.6 1.65 1.7 1.75 1.8 1.85 1.9 1.95 2.0]
 
 
 
@@ -446,14 +450,14 @@ const vec3 filterPower = vec3(1.0, 1.0, 1.0) * FILTER_CONTRAST;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define TONE_MAPPING ACESFull        // [ACESFull ACES AgX Hejl Lottes Hable Neutral Uchimura]
 
-#define ACES_FULL_ADDITIVE 1.7
+#define ACES_FULL_ADDITIVE 1.6
 #define ACES_ADDITIVE 0.75
 #define AGX_ADDITIVE 2.25
 #define HEJL_ADDITIVE 0.75
 #define LOTTES_ADDITIVE 0.75
-#define HABLE_ADDITIVE 1.5
+#define HABLE_ADDITIVE 1.8
 #define NEUTRAL_ADDITIVE 1.0
-#define UCHIMURA_ADDITIVE 1.0
+#define UCHIMURA_ADDITIVE 0.8
 
 #define AGX_EV 12.0     // [10.0 10.25 10.5 10.75 11.0 11.25 11.5 11.75 12.0 12.25 12.5 12.75 13.0 13.25 13.5 13.75 14.0 14.25 14.5 14.75 15.0]
 

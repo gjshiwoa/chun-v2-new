@@ -57,7 +57,7 @@ vec3 underWaterFog(vec3 color, vec3 worldDir, float worldDis){
     density /= c + 0.01;
     // density = (density * min(worldDis, stepSum) + max(worldDis - stepSum, 0.0)) / worldDis;
     float eyeBrightness = eyeBrightnessSmooth.y / 240.0;
-    density = mix(1.0, density * UNDERWATER_FOG_LIGHT_BRI, 0.66);
+    density = mix(1.0, density * UNDERWATER_FOG_LIGHT_BRI, 0.33);
 
     float phase0 = hgPhase1(dot(sunWorldDir, worldDir), UNDERWATER_FOG_G);
     float phase1 = hgPhase1(dot(sunWorldDir, worldDir), UNDERWATER_FOG_G2) * UNDERWATER_FOG_G2_BRI;
@@ -66,7 +66,7 @@ vec3 underWaterFog(vec3 color, vec3 worldDir, float worldDis){
     vec3 underWaterFogColor = UNDERWATER_FOG_BRI * density * phase * waterFogColor * sunColor * mix(1.0, eyeBrightness, 0.9);
     color.rgb = mix(color, underWaterFogColor, pow(saturate(worldDis / UNDERWATER_FOG_MIST), 1.0));
 
-    color += rand2_1(texcoord + sin(frameTimeCounter)) / 512.0;
+    color += waterFogColor * rand2_1(texcoord + sin(frameTimeCounter)) / 512.0;
     return vec3(color);
 }
 #endif

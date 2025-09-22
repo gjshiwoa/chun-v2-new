@@ -1,8 +1,7 @@
 option.Information = 光影信息
-profile.Low = 低
-profile.Medium = 中
-profile.High = 高
-profile.Ultra = 显卡爆燃
+profile.Balanced = 平衡
+profile.Vivid = 鲜艳
+profile.Native = 原生
 
 screen.Lighting = 光照
 option.DISABLE_LEAKAGE_REPAIR = 禁用漏光修复
@@ -51,6 +50,7 @@ option.RSM_MAX_SAMPLES = RSM最大采样数
 option.RSM_MIN_SAMPLES = RSM最小采样数
 option.DENOISER_RADIUS = （RSM/AO）降噪半径
 option.DENOISER_QUALITY = （RSM/AO）降噪质量
+option.RSM_LEAK_FIX = 缓解RSM漏光
 
 option.ambientOcclusionLevel = 原版AO强度
 option.AO_ENABLED = 启用光影SSAO

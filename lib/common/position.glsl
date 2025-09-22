@@ -117,10 +117,10 @@ vec3 getClosestOffset(vec2 uv, float scale){
 
 #if !defined GBF && !defined SHD
 vec2 getVelocity(){
-    return texture(colortex5, getClosestOffset(texcoord.st, 1.0).st).ba;
+    return texture(colortex9, getClosestOffset(texcoord.st, 1.0).st).rg;
 }
 
 vec2 getVelocity_R(vec2 uv){
-    return texture(colortex5, uv).ba;
+    return texture(colortex9, uv).rg;
 }
 #endif

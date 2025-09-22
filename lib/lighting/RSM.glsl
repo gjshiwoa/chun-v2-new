@@ -1,6 +1,6 @@
 // 感谢 Tahnass、GeForceLegend 提供的帮助
 // Temporal 思路参考了 iterationT
-vec3 RSM(vec4 p_worldPos, vec3 p_worldNormal){
+vec3 RSM(vec4 p_worldPos, vec3 p_worldNormal, out vec3 mainDir){
     vec4 p_s_clip = shadowMVP * p_worldPos;
     vec3 p_s_ndc = p_s_clip.xyz / p_s_clip.w;
 
@@ -23,7 +23,7 @@ vec3 RSM(vec4 p_worldPos, vec3 p_worldNormal){
     float cosRot = cos(rotAngle);
     mat2 rotMatrix = mat2(cosRot, -sinRot, sinRot, cosRot);
 
-    float curStep = firstStep / float(N_SAMPLES);
+    float curStep = (firstStep + 0.1) / float(N_SAMPLES);
     float dStep = 1.0 / float(N_SAMPLES);
 
     for(int i = 0; i < N_SAMPLES; ++i){    
@@ -43,7 +43,8 @@ vec3 RSM(vec4 p_worldPos, vec3 p_worldNormal){
         q_s_ndc.z = (q_s_ndc.z - 0.4) * 5.0;
 
         vec4 SC1 = texelFetch(shadowcolor1, ivec2(sampleTexel), 0);
-        vec3 q_s_normal = SC1.xyz;
+        vec3 q_s_normal = SC1.xyz * 2.0 - 1.0;
+        if(length(q_s_normal) < 0.01 || SC1.a < 0.01) continue;
         q_s_normal = (shadowProjection * vec4(q_s_normal, 0.0)).xyz;
         q_s_normal = normalize(q_s_normal);
 
@@ -55,14 +56,14 @@ vec3 RSM(vec4 p_worldPos, vec3 p_worldNormal){
         #else
             float PQoPN = smoothstep(-0.4, 1.0, dot(pq_dir, p_s_normal));
         #endif
-        if(PQoPN <= 0.0001) continue;
+        if(PQoPN <= 0.01) continue;
 
         #if RSM_GEOMETRY_MODE == 0
             float QPoQN = max(0.0, dot(-pq_dir, q_s_normal));
         #else
             float QPoQN = smoothstep(-0.4, 1.0, dot(-pq_dir, q_s_normal));
         #endif
-        if(QPoQN <= 0.0001) continue;
+        if(QPoQN <= 0.01) continue;
 
         float q_lm_y = SC1.a;
         q_lm_y = smoothstep(0.0, 0.25, q_lm_y);
@@ -81,20 +82,86 @@ vec3 RSM(vec4 p_worldPos, vec3 p_worldNormal){
         float w_cur = (a2 - b2) * PI;
         w_cur = mix(PI / 256, w_cur, saturate(1.0 - worldDis));
 
-        L += w_cur * q_albedo * q_lm_y * PQoPN * QPoQN / (dist * dist + 0.05);
+        float weight = w_cur * q_lm_y * PQoPN * QPoQN / (dist * dist);
+        L += q_albedo * weight;
+        mainDir += pq_dir * weight;
     }
 
+    mainDir = normalize(mainDir);
     #if RSM_GEOMETRY_MODE == 0
-        return L * 256.0 * 16 / N_SAMPLES;
+        return L * 192.0 * 16 / N_SAMPLES * RSM_SEARCH_RADIUS * RSM_SEARCH_RADIUS / 57600.0;
     #else
-        return L * 128.0 * 16 / N_SAMPLES;
+        return L * 96.0 * 16 / N_SAMPLES * RSM_SEARCH_RADIUS * RSM_SEARCH_RADIUS / 57600.0;
     #endif
+}
+
+float estimateRsmLeakAO(vec3 mainDir, vec3 hrrViewPos){
+    mainDir = normalize((shadowMVPInverse * vec4(mainDir, 0.0)).xyz);
+    mainDir = normalize(mat3(gbufferModelView) * mainDir);
+
+    const int   MAX_STEPS         = 7;
+    const float STEP_SIZE         = 0.5;
+    const float STEP_GROWTH_BASE  = 1.5;
+    const float FALLOFF_SCALE     = 0.1;
+    const float HIT_FALLOFF_SCALE = 0.1;
+    const float JITTER_SCALE      = 1.0;
+    const float MAX_JITTER        = 0.95;
+
+    float jitter = clamp(temporalBayer64(gl_FragCoord.xy) * JITTER_SCALE, 0.0, MAX_JITTER);
+
+    float cumUnjittered = 0.0;
+    float curStep = STEP_SIZE;
+    vec3 prevP = hrrViewPos;
+    bool isHit = false;
+    vec3 hitP = vec3(0.0);
+    float dist_p_sdp = 0.0;
+
+    for (int i = 0; i < MAX_STEPS; ++i) {
+        cumUnjittered += curStep;
+
+        float adjustedDist = cumUnjittered - jitter * curStep;
+        vec3 p = hrrViewPos + mainDir * adjustedDist;
+
+        vec3 sp = viewPosToScreenPos(vec4(p, 1.0)).xyz;
+
+        if (outScreen(sp.xy)) {
+            return 1.0;
+        }
+
+        float depth = texture(depthtex2, sp.xy).x;
+
+        if (depth < sp.z) {
+            isHit = true;
+            hitP = p;
+            vec3 sdp = screenPosToViewPos(vec4(sp.xy, depth, 1.0)).xyz;     // screen depth pos
+            dist_p_sdp = distance(hitP, sdp);
+            break;
+        }
+
+        prevP = p;
+
+        curStep *= STEP_GROWTH_BASE;
+    }
+
+    if (isHit) {
+        vec3 worldPos = viewPosToWorldPos(vec4(prevP, 1.0)).xyz;
+        vec3 shadowPos = getShadowPos(vec4(worldPos, 1.0)).xyz;
+        float psd = texture(shadowtex1, shadowPos.xy).r;
+
+        if (psd < shadowPos.z + 0.00005) {
+            float dist = distance(hitP, hrrViewPos);
+            float rsmAO = 1.0 - saturate(1.0 / (1.0 + FALLOFF_SCALE * dist + HIT_FALLOFF_SCALE * dist_p_sdp));
+            return saturate(rsmAO);
+        }
+    }
+
+    return 1.0;
 }
 
 vec4 temporal_RSM(vec4 color_c){
     vec2 uv = texcoord * 2;
     vec4 cur = texelFetch(colortex6, ivec2(gl_FragCoord.xy), 0);
-    float z = cur.a;
+    float z = cur.g;
     vec3 prePos = getPrePos(viewPosToWorldPos(screenPosToViewPos(vec4(uv, z, 1.0))));
     vec3 prePosO = prePos;
 
@@ -104,7 +171,7 @@ vec4 temporal_RSM(vec4 color_c){
     vec4 c_s = vec4(0.0);
     float w_s = 0.0;
     
-    vec3 normal_c = cur.xyz;
+    vec3 normal_c = unpackNormal(cur.r);
     float depth_c = linearizeDepth(prePos.z);
     float fDepth = fwidth(depth_c);
 
@@ -114,62 +181,24 @@ vec4 temporal_RSM(vec4 color_c){
         if(outScreen(curUV * 2 * invViewSize)) continue;
 
         vec4 pre = texelFetch(colortex6, ivec2(curUV + 0.5 * viewSize), 0);
-        float depth_p = linearizeDepth(pre.a);   
+        float depth_p = linearizeDepth(pre.g);   
 
         float weight = (1.0 - abs(prePos.x - curUV.x)) * (1.0 - abs(prePos.y - curUV.y));
-        // float depthWeight = saturate(1.2 - abs(depth_p - depth_c) / (1.0 + fDepth * 2.0 + depth_p / 10.0));
         float depthWeight = exp(-abs(depth_p - depth_c) / (1.0 + fDepth * 2.0 + depth_p / 2.0));
+        float normalWeight = saturate(dot(normal_c, unpackNormal(pre.r)));
+
         weight *= depthWeight;
-        weight *= saturate(step(0.5, dot(normal_c, pre.xyz)));
+        weight *= normalWeight;
         
         c_s += texelFetch(colortex3, ivec2(curUV), 0) * weight;
         w_s += weight;
     }
     }
 
-    vec4 blend = vec4(0.95, 0.95, 0.95, 0.90);
+    vec4 blend = vec4(0.95, 0.95, 0.95, 0.9);
     color_c = mix(color_c, c_s, w_s * blend);
 
     return color_c;
-}
-
-vec4 JointBilateralFiltering_RSM(){
-    vec4 cur = texelFetch(colortex6, ivec2(gl_FragCoord.xy), 0);
-    vec3 normal = cur.xyz;
-    float z = cur.a;
-    z = linearizeDepth(z);
-
-    const float radius = DENOISER_RADIUS;
-	const float quality = DENOISER_QUALITY;
-	float d = 2.0 * radius / quality;
-    
-    float w_s = 0.0;
-    vec4 c_s = vec4(0.0);
-
-    for(float i = -radius; i <= radius + 0.1; i += d){
-	for(float j = -radius; j <= radius + 0.1; j += d){    
-        ivec2 offset = ivec2(i, j);
-        ivec2 curUV = ivec2(gl_FragCoord.xy) + offset;
-        if(outScreen(curUV * 2 * invViewSize)) continue;
-        
-        vec4 curData = texelFetch(colortex6, curUV, 0);
-        vec3 curNormal = curData.xyz;
-        float curZ = curData.a;
-        curZ = linearizeDepth(curZ);
-
-        float normalWeight = saturate(mix(1.0, dot(curNormal, normal), 1.0));
-        float depthWeight = saturate(1.2 - abs(curZ - z) * 1.0);
-        float weight = normalWeight * depthWeight;
-        // if(weight < 0.001) continue;
-
-        vec4 curColor = texelFetch(colortex1, curUV, 0);
-
-        c_s += curColor * weight;
-        w_s += weight;
-    }
-    }
-    if(w_s <= 0.001) return vec4(vec3(0.0), 1.0);
-    return c_s / max(w_s, 0.001);
 }
 
 vec4 JointBilateralFiltering_RSM_Horizontal(){
@@ -177,8 +206,8 @@ vec4 JointBilateralFiltering_RSM_Horizontal(){
     
     ivec2 pix = ivec2(gl_FragCoord.xy);
     vec4 curGD = texelFetch(colortex6, pix, 0);
-    vec3  normal0 = curGD.xyz;
-    float z0      = linearizeDepth(curGD.a);
+    vec3  normal0 = unpackNormal(curGD.r);
+    float z0      = linearizeDepth(curGD.g);
 
     const float radius  = DENOISER_RADIUS;
     const float quality = DENOISER_QUALITY;
@@ -194,8 +223,8 @@ vec4 JointBilateralFiltering_RSM_Horizontal(){
         if (outScreen(vec2(p) * 2.0 * invViewSize)) continue;
 
         vec4 gd = texelFetch(colortex6, p, 0);
-        vec3  n  = gd.xyz;
-        float z  = linearizeDepth(gd.a);
+        vec3  n  = unpackNormal(gd.r);
+        float z  = linearizeDepth(gd.g);
 
         float wN = saturate(dot(n, normal0));             // 法线权重
         float wZ = saturate(1.2 - abs(z - z0) * 1.0);      // 深度权重
@@ -215,8 +244,8 @@ vec4 JointBilateralFiltering_RSM_Vertical(){
 
     ivec2 pix = ivec2(gl_FragCoord.xy);
     vec4 curGD = texelFetch(colortex6, pix, 0);
-    vec3  normal0 = curGD.xyz;
-    float z0      = linearizeDepth(curGD.a);
+    vec3  normal0 = unpackNormal(curGD.r);
+    float z0      = linearizeDepth(curGD.g);
 
     const float radius  = DENOISER_RADIUS;
     const float quality = DENOISER_QUALITY;
@@ -232,8 +261,8 @@ vec4 JointBilateralFiltering_RSM_Vertical(){
         if (outScreen(vec2(p) * 2.0 * invViewSize)) continue;
 
         vec4 gd = texelFetch(colortex6, p, 0);
-        vec3  n  = gd.xyz;
-        float z  = linearizeDepth(gd.a);
+        vec3  n  = unpackNormal(gd.r);
+        float z  = linearizeDepth(gd.g);
 
         float wN = saturate(dot(n, normal0));
         float wZ = saturate(1.2 - abs(z - z0) * 1.0);
@@ -263,9 +292,9 @@ vec4 getGI(float depth, vec3 normal){
         if(outScreen(curUV * 2 * invViewSize)) continue;
 
         vec4 curData = texelFetch(colortex6, curUV, 0);
-        weight *= max(0.0f, mix(1.0, dot(curData.xyz, normal), 2.0));
+        weight *= max(0.0f, mix(1.0, dot(unpackNormal(curData.r), normal), 2.0));
 
-        float curZ = linearizeDepth(curData.a);
+        float curZ = linearizeDepth(curData.g);
         weight *= saturate(1.0 - abs(curZ - z) * 2.0);
 
         if(weight > w_max){
@@ -276,3 +305,43 @@ vec4 getGI(float depth, vec3 normal){
     // return catmullRom(colortex1, uv_closet * invViewSize);
     return texelFetch(colortex1, uv_closet, 0);
 }
+
+
+// vec4 JointBilateralFiltering_RSM(){
+//     vec4 cur = texelFetch(colortex6, ivec2(gl_FragCoord.xy), 0);
+//     vec3 normal = cur.xyz;
+//     float z = cur.a;
+//     z = linearizeDepth(z);
+
+//     const float radius = DENOISER_RADIUS;
+// 	const float quality = DENOISER_QUALITY;
+// 	float d = 2.0 * radius / quality;
+    
+//     float w_s = 0.0;
+//     vec4 c_s = vec4(0.0);
+
+//     for(float i = -radius; i <= radius + 0.1; i += d){
+// 	for(float j = -radius; j <= radius + 0.1; j += d){    
+//         ivec2 offset = ivec2(i, j);
+//         ivec2 curUV = ivec2(gl_FragCoord.xy) + offset;
+//         if(outScreen(curUV * 2 * invViewSize)) continue;
+        
+//         vec4 curData = texelFetch(colortex6, curUV, 0);
+//         vec3 curNormal = curData.xyz;
+//         float curZ = curData.a;
+//         curZ = linearizeDepth(curZ);
+
+//         float normalWeight = saturate(mix(1.0, dot(curNormal, normal), 1.0));
+//         float depthWeight = saturate(1.2 - abs(curZ - z) * 1.0);
+//         float weight = normalWeight * depthWeight;
+//         // if(weight < 0.001) continue;
+
+//         vec4 curColor = texelFetch(colortex1, curUV, 0);
+
+//         c_s += curColor * weight;
+//         w_s += weight;
+//     }
+//     }
+//     if(w_s <= 0.001) return vec4(vec3(0.0), 1.0);
+//     return c_s / max(w_s, 0.001);
+// }

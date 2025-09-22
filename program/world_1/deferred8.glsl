@@ -1,3 +1,5 @@
+#define CLOUD3D
+
 varying vec2 texcoord;
 
 varying vec3 sunWorldDir, moonWorldDir, lightWorldDir;
@@ -31,7 +33,7 @@ varying float isNoonS, isNightS, sunRiseSetS;
 
 
 float sampleLowFrequencyNoise(vec3 p){
-    vec4 low_frequency_noises = texture(depthtex2, p + vec3(0.0, 0.2, 0.0));
+    vec4 low_frequency_noises = texture(colortex8, p + vec3(0.0, 0.2, 0.0));
     float low_freq_FBM = (low_frequency_noises.g * 0.625) + (low_frequency_noises.b * 0.25) + (low_frequency_noises.a * 0.125);
     float base_cloud = remapSaturate(low_frequency_noises.r, -2.0 * (1.0 - low_freq_FBM), 1.0, 0.0, 1.0);
     return base_cloud;
@@ -280,7 +282,7 @@ float fakeCaustics(vec3 pos){
     }
 
     // worley 伪造焦散，最后用pow值调整曲线
-    float caustics  = texture(depthtex2, vec3(waveUV * 0.015, 0.0) + frameTimeCounter * 0.025).g;
+    float caustics  = texture(colortex8, vec3(waveUV * 0.015, 0.0) + frameTimeCounter * 0.025).g;
 
 
     return caustics;

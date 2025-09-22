@@ -1,3 +1,5 @@
+#define CLOUD3D
+
 varying vec2 texcoord;
 
 varying vec3 sunWorldDir, moonWorldDir, lightWorldDir;
@@ -21,13 +23,13 @@ varying vec3 sunColor, skyColor;
 #include "/lib/atmosphere/volumetricClouds.glsl"
 
 #ifdef FSH
-const bool shadowtex1Mipmap = true;
-const bool shadowtex1Nearest = false;
+// const bool shadowtex1Mipmap = true;
+// const bool shadowtex1Nearest = false;
 
-const bool shadowcolor0Mipmap = true;
-const bool shadowcolor0Nearest = false;
-const bool shadowcolor1Mipmap = true;
-const bool shadowcolor1Nearest = false;
+// const bool shadowcolor0Mipmap = true;
+// const bool shadowcolor0Nearest = false;
+// const bool shadowcolor1Mipmap = true;
+// const bool shadowcolor1Nearest = false;
 
 #include "/lib/common/gbufferData.glsl"
 #include "/lib/common/materialIdMapper.glsl"
@@ -49,12 +51,15 @@ void main() {
 		vec3 hrrWorldDirO = normalize(hrrWorldPos.xyz);
 		vec3 hrrWorldDir = normalize(vec3(hrrWorldPos.x, max(hrrWorldPos.y, 0.0), hrrWorldPos.z));
 
+		float dirMixFactor = remapSaturate(camera.y, 10000.0, 10002.0, 0.0, 1.0);
+		hrrWorldDir = normalize(mix(hrrWorldDir, hrrWorldDirO, dirMixFactor));
 		// vec2 prePos = getPrePos(viewPosToWorldPos(screenPosToViewPos(vec4(hrrUV_a, hrrZ, 1.0)))).xy * 0.5 + 0.5;
 
 		if(isSkyHRR() > 0.5) {
 			float d_p2a = RaySphereIntersection(earthPos, hrrWorldDir, vec3(0.0), earth_r + atmosphere_h).y;
-			// float d_p2e = RaySphereIntersection(earthPos, hrrWorldDirO, vec3(0.0), earth_r).x;
+			float d_p2e = RaySphereIntersection(earthPos, hrrWorldDir, vec3(0.0), earth_r).x;
 			float d = d_p2a;
+			d = d_p2e > 0.0 ? d_p2e : d;
 			d = max(d, 0.0);
 
 			mat2x3 atmosphericScattering = AtmosphericScattering(hrrWorldDir * d, hrrWorldDirO, sunWorldDir, IncomingLight * (1.0 - 0.3 * rainStrength), 1.0, ATMOSPHERE_SCATTERING_SAMPLES);
@@ -73,7 +78,7 @@ void main() {
 		vec3 hrrWorldDirO = normalize(hrrWorldPos.xyz);
 		vec3 hrrWorldDir = normalize(vec3(hrrWorldPos.x, max(hrrWorldPos.y, 0.0), hrrWorldPos.z));
 
-		if(isSkyHRR1() > 0.5) {
+		if(isSkyHRR1() > 0.5 && camera.y < 5000.0) {
 			float d_p2a = RaySphereIntersection(earthPos, hrrWorldDir, vec3(0.0), earth_r + atmosphere_h).y;
 			float d_p2e = RaySphereIntersection(earthPos, hrrWorldDirO, vec3(0.0), earth_r).x;
 			float d = d_p2e > 0.0 ? d_p2e : d_p2a;
@@ -95,7 +100,7 @@ void main() {
 
 
 	vec2 hrrUV = texcoord * 2.0;
-	float hrrZ = CT6.a;
+	float hrrZ = CT6.g;
 	vec3 rsm = BLACK;
 	float ao = 1.0;
 	if(!outScreen(hrrUV) && hrrZ < 1.0){
@@ -103,11 +108,21 @@ void main() {
 		vec4 hrrViewPos = screenPosToViewPos(hrrScreenPos);
 		vec4 hrrWorldPos = viewPosToWorldPos(hrrViewPos);
 
-		vec3 hrrNormalW = CT6.xyz;
+		vec3 hrrNormalW = unpackNormal(CT6.r);
 		vec3 hrrNormal = normalize(mat3(gbufferModelView) * hrrNormalW);
 
+		float rsmAO = 1.0;
 		#ifdef RSM_ENABLED
-			if(isNoon > 0.0) rsm = RSM(hrrWorldPos, hrrNormalW);
+			if(isNoon > 0.0 && isEyeInWater == 0.0) {
+				vec3 mainDir = vec3(0.0);
+				rsm = RSM(hrrWorldPos, hrrNormalW, mainDir);
+
+				#ifdef RSM_LEAK_FIX
+					float rsmAO = estimateRsmLeakAO(mainDir, hrrViewPos.xyz);
+					rsm *= rsmAO;
+				#endif
+
+			};
 			rsm = max(BLACK, rsm);
 		#endif
 

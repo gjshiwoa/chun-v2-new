@@ -2,4 +2,4 @@
 
 #define VSH
 
-#include "/program/world_1/deferred10.glsl"
+#include "/program/world_1/deferred3.glsl"

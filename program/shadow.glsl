@@ -53,7 +53,7 @@ void main(){
     vec3 shadowNormal = normal * (1.0 - isTranslucent);
 
     gl_FragData[0] = vec4(color.rgb, 1.0);
-    gl_FragData[1] = vec4(shadowNormal, lmcoord.y);
+    gl_FragData[1] = vec4(shadowNormal * 0.5 + 0.5, lmcoord.y);
 }
 #endif
 
@@ -106,7 +106,6 @@ void main(){
     vec4 sClipPos = shadowProjection * sViewPos;
     vec4 sNDCPos = vec4(sClipPos.xyz / sClipPos.w, 1.0);
     gl_Position = sNDCPos;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
     gl_Position.xy = shadowDistort1(gl_Position.xy);
     gl_Position.z = mix(gl_Position.z, 0.5, 0.8);
 

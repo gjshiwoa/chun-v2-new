@@ -1,3 +1,5 @@
+#define SKY_BOX
+
 varying vec2 texcoord;
 
 varying vec3 sunWorldDir, moonWorldDir, lightWorldDir;
@@ -23,20 +25,20 @@ varying float isNoonS, isNightS, sunRiseSetS;
 #include "/lib/atmosphere/volumetricClouds.glsl"
 
 #ifdef FSH
-const bool shadowtex1Mipmap = true;
-const bool shadowtex1Nearest = false;
+// const bool shadowtex1Mipmap = true;
+// const bool shadowtex1Nearest = false;
 
-const bool shadowcolor0Mipmap = true;
-const bool shadowcolor0Nearest = false;
-const bool shadowcolor1Mipmap = true;
-const bool shadowcolor1Nearest = false;
+// const bool shadowcolor0Mipmap = true;
+// const bool shadowcolor0Nearest = false;
+// const bool shadowcolor1Mipmap = true;
+// const bool shadowcolor1Nearest = false;
 
 #include "/lib/common/gbufferData.glsl"
 #include "/lib/common/materialIdMapper.glsl"
 #include "/lib/common/octahedralMapping.glsl"
 
 void main() {
-	vec4 CT7 = texture(colortex7, texcoord);
+	vec4 CT7 = texelFetch(colortex7, ivec2(gl_FragCoord.xy), 0);
 
 	vec2 uv = texcoord * 2.0;
 	if(!outScreen(uv)){
@@ -78,7 +80,8 @@ void main() {
 		
 		CT7.rgb = max(color.rgb, vec3(0.0));
 
-		CT7.rgb = mix(texture(colortex7, texcoord).rgb, CT7.rgb, 0.05);
+		if(!outScreen(texcoord * 2.0))
+			CT7.rgb = mix(texture(colortex7, texcoord).rgb, CT7.rgb, 0.05);
 	}
 
 /* DRAWBUFFERS:7 */

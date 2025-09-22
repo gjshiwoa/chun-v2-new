@@ -306,11 +306,6 @@ vec2 rayBoxDst(vec3 boundsMin, vec3 boundsMax, vec3 rayOrigin, vec3 invRaydir) {
     return vec2(dstToBox, dstInsideBox);
 }
 
-float getHeightFractionForPoint(float height, vec2 minMax){
-    float height_fraction = (height - minMax.x) / (minMax.y - minMax.x);
-    return saturate(height_fraction);
-}
-
 float remap(float original_value, float original_min, float original_max, float new_min, float new_max){
     float result = new_min + ((( original_value - original_min) / (original_max - original_min)) * (new_max - new_min));
     return result;
@@ -319,6 +314,11 @@ float remap(float original_value, float original_min, float original_max, float 
 float remapSaturate(float original_value, float original_min, float original_max, float new_min, float new_max){
     float result = new_min + ((( original_value - original_min) / (original_max - original_min)) * (new_max - new_min));
     return clamp(result, min(new_min, new_max), max(new_min, new_max));
+}
+
+float getHeightFractionForPoint(float height, vec2 minMax){
+    float height_fraction = remapSaturate(height, minMax.x, minMax.y, 0.0, 1.0);
+    return height_fraction;
 }
 
 float smoothRemap(float y, float lowerBound, float upperBound, float transitionRange_L, float transitionRange_U,  float smoothness) {

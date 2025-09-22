@@ -1,3 +1,6 @@
+#ifndef _FILTER_GLSL_
+#define _FILTER_GLSL_
+
 // hornet: Texture Filtering: Catmull-Rom 
 // https://www.shadertoy.com/view/MtVGWz
 vec4 catmullRom(sampler2D text, vec2 uv){
@@ -191,6 +194,29 @@ vec4 textureBicubic(sampler2D text, vec2 uv){
                         g1x * texture(text, p3));
 }
 
+vec4 textureBicubic(sampler2D text, vec2 uv, float textureSize){
+	uv = uv * textureSize + 0.5;
+	vec2 iuv = floor( uv );
+	vec2 fuv = fract( uv );
+
+    float g0x = g0(fuv.x);
+    float g1x = g1(fuv.x);
+    float h0x = h0(fuv.x);
+    float h1x = h1(fuv.x);
+    float h0y = h0(fuv.y);
+    float h1y = h1(fuv.y);
+
+	vec2 p0 = (vec2(iuv.x + h0x, iuv.y + h0y) - 0.5) / textureSize;
+	vec2 p1 = (vec2(iuv.x + h1x, iuv.y + h0y) - 0.5) / textureSize;
+	vec2 p2 = (vec2(iuv.x + h0x, iuv.y + h1y) - 0.5) / textureSize;
+	vec2 p3 = (vec2(iuv.x + h1x, iuv.y + h1y) - 0.5) / textureSize;
+	
+    return g0(fuv.y) * (g0x * texture(text, p0)  +
+                        g1x * texture(text, p1)) +
+           g1(fuv.y) * (g0x * texture(text, p2)  +
+                        g1x * texture(text, p3));
+}
+
 vec4 textureNice(sampler2D tex, vec2 uv, float texResolution){
     uv = uv*texResolution + 0.5;
     vec2 iuv = floor( uv );
@@ -261,3 +287,4 @@ const vec2 offsetUV16[16] = vec2[](
     vec2(0.30901712, -0.9510565),
     vec2(0.80901694, -0.5877853)
 );
+#endif

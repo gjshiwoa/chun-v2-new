@@ -35,7 +35,7 @@ void main() {
 	#ifdef EXPOSURE
 		avgExposure(color.rgb);
 		#if !defined END && !defined NETHER
-			color.rgb *= 1.0 - isNight * 0.4;
+			color.rgb *= 1.0 - isNight * 0.4 * saturate(1.0 - isEyeInWater);
 		#endif
 		#if defined END
 			color.rgb = 1.3 * pow(color.rgb, vec3(1.2));

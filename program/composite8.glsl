@@ -12,11 +12,10 @@ varying float curLum, preLum;
 #include "/lib/camera/exposure.glsl"
 
 #ifdef FSH
-const bool colortex0MipmapEnabled = true;
+// const bool colortex0MipmapEnabled = true;
 
 #include "/lib/camera/bloom.glsl"
 #include "/lib/camera/depthOfField.glsl"
-
 
 void main() {
 	vec3 blur = BLACK;
@@ -77,9 +76,8 @@ void main() {
 	
 
 
-
-	vec4 CT2 = texelFetch(colortex2, ivec2(gl_FragCoord.xy), 0);
-    if(ivec2(gl_FragCoord.xy) == ivec2(0, 0)){
+	vec4 CT2 = texture(colortex2, texcoord);
+    if(ivec2(gl_FragCoord.xy) == vec2(0.0)){
         float AverageLum = mix(preLum, curLum, saturate(frameTime*2.0));
         CT2.a = AverageLum;
     }
@@ -96,6 +94,7 @@ void main() {
 	gl_FragData[0] = color;
 	gl_FragData[1] = CT1;
 	gl_FragData[2] = CT2;
+
 }
 
 #endif
@@ -111,7 +110,7 @@ void main() {
 	#else
 		curLum = calculateAverageLuminance1();
 	#endif
-	preLum = texelFetch(colortex2, ivec2(0, 0), 0).a;
+	preLum = texelFetch(colortex2, averageLumUV, 0).a;
 
 	gl_Position = ftransform();
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;

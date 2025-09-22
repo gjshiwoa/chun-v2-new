@@ -145,8 +145,8 @@ vec3 TransmittanceToAtmosphere(vec3 p, vec3 dir){
     vec2 uv = GetTransmittanceLutUv(bottomRadius, topRadius, cos_theta, r);
     if(outScreen(uv)) return BLACK;
 
-    uv = vec2(remap(uv.x, 0.0, 1.0, T1_I.x, T1_I.z),
-              remap(uv.y, 0.0, 1.0, T1_I.y, T1_I.w));
+    uv = vec2(remap(uv.x, 0.0, 1.0, T1_I.x - 1, T1_I.z + 1),
+              remap(uv.y, 0.0, 1.0, T1_I.y - 1, T1_I.w + 1));
     uv /= 512.0;
 
     return texture(colortex7, uv).rgb;
@@ -278,8 +278,8 @@ vec3 GetMultiScattering(float h, vec3 p, vec3 lightDir){
     vec2 uv = vec2(cosSunZenithAngle * 0.5 + 0.5, mix(1.0, h / atmosphere_h, 1.0));
     if(outScreen(uv)) return vec3(0.0);
 
-    uv = vec2(remap(uv.x, 0.0, 1.0, MS_I.x, MS_I.z),
-              remap(uv.y, 0.0, 1.0, MS_I.y, MS_I.w));
+    uv = vec2(remap(uv.x, 0.0, 1.0, MS_I.x - 1, MS_I.z + 1),
+              remap(uv.y, 0.0, 1.0, MS_I.y - 1, MS_I.w + 1));
     uv /= 512.0;
 
     return texture(colortex7, uv).rgb * 0.02;
@@ -361,6 +361,8 @@ mat2x3 AtmosphericScattering(vec3 worldPos, vec3 worldDirO, vec3 lightDir, vec3 
     vec3 multiScattering = multiScatteringR * RayleighSigma
                         + multiScatteringM * MieSigma * mieAmount * MIE_STRENGTHNESS;
 
+    inScattering = mix(inScattering, vec3(getLuminance(inScattering)), rainStrength * 0.33);
+
     return mat2x3(inScattering * ds * I, multiScattering * ds * I);
 }
 
@@ -393,7 +395,7 @@ vec3 Transmittance1(vec3 startPos, vec3 endPos, float stepCount){
     vec3 opticalDepth = dRayleigh * RayleighSigma
                 + dMie * (MieSigma + MieAbsorptionSigma)
                 + dOzone * OzoneAbsorptionSigma;
-    vec3 t = fastExp(-opticalDepth * stepSize);
+    vec3 t = exp(-opticalDepth * stepSize);
 
     return t;
 }

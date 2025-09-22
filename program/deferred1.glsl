@@ -21,7 +21,7 @@ void main() {
 	ivec2 uv1 = ivec2(remap(iTexcoord.x, MS_I.x, MS_I.z, MS_O.x, MS_O.z), 
 					  remap(iTexcoord.y, MS_I.y, MS_I.w, MS_O.y, MS_O.w));
 	if(iTexcoord.x >= MS_I.x && iTexcoord.x <= MS_I.z && iTexcoord.y >= MS_I.y && iTexcoord.y <= MS_I.w)
-		CT7 = texelFetch(depthtex2, uv1, 0);
+		CT7 = texelFetch(colortex8, uv1, 0);
 
 
 

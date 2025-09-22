@@ -32,7 +32,7 @@ void main() {
 	vec4 viewPos1 = screenPosToViewPos(vec4(unTAAJitter(texcoord), depth1, 1.0));
 
 #ifdef PBR_REFLECTIVITY
-	if(specularMap.r + rainStrength > 0.001){
+	if(specularMap.r + rainStrength > 1.0 / 255.0){
 		
 		vec3 viewDir = normalize(viewPos1.xyz);
 
@@ -76,17 +76,24 @@ void main() {
 		CT6 = texelFetch(colortex6, ivec2(gl_FragCoord.xy - 0.5 * viewSize), 0);;
 	}
 
+	vec4 viewPos1R = screenPosToViewPos(vec4(texcoord.st, depth1, 1.0));
+	vec4 worldPos1R = viewPosToWorldPos(viewPos1R);
+	vec2 prePos = getPrePos(worldPos1R).xy;
+	vec2 velocity = texcoord - prePos;
+
 	// vec3 worldDir = normalize(mat3(gbufferModelViewInverse) * viewPos1.xyz);
 	// color.rgb = texture(colortex7, clamp(0.5 * directionToOctahedral(worldDir), 0.0, 0.5 - 1.0 / 512.0)).rgb;
 	// color.rgb = vec3(texture(colortex1, texcoord * 0.5 + vec2(0.5, 0.0)).rgb);
+	// color.rgb = texture(colortex3, texcoord).rgb;
 
 
 
 
-/* DRAWBUFFERS:046 */
+/* DRAWBUFFERS:0456 */
 	gl_FragData[0] = color;
 	gl_FragData[1] = color1;
-	gl_FragData[2] = CT6;
+	gl_FragData[2] = vec4(texture(colortex2, texcoord).rgb / COLOR_UI_SCALE, 1.0);
+	gl_FragData[3] = CT6;
 }
 
 #endif

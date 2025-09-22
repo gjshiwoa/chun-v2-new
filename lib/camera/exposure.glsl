@@ -15,7 +15,7 @@ float calculateAverageLuminance1() {
 }
 
 void avgExposure(inout vec3 color) {
-    float avgLuminance = texelFetch(colortex2, ivec2(0, 0), 0).a;
+    float avgLuminance = texelFetch(colortex2, averageLumUV, 0).a;
     float t = TARGET_BRIGHTNESS;
     float d = EXPOSURE_DELTA;
     float s = LIGHT_SENSITIVITY;
