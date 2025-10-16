@@ -162,12 +162,12 @@ float estimateRsmLeakAO(vec3 mainDir, vec3 hrrViewPos){
     return 1.0;
 }
 
-vec4 temporal_RSM(vec4 color_c){
+vec4 temporal_RSM(vec4 color_c, float dhTerrain){
     vec2 uv = texcoord * 2;
-    vec4 cur = texelFetch(colortex6, ivec2(gl_FragCoord.xy), 0);
+    vec2 cur = texelFetch(colortex6, ivec2(gl_FragCoord.xy), 0).rg;
     float z = cur.g;
-    vec3 prePos = getPrePos(viewPosToWorldPos(screenPosToViewPos(vec4(uv, z, 1.0))));
-    vec3 prePosO = prePos;
+    vec4 viewPos = screenPosToViewPos(vec4(uv, z, 1.0));
+    vec3 prePos = getPrePos(viewPosToWorldPos(viewPos));
 
     prePos.xy = prePos.xy * 0.5 * viewSize - 0.5;
     vec2 fPrePos = floor(prePos.xy);
@@ -184,7 +184,7 @@ vec4 temporal_RSM(vec4 color_c){
         vec2 curUV = fPrePos + vec2(i, j);
         if(outScreen(curUV * 2 * invViewSize)) continue;
 
-        vec4 pre = texelFetch(colortex6, ivec2(curUV + 0.5 * viewSize), 0);
+        vec2 pre = texelFetch(colortex6, ivec2(curUV + 0.5 * viewSize), 0).rg;
         float depth_p = linearizeDepth(pre.g);   
 
         float weight = (1.0 - abs(prePos.x - curUV.x)) * (1.0 - abs(prePos.y - curUV.y));
@@ -209,7 +209,7 @@ vec4 JointBilateralFiltering_RSM_Horizontal(){
     // return texelFetch(colortex3, ivec2(gl_FragCoord.xy), 0);
     
     ivec2 pix = ivec2(gl_FragCoord.xy);
-    vec4 curGD = texelFetch(colortex6, pix, 0);
+    vec2 curGD = texelFetch(colortex6, pix, 0).rg;
     vec3  normal0 = unpackNormal(curGD.r);
     float z0      = linearizeDepth(curGD.g);
 
@@ -226,7 +226,7 @@ vec4 JointBilateralFiltering_RSM_Horizontal(){
 
         if (outScreen(vec2(p) * 2.0 * invViewSize)) continue;
 
-        vec4 gd = texelFetch(colortex6, p, 0);
+        vec2 gd = texelFetch(colortex6, p, 0).rg;
         vec3  n  = unpackNormal(gd.r);
         float z  = linearizeDepth(gd.g);
 
@@ -247,7 +247,7 @@ vec4 JointBilateralFiltering_RSM_Vertical(){
     // return texelFetch(colortex1, ivec2(gl_FragCoord.xy), 0);
 
     ivec2 pix = ivec2(gl_FragCoord.xy);
-    vec4 curGD = texelFetch(colortex6, pix, 0);
+    vec2 curGD = texelFetch(colortex6, pix, 0).rg;
     vec3  normal0 = unpackNormal(curGD.r);
     float z0      = linearizeDepth(curGD.g);
 
@@ -264,7 +264,7 @@ vec4 JointBilateralFiltering_RSM_Vertical(){
 
         if (outScreen(vec2(p) * 2.0 * invViewSize + vec2(1.0, 1.0) * invViewSize)) continue;
 
-        vec4 gd = texelFetch(colortex6, p, 0);
+        vec2 gd = texelFetch(colortex6, p, 0).rg;
         vec3  n  = unpackNormal(gd.r);
         float z  = linearizeDepth(gd.g);
 

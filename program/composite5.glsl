@@ -29,9 +29,29 @@ varying float isNoonS, isNightS, sunRiseSetS;
 #include "/lib/atmosphere/fog.glsl"
 
 void main() {
-	vec4 color = texture2D(colortex0, texcoord);
-	float depth = texture2D(depthtex0, texcoord).r;
-	vec4 viewPos = screenPosToViewPos(vec4(texcoord, depth, 1.0));
+	float skyB = texelFetch(depthtex1, ivec2(gl_FragCoord.xy), 0).r == 1.0 ? 1.0 : 0.0;
+	vec4 color = texelFetch(colortex0, ivec2(gl_FragCoord.xy), 0);
+
+	#ifdef DISTANT_HORIZONS
+		bool isTerrain = skyB < 0.5;
+
+		float depth;
+		vec4 viewPos;
+		float dhDepth = texture(dhDepthTex0, texcoord).r;
+		if(dhDepth < 1.0){ 
+			viewPos = screenPosToViewPosDH(vec4(unTAAJitter(texcoord), dhDepth, 1.0));
+			depth = viewPosToScreenPos(viewPos).z;
+		}else{
+			depth = texture(depthtex1, texcoord).r;
+			viewPos = screenPosToViewPos(vec4(unTAAJitter(texcoord), depth, 1.0));	
+		}
+	#else 
+		bool isTerrain = skyB < 0.5;
+
+		float depth = texture(depthtex1, texcoord).r;
+		vec4 viewPos = screenPosToViewPos(vec4(unTAAJitter(texcoord), depth, 1.0));	
+	#endif
+
 	vec4 worldPos = viewPosToWorldPos(viewPos);
 	float worldDis = length(worldPos);
 	vec3 worldDir = normalize(worldPos.xyz);

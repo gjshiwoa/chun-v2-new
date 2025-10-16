@@ -25,9 +25,25 @@ varying vec3 sunViewDir, moonViewDir, lightViewDir;
 
 
 void main() {
-	bool isTerrain = skyB < 0.5;
-	float depth1 = texture(depthtex1, texcoord).r;
-	vec4 viewPos1 = screenPosToViewPos(vec4(unTAAJitter(texcoord), depth1, 1.0));
+	#ifdef DISTANT_HORIZONS
+		bool isTerrain = skyB < 0.5;
+
+		float depth1;
+		vec4 viewPos1;
+		if(dhTerrain > 0.5){ 
+			depth1 = texture(dhDepthTex0, texcoord).r;
+			viewPos1 = screenPosToViewPosDH(vec4(unTAAJitter(texcoord), depth1, 1.0));
+			depth1 = viewPosToScreenPos(viewPos1).z;
+		}else{
+			depth1 = texture(depthtex1, texcoord).r;
+			viewPos1 = screenPosToViewPos(vec4(unTAAJitter(texcoord), depth1, 1.0));	
+		}
+	#else 
+		bool isTerrain = skyB < 0.5;
+
+		float depth1 = texture(depthtex1, texcoord).r;
+		vec4 viewPos1 = screenPosToViewPos(vec4(unTAAJitter(texcoord), depth1, 1.0));	
+	#endif
 
 	vec3 viewDir = normalize(viewPos1.xyz);
 	vec4 worldPos1 = viewPosToWorldPos(viewPos1);

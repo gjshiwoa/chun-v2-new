@@ -56,7 +56,7 @@ void main() {
 
 		vec4 gi = vec4(rsm, ao);
 		#if defined RSM_ENABLED || defined AO_ENABLED
-			gi = temporal_RSM(gi);
+			gi = temporal_RSM(gi, 0.0);
 			gi = max(vec4(0.0), gi);
 			CT1 = gi;
 			CT3 = gi;

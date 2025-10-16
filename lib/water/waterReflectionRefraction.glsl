@@ -41,7 +41,7 @@ vec2 SSRT(vec3 viewPos, vec3 reflectViewDir, vec3 normalTex){
 
         float closest = texture(depthtex1, testScreenPos.xy).r;
         #ifdef DISTANT_HORIZONS
-            float dhDepth = texture(dhDepthTex1, testScreenPos.xy).r;
+            float dhDepth = texture(dhDepthTex0, testScreenPos.xy).r;
             vec4 dhViewPos = screenPosToViewPosDH(vec4(testScreenPos.xy, dhDepth, 1.0));
             closest = min(closest, viewPosToScreenPos(dhViewPos).z);
         #endif
@@ -58,7 +58,7 @@ vec2 SSRT(vec3 viewPos, vec3 reflectViewDir, vec3 normalTex){
                 testScreenPos = viewPosToScreenPos(vec4(probePos, 1.0)).xyz;
                 closestB = texture(depthtex1, testScreenPos.xy).r;
                 #ifdef DISTANT_HORIZONS
-                    float dhDepthB = texture(dhDepthTex1, testScreenPos.xy).r;
+                    float dhDepthB = texture(dhDepthTex0, testScreenPos.xy).r;
                     vec4 dhViewPosB = screenPosToViewPosDH(vec4(testScreenPos.xy, dhDepthB, 1.0));
                     closestB = min(closestB, viewPosToScreenPos(dhViewPosB).z);
                 #endif

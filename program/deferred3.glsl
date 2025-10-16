@@ -31,7 +31,7 @@ varying vec3 sunColor, skyColor;
 void main() {
 	vec4 CT1 = vec4(0.0, 0.0, 0.0, 1.0);
 	vec4 CT3 = texelFetch(colortex3, ivec2(gl_FragCoord.xy), 0);
-	vec4 CT6 = texelFetch(colortex6, ivec2(gl_FragCoord.xy), 0);
+	vec2 CT6 = texelFetch(colortex6, ivec2(gl_FragCoord.xy), 0).rg;
 
 	vec2 hrrUV_a = texcoord * 2.0 - 1.0;
 	if(!outScreen(hrrUV_a)){
@@ -65,20 +65,27 @@ void main() {
 	vec3 rsm = BLACK;
 	float ao = 1.0;
 
-	float dhTerrain = 0.0;
+	float dhTerrainHrr = 0.0;
 	#ifdef DISTANT_HORIZONS
 		vec4 CT4Hrr = texelFetch(colortex4, ivec2(hrrUV * viewSize), 0);
 		vec2 CT4GHrr = unpack16To2x8(CT4Hrr.g);
 		float blockIDHrr = CT4GHrr.x * ID_SCALE;
-		dhTerrain = blockIDHrr > DH_TERRAIN - 0.5 ? 1.0 : 0.0;
+		dhTerrainHrr = blockIDHrr > DH_TERRAIN - 0.5 ? 1.0 : 0.0;
 	#endif
 
 	float isTerrainHrr = texelFetch(depthtex1, ivec2(hrrUV * viewSize), 0).r < 1.0
-						|| dhTerrain > 0.5 ? 1.0 : 0.0;
+						|| dhTerrainHrr > 0.5 ? 1.0 : 0.0;
 
 	if(!outScreen(hrrUV) && isTerrainHrr > 0.5){
 		vec4 hrrScreenPos = vec4(unTAAJitter(hrrUV), hrrZ, 1.0);
 		vec4 hrrViewPos = screenPosToViewPos(hrrScreenPos);
+		#ifdef DISTANT_HORIZONS
+			if(dhTerrainHrr > 0.5){
+				float dhDepth = texture(dhDepthTex0, hrrUV).r;
+				hrrViewPos = screenPosToViewPosDH(vec4(unTAAJitter(hrrUV), dhDepth, 1.0));
+			}
+		#endif
+		
 		vec4 hrrWorldPos = viewPosToWorldPos(hrrViewPos);
 
 		vec3 hrrNormalW = unpackNormal(CT6.r);
@@ -100,13 +107,13 @@ void main() {
 		#endif
 
 		#ifdef AO_ENABLED
-			ao = saturate(1.0 - GTAO(hrrViewPos.xyz, hrrNormal, dhTerrain));
+			ao = saturate(1.0 - GTAO(hrrViewPos.xyz, hrrNormal, dhTerrainHrr));
 			// ao = 0.0;
 		#endif
 
 		vec4 gi = vec4(rsm, ao);
 		#if defined RSM_ENABLED || defined AO_ENABLED
-			gi = temporal_RSM(gi);
+			gi = temporal_RSM(gi, dhTerrainHrr);
 			gi = max(vec4(0.0), gi);
 			// CT1 = gi;
 			CT3 = gi;

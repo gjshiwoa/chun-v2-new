@@ -65,7 +65,7 @@ void main() {
 		float depth1;
 		vec4 viewPos1;
 		if(dhTerrain > 0.5){ 
-			depth1 = texture(dhDepthTex1, texcoord).r;
+			depth1 = texture(dhDepthTex0, texcoord).r;
 			viewPos1 = screenPosToViewPosDH(vec4(unTAAJitter(texcoord), depth1, 1.0));
 			depth1 = viewPosToScreenPos(viewPos1).z;
 		}else{
@@ -147,8 +147,8 @@ void main() {
 		if(worldDis1 > shadowDistance * 0.75){
 			float mixFactor = smoothstep(shadowDistance * 0.75, shadowDistance * 0.90, worldDis1);
 			mixFactor = saturate(mixFactor);
-			// float RTShadow = CT4R.y;
-			// shadow = min(shadow, mix(1.0, RTShadow, mixFactor));
+			float RTShadow = CT4R.y;
+			shadow = min(shadow, mix(1.0, RTShadow, mixFactor));
 			shadow = saturate(shadow);
 		}
 		vec3 visibility = vec3(shadow + colorShadow * 1.0);
@@ -182,7 +182,7 @@ void main() {
 		
 		color.rgb += artificial;
 		// color.rgb = gi.rgb;
-		color.rgb = vec3(gi.a);
+		// color.rgb = vec3(ao);
 
 	}else{
 		float d_p2a = RaySphereIntersection(earthPos, worldDir, vec3(0.0), earth_r + atmosphere_h).y;
@@ -241,7 +241,7 @@ void main() {
 	}
 	
 	color.rgb = max(BLACK, color.rgb);
-	// color.rgb = vec3(1.0 - texture(colortex1, texcoord * 0.5).a);
+	// color.rgb = vec3(1.0 - texture(colortex3, texcoord * 0.5).a);
 	
 	// if(dhTerrain > 0.5) color.rgb = vec3(1.0 - texture(colortex1, texcoord * 0.5).a);
 	

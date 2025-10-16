@@ -20,16 +20,16 @@ void main() {
 	vec4 gi = vec4(BLACK, 1.0);
 	vec2 uv = texcoord * 2;
 
-	float dhTerrain = 0.0;
+	float dhTerrainHrr = 0.0;
 	#ifdef DISTANT_HORIZONS
 		vec4 CT4Hrr = texelFetch(colortex4, ivec2(uv * viewSize), 0);
 		vec2 CT4GHrr = unpack16To2x8(CT4Hrr.g);
 		float blockIDHrr = CT4GHrr.x * ID_SCALE;
-		dhTerrain = blockIDHrr > DH_TERRAIN - 0.5 ? 1.0 : 0.0;
+		dhTerrainHrr = blockIDHrr > DH_TERRAIN - 0.5 ? 1.0 : 0.0;
 	#endif
 
 	float isTerrainHrr = texelFetch(depthtex1, ivec2(uv * viewSize), 0).r < 1.0
-						|| dhTerrain > 0.5 ? 1.0 : 0.0;
+						|| dhTerrainHrr > 0.5 ? 1.0 : 0.0;
 
 	#if defined RSM_ENABLED || defined AO_ENABLED
 		if(!outScreen(uv) && isTerrainHrr > 0.5){
