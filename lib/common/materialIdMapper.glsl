@@ -43,11 +43,7 @@ float IDMappingT(){
             float depth = texture(depthtex1, curUV).r;
 
             #ifdef DISTANT_HORIZONS
-                vec4 CT4 = texture(colortex4, uv);
-                vec2 CT4G = unpack16To2x8(CT4.g);
-                float blockID = CT4G.x * ID_SCALE;
-
-                float dhTerrain = blockID > DH_TERRAIN - 0.5 ? 1.0 : 0.0;
+                float dhTerrain = texture(dhDepthTex0, curUV).r < 1.0 && depth == 1.0 ? 1.0 : 0.0;
                 if(depth == 1.0 && dhTerrain < 0.5) return 1.0;
             #endif
 
@@ -55,6 +51,9 @@ float IDMappingT(){
         }
         return 0.0;
     }
+
+    float depthB0 = texture(depthtex0, texcoord).r;
+    float depthB1 = texture(depthtex1, texcoord).r;
 
     float blockIDRange = 0.3;
 
@@ -69,7 +68,7 @@ float IDMappingT(){
                     + checkInRange(blockID, NO_ANISO, blockIDRange);
 
     // DH
-    float dhTerrain = blockID > DH_TERRAIN - 0.5 ? 1.0 : 0.0;
+    float dhTerrain = texture(dhDepthTex0, texcoord).r < 1.0 && depthB0 == 1.0 ? 1.0 : 0.0;
     float dhLeaves = checkInRange(blockID, DH_LEAVES, blockIDRange);
     float dhWood = checkInRange(blockID, DH_WOOD, blockIDRange);
 
@@ -82,8 +81,6 @@ float IDMappingT(){
     float block = checkInRange(blockID, BLOCK, blockIDRange);
     float hand = checkInRange(blockID, HAND, blockIDRange);
 
-    float depthB0 = texture(depthtex0, texcoord).r;
-    float depthB1 = texture(depthtex1, texcoord).r;
     float skyA = depthB0 == 1.0 && dhTerrain < 0.5 ? 1.0 : 0.0;
     float skyB = depthB1 == 1.0 && dhTerrain < 0.5 ? 1.0 : 0.0;
 

@@ -184,7 +184,7 @@ const vec3 IncomingLight_N = vec3(INCOMING_LIGHT_N_RED, INCOMING_LIGHT_N_GREEN, 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ATMOSPHERIC_SCATTERING_FOG
-#define ATMOSPHERIC_SCATTERING_FOG_DENSITY 50.0 // [10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0 60.0 70.0 80.0 90.0 100.0 110.0 120.0 130.0 140.0 150.0 160.0 170.0 180.0 190.0 200.0]
+#define ATMOSPHERIC_SCATTERING_FOG_DENSITY 30.0 // [10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0 60.0 70.0 80.0 90.0 100.0 110.0 120.0 130.0 140.0 150.0 160.0 170.0 180.0 190.0 200.0]
 #define VOLUME_LIGHT_SAMPLES 1.0    // [1.0 2.0 3.0 5.0 7.0 9.0 11.0 13.0 15.0]
 
 
@@ -239,7 +239,7 @@ const float fog_startHeight = 0.0;
 
 
 const float fogSigmaS = 0.03;
-const float fogSigmaA = 0.005;
+const float fogSigmaA = 0.01;
 const float fogSigmaE = fogSigmaS + fogSigmaA;
 
 #define FOG_REF_HEIGHT 64.0

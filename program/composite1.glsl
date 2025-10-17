@@ -41,9 +41,29 @@ void main() {
 
 		vec4 hrrScreenPos = vec4(unTAAJitter(hrrUV_c), hrrZ, 1.0);
 		vec4 hrrViewPos = screenPosToViewPos(hrrScreenPos);
+
+		float dhTerrainHrr = 0.0;
+		float depthHrr = texelFetch(depthtex0, ivec2(hrrUV_c * viewSize), 0).r;
+		#ifdef DISTANT_HORIZONS
+			float dhDepth = texture(dhDepthTex0, hrrUV_c).r;
+			dhTerrainHrr = depthHrr == 1.0 && dhDepth < 1.0 ? 1.0 : 0.0;
+			if(dhTerrainHrr > 0.5){
+				hrrViewPos = screenPosToViewPosDH(vec4(unTAAJitter(hrrUV_c), dhDepth, 1.0));
+			}
+		#endif
+
+		float isTerrainHrr = depthHrr < 1.0 || dhTerrainHrr > 0.5 ? 1.0 : 0.0;
+
+
 		vec4 hrrWorldPos = viewPosToWorldPos(hrrViewPos);
-		float hrrWorldDis = length(hrrWorldPos.xyz);
 		vec3 hrrWorldDir = normalize(hrrWorldPos.xyz);
+
+		#ifdef DISTANT_HORIZONS
+			if(isTerrainHrr < 0.5){
+				hrrWorldPos.xyz = hrrWorldDir * dhRenderDistance;
+			}
+		#endif
+		float hrrWorldDis = length(hrrWorldPos.xyz);
 
 		#ifdef UNDERWATER_FOG
 			if(isEyeInWater == 1){
@@ -55,7 +75,7 @@ void main() {
 			fogColor = volumtricFog(camera, hrrWorldPos.xyz);
 
 			#ifdef ATMOSPHERIC_SCATTERING_FOG
-				if(isEyeInWater == 0 && hrrZ < 1.0){
+				if(isEyeInWater == 0 && isTerrainHrr > 0.5){
 					float fogVis = fogVisibility(hrrWorldPos);
 					fogVis = (fogVis * min(shadowDistance, hrrWorldDis) + max(hrrWorldDis - shadowDistance, 0.0)) / hrrWorldDis;
 					fogVis = saturate(fogVis * isNoon);

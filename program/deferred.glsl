@@ -30,10 +30,7 @@ void main() {
 			vec4 dhViewPos = screenPosToViewPosDH(vec4(uv1, dhCurZ, 1.0));
 			dhCurZ = viewPosToScreenPos(dhViewPos).z;
 
-			vec4 CT4Hrr = texture(colortex4, uv1);
-			vec2 CT4GHrr = unpack16To2x8(CT4Hrr.g);
-			float blockIDHrr = CT4GHrr.x * ID_SCALE;
-			float dhTerrain = blockIDHrr > DH_TERRAIN - 0.5 ? 1.0 : 0.0;
+			float dhTerrain = texture(dhDepthTex0, uv1).r < 1.0 && curZ == 1.0 ? 1.0 : 0.0;
 
 			if(dhTerrain > 0.5){
 				curZ = dhCurZ;

@@ -72,7 +72,7 @@ void main() {
 	// color.rgb = textureLod(shadowcolor0, texcoord, 0.0).rgb;
 	// color.rgb = vec3(textureLod(shadowcolor1, texcoord, 0.0).a);
 	// color.rgb = normalize((shadowProjection * vec4(color.rgb, 0.0)).xyz);
-	
+	// color.rgb = vec3(texture(dhDepthTex0, texcoord).rgb);
 	// color.rgb = getSpecularTex(texcoord).rgb;
 	// color.rgb = vec3(temporalBayer64(gl_FragCoord.xy));
 	// color.rgb = vec3(temporalBayer64(gl_FragCoord.xy));

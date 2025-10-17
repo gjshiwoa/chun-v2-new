@@ -91,19 +91,19 @@ uniform mat4 shadowModelViewInverse;
 mat4 shadowMVP = shadowProjection * shadowModelView;
 mat4 shadowMVPInverse = shadowModelViewInverse * shadowProjectionInverse;
 
-#ifdef DISTANT_HORIZONS
-    uniform sampler2D dhDepthTex0;
-    uniform sampler2D dhDepthTex1;
 
-    uniform int dhRenderDistance;
-    
-    uniform float dhNearPlane;
-    uniform float dhFarPlane;
+uniform sampler2D dhDepthTex0;
+uniform sampler2D dhDepthTex1;
 
-    uniform mat4 dhProjection;
-    uniform mat4 dhProjectionInverse;
-    uniform mat4 dhPreviousProjection;
-#endif
+uniform int dhRenderDistance;
+
+uniform float dhNearPlane;
+uniform float dhFarPlane;
+
+uniform mat4 dhProjection;
+uniform mat4 dhProjectionInverse;
+uniform mat4 dhPreviousProjection;
+
 
 uniform int frameCounter;
 uniform float frameTime;

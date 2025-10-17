@@ -7,6 +7,10 @@ float screenSpaceShadow(vec3 viewPos, vec3 normal, float shadowMappingResult){
     vec3 startPos = viewPos;
     vec3 rayDir = lightViewDir;
     float rayLength = dist / 60.0;
+    // #ifdef DISTANT_HORIZONS
+    //     rayLength = pow(rayLength, 1.5);
+    // #endif
+
     float ds = rayLength / N_SAMPLE;
     vec3 dStep = ds * rayDir;
 
@@ -15,6 +19,9 @@ float screenSpaceShadow(vec3 viewPos, vec3 normal, float shadowMappingResult){
     float shadow = 0.0;
     for(int i = 1; i < N_SAMPLE; i++){
         vec3 p = startPos + i * dStep;
+        // #ifdef DISTANT_HORIZONS
+        //     p = startPos + (i - 1) * dStep;
+        // #endif
 
         vec3 p_screen = viewPosToScreenPos(vec4(p, 1.0)).xyz;
         p_screen.xy += 0.5 * Halton_2_3[framemod8] * invViewSize * TAA_JITTER_AMOUNT;

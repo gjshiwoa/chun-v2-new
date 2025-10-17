@@ -20,7 +20,7 @@ varying vec4 vViewPos;
 flat in float blockID;
 
 void main() {
-	if(length(vViewPos.xyz) < far * 0.9) {
+	if(length(vViewPos.xyz) < far * 0.9 || outScreen(gl_FragCoord.xy * invViewSize)) {
 		discard;
 	}
 

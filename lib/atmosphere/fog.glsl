@@ -79,16 +79,16 @@ float computeCrepuscularLight(vec4 viewPos){
 
 #ifdef PROGRAM_VLF
 float sampleFogDensityLow(vec3 cameraPos, float height_fraction){
-    vec4 weatherData = texture(noisetex, cameraPos.xz * 0.00085 + vec2(0.17325, 0.17325));
+    vec4 weatherData = texture(noisetex, cameraPos.xz * 0.00045 + vec2(0.17325, 0.17325));
     float coverage = saturate(mix(weatherData.r, weatherData.g, 1.0));
     coverage = pow(coverage, remapSaturate(height_fraction, 0.1, 0.75, 0.6, 1.2));
-    coverage = saturate(1.0 - 0.65 * coverage 
+    coverage = saturate(1.0 - 0.7 * coverage 
                         - 0.4 * saturate(rainStrength + 0.66 * isNightS + 0.66 * sunRiseSetS) 
-                        + 0.25 * remapSaturate(pow(height_fraction, 0.8), 0.5, 1.0, 0.0, 1.0));
+                        + 0.15 * remapSaturate(pow(height_fraction, 0.8), 0.5, 1.0, 0.0, 1.0));
 
     cameraPos.y *= 1.33;
 
-    vec4 low_frequency_noise = texture(colortex8, cameraPos * 0.005 + vec3(0.0, 0.9, 0.0));
+    vec4 low_frequency_noise = texture(colortex8, cameraPos * 0.0035 + vec3(0.0, 0.9, 0.0));
     float perlin3d = low_frequency_noise.r;
     vec3 worley3d = low_frequency_noise.gba;
     float worley3d_FBM = worley3d.g * 0.66 + worley3d.b * 0.33;
@@ -219,7 +219,10 @@ vec4 volumtricFog(vec3 startPos, vec3 worldPos){
 
     vec2 dis = intersectHorizontalAABB(startPos, worldDir, fogHeight);
     vec2 stepDis = calculateStepDistances(dis.x, dis.y, worldDis);
-    const float fogMaxDistance = far;
+    float fogMaxDistance = far;
+    #ifdef DISTANT_HORIZONS
+        fogMaxDistance = dhRenderDistance;
+    #endif
     stepDis.y = min(stepDis.y, fogMaxDistance);
     // if(stepDis.y < 0.0001 || stepDis.x > fogMaxDistance){
     //     return intScattTrans;
@@ -237,7 +240,7 @@ vec4 volumtricFog(vec3 startPos, vec3 worldPos){
     float farLen  = max(0.0, tEnd - nearEnd);
 
     const float NEAR_UNIT = 30.0;
-    const float FAR_UNIT  = 60.0;
+    const float FAR_UNIT  = 120.0;
 
     int nNear = (nearLen > 0.01) ? int(ceil(nearLen / NEAR_UNIT)) : 0;
     int nFar  = (farLen  > 0.01) ? int(ceil(farLen  / FAR_UNIT))  : 0;
@@ -251,9 +254,9 @@ vec4 volumtricFog(vec3 startPos, vec3 worldPos){
         vec3 pos = startPos + jitter * stepVec;
         
         for(int i = 0; i < nNear; ++i){
-            if(intScattTrans.a < 0.01 || distance(oriStartPos, pos) > fogMaxDistance){
-                break;
-            }   
+            // if(intScattTrans.a < 0.01 || distance(oriStartPos, pos) > fogMaxDistance){
+            //     break;
+            // }   
             float density = sampleFogDensity(pos, false);
             
             if(density > 0.001){
@@ -271,9 +274,9 @@ vec4 volumtricFog(vec3 startPos, vec3 worldPos){
         vec3 pos = startPos + jitter * stepVec;
 
         for(int i = 0; i < nFar; ++i){
-            if(intScattTrans.a < 0.01 || distance(oriStartPos, pos) > fogMaxDistance){
-                break;
-            }
+            // if(intScattTrans.a < 0.01 || distance(oriStartPos, pos) > fogMaxDistance){
+            //     break;
+            // }
             float density = sampleFogDensity(pos, false);
 
             if(density > 0.001){

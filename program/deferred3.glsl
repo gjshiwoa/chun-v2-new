@@ -66,22 +66,19 @@ void main() {
 	float ao = 1.0;
 
 	float dhTerrainHrr = 0.0;
+	float depthHrr1 = texelFetch(depthtex1, ivec2(hrrUV * viewSize), 0).r;
 	#ifdef DISTANT_HORIZONS
-		vec4 CT4Hrr = texelFetch(colortex4, ivec2(hrrUV * viewSize), 0);
-		vec2 CT4GHrr = unpack16To2x8(CT4Hrr.g);
-		float blockIDHrr = CT4GHrr.x * ID_SCALE;
-		dhTerrainHrr = blockIDHrr > DH_TERRAIN - 0.5 ? 1.0 : 0.0;
+		float dhDepth = texture(dhDepthTex0, hrrUV).r;
+		dhTerrainHrr = depthHrr1 == 1.0 && dhDepth < 1.0 ? 1.0 : 0.0;
 	#endif
 
-	float isTerrainHrr = texelFetch(depthtex1, ivec2(hrrUV * viewSize), 0).r < 1.0
-						|| dhTerrainHrr > 0.5 ? 1.0 : 0.0;
+	float isTerrainHrr = depthHrr1 < 1.0 || dhTerrainHrr > 0.5 ? 1.0 : 0.0;
 
 	if(!outScreen(hrrUV) && isTerrainHrr > 0.5){
 		vec4 hrrScreenPos = vec4(unTAAJitter(hrrUV), hrrZ, 1.0);
 		vec4 hrrViewPos = screenPosToViewPos(hrrScreenPos);
 		#ifdef DISTANT_HORIZONS
 			if(dhTerrainHrr > 0.5){
-				float dhDepth = texture(dhDepthTex0, hrrUV).r;
 				hrrViewPos = screenPosToViewPosDH(vec4(unTAAJitter(hrrUV), dhDepth, 1.0));
 			}
 		#endif
