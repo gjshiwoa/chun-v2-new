@@ -29,8 +29,12 @@ void main() {
 
 	vec2 uv = texcoord * 2.0 - vec2(0.0, 1.0);
 	vec4 fogColor = vec4(0.0, 0.0, 0.0, 1.0);
-	#if defined UNDERWATER_FOG || defined ATMOSPHERIC_SCATTERING_FOG
-		if(!outScreen(uv)){
+	
+	#if defined UNDERWATER_FOG || defined ATMOSPHERIC_SCATTERING_FOG || defined VOLUMETRIC_FOG
+		bool useFilter = false;
+		useFilter = !outScreen(uv);
+		
+		if(useFilter){
 			fogColor = JointBilateralFiltering_hrr_Horizontal();
 			CT1 = fogColor;
 		}

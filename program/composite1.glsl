@@ -65,30 +65,38 @@ void main() {
 		#endif
 		float hrrWorldDis = length(hrrWorldPos.xyz);
 
+		bool useTemporal = false;
 		#ifdef UNDERWATER_FOG
 			if(isEyeInWater == 1){
 				fogColor.rgb = underWaterFog(hrrWorldDir, hrrWorldDis).rgb;
+				useTemporal = true;
 			}
 		#endif
 
 		if(isEyeInWater == 0){
-			fogColor = volumtricFog(camera, hrrWorldPos.xyz);
+			#ifdef VOLUMETRIC_FOG
+				fogColor = volumtricFog(camera, hrrWorldPos.xyz);
+				useTemporal = true;
+			#endif
 
 			#ifdef ATMOSPHERIC_SCATTERING_FOG
-				if(isEyeInWater == 0 && isTerrainHrr > 0.5){
+				if(isTerrainHrr > 0.5){
 					float fogVis = fogVisibility(hrrWorldPos);
 					fogVis = (fogVis * min(shadowDistance, hrrWorldDis) + max(hrrWorldDis - shadowDistance, 0.0)) / hrrWorldDis;
 					fogVis = saturate(fogVis * isNoon);
 
-					mat2x3 AtmosphericScattering_Land = AtmosphericScattering(hrrWorldPos.xyz, normalize(hrrWorldPos.xyz), 
+					mat2x3 AtmosphericScattering_Land = AtmosphericScattering(hrrWorldPos.xyz, normalize(hrrWorldPos.xyz),
 														sunWorldDir, IncomingLight, 1.0, int(VOLUME_LIGHT_SAMPLES));
 					fogColor.rgb += (AtmosphericScattering_Land[0] * fogVis + AtmosphericScattering_Land[1])
 														 * ATMOSPHERIC_SCATTERING_FOG_DENSITY * fogColor.a;
+					useTemporal = true;
 				}
 			#endif
 		}
 
-		fogColor = temporal_fog(fogColor);
+		if(useTemporal){
+			fogColor = temporal_fog(fogColor);
+		}
 		fogColor.rgb = max(fogColor.rgb, vec3(0.0));
 		fogColor.a = saturate(fogColor.a);
 		CT3 = fogColor;

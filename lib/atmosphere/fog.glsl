@@ -287,7 +287,7 @@ vec4 volumtricFog(vec3 startPos, vec3 worldPos){
             pos += stepVec;
         }
     }
-    intScattTrans.rgb *= (1.0 - isNightS * 0.65);
+    intScattTrans.rgb *= (1.0 - isNightS * 0.75);
     return intScattTrans;
 }
 

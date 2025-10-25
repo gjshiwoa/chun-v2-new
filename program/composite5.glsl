@@ -57,15 +57,16 @@ void main() {
 	float worldDis = length(worldPos);
 	vec3 worldDir = normalize(worldPos.xyz);
 
-	vec4 fogColor = getFog(depth);
+	
 	// if(dot(fogColor.rgb, fogColor.rgb) < 1e-9){
 	// 	fogColor.a = 1.0;
 	// }
 
-	#if defined UNDERWATER_FOG || defined ATMOSPHERIC_SCATTERING_FOG
+	#if defined UNDERWATER_FOG || defined ATMOSPHERIC_SCATTERING_FOG || defined VOLUMETRIC_FOG
+		vec4 fogColor = getFog(depth);
 		#ifdef UNDERWATER_FOG
 			if(isEyeInWater == 1){
-				color.rgb = mix(color.rgb, fogColor.rgb, pow(saturate(worldDis / UNDERWATER_FOG_MIST), 1.0));
+				color.rgb = mix(color.rgb, fogColor.rgb, saturate(worldDis / UNDERWATER_FOG_MIST));
 				color.rgb += waterFogColor * rand2_1(texcoord + sin(frameTimeCounter)) / 512.0;
 			}
 		#endif

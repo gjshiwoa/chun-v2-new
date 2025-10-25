@@ -121,7 +121,7 @@ void main() {
 		#endif
 
 		#ifdef WATER_REFRACTION
-			bool useRefract = dot(normalize(worldPos1.xyz - vWorldPos.xyz), normalWO) < 0.0;
+			bool useRefract = dot(normalize(worldPos1.xyz - vWorldPos.xyz), normalWO) < -0.01;
 			vec2 sampleCoord = useRefract ? refractCoord : fragCoord;
 			vec3 colorRGB = textureLod(gaux1, sampleCoord, 1).rgb * 1.25;
 
@@ -346,11 +346,11 @@ void main() {
 	worldDis0 = length(vWorldPos.xyz);
 	vMcPos = vec4(vWorldPos.xyz + cameraPosition, 1.0);
 
-	// vec2 jitter = Halton_2_3[framemod8];	//-1 to 1
-	// jitter *= invViewSize;
-	// gl_Position.xyz /= gl_Position.w;
-    // gl_Position.xy += jitter * TAA_JITTER_AMOUNT;
-    // gl_Position.xyz *= gl_Position.w;
+	vec2 jitter = Halton_2_3[framemod8];	//-1 to 1
+	jitter *= invViewSize;
+	gl_Position.xyz /= gl_Position.w;
+    gl_Position.xy += jitter * TAA_JITTER_AMOUNT;
+    gl_Position.xyz *= gl_Position.w;
 
 	// TBN Mat 参考自 BSL shader
 	vec3 N = normalize(gl_NormalMatrix * gl_Normal);
