@@ -86,6 +86,20 @@ option.ATMOSPHERIC_SCATTERING_FOG_DENSITY = 大气散射雾浓度
 option.VOLUME_LIGHT_SAMPLES = 体积光采样数
 
 option.VOLUMETRIC_FOG = 体积雾
+option.FOG_REF_HEIGHT = 雾效参考高度
+option.FOG_THICKNESS = 雾效厚度
+option.FOG_DIRECT_INTENSITY = 雾效直射光强度
+option.FOG_AMBIENT_INTENSITY = 雾效环境光强度
+option.FOG_SIGMA_S = 雾效散射系数
+option.FOG_SIGMA_A = 雾效吸收系数
+option.FOG_BASE_COVERAGE_RAIN = 雾效基础覆盖率_雨天
+option.FOG_BASE_COVERAGE_NIGHT = 雾效基础覆盖率_夜晚
+option.FOG_BASE_COVERAGE_SUNRISESET = 雾效基础覆盖率_日出日落
+option.FOG_BASE_COVERAGE_NOON = 雾效基础覆盖率_中午
+option.FOG_ADD_COVERAGE_RAIN = 雾效附加覆盖率_雨天
+option.FOG_ADD_COVERAGE_NIGHT = 雾效附加覆盖率_夜晚
+option.FOG_ADD_COVERAGE_SUNRISESET = 雾效附加覆盖率_日出日落
+option.FOG_ADD_COVERAGE_NOON = 雾效附加覆盖率_中午
 
 option.VOLUMETRIC_CLOUDS = 体积云
 option.VOLUMETRIC_CLOUDS_MAX_SAMPLES = 体积云最大采样数
@@ -221,6 +235,9 @@ option.BLOOM = 泛光
 option.BLOOM_MODE = 泛光模式
 option.BLOOM_AMOUNT = 泛光强度
 option.RAIN_ADDITIONAL_BLOOM = 雨天附加泛光
+option.NIGHT_ADDITIONAL_BLOOM = 夜间附加泛光
+option.NETHER_ADDITIONAL_BLOOM = 下界附加泛光
+option.END_ADDITIONAL_BLOOM = 末界附加泛光
 
 option.EXPOSURE = 曝光
 option.TARGET_BRIGHTNESS = 目标亮度

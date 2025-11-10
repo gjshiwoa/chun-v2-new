@@ -34,12 +34,12 @@ void main() {
 
 	float bloomAmount = BLOOM_AMOUNT;
 	#if defined NETHER
-		bloomAmount += 0.25;
+		bloomAmount += NETHER_ADDITIONAL_BLOOM;
 	#elif defined END
-		bloomAmount += 0.1;
+		bloomAmount += END_ADDITIONAL_BLOOM;
 	#else
 		bloomAmount += rainStrength * RAIN_ADDITIONAL_BLOOM;
-		bloomAmount += isNight * 0.05;
+		bloomAmount += isNight * NIGHT_ADDITIONAL_BLOOM;
 		// bloomAmount += max(isNight, 1.0 - eyeBrightnessSmooth.y/240.0) * 0.05;
 
 		if(isEyeInWater == 1){

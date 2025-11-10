@@ -82,8 +82,16 @@ float sampleFogDensityLow(vec3 cameraPos, float height_fraction){
     vec4 weatherData = texture(noisetex, cameraPos.xz * 0.00045 + vec2(0.17325, 0.17325));
     float coverage = saturate(mix(weatherData.r, weatherData.g, 1.0));
     coverage = pow(coverage, remapSaturate(height_fraction, 0.1, 0.75, 0.6, 1.2));
-    coverage = saturate(1.0 - 0.65 * coverage 
-                        - 0.35 * saturate(rainStrength + 0.66 * isNightS + 0.66 * sunRiseSetS)
+    float fogBaseCoverage = max4(FOG_BASE_COVERAGE_RAIN * rainStrength, 
+                                FOG_BASE_COVERAGE_NIGHT * isNightS, 
+                                FOG_BASE_COVERAGE_SUNRISESET * sunRiseSetS, 
+                                FOG_BASE_COVERAGE_NOON * isNoonS);
+    float fogAddCoverage = saturate(FOG_ADD_COVERAGE_RAIN * rainStrength 
+                                + FOG_ADD_COVERAGE_NIGHT * isNightS 
+                                + FOG_ADD_COVERAGE_SUNRISESET * sunRiseSetS 
+                                + FOG_ADD_COVERAGE_NOON * isNoonS
+                                + 0.05);
+    coverage = saturate(1.0 - fogBaseCoverage * coverage - fogAddCoverage
                         + 0.15 * remapSaturate(pow(height_fraction, 1.0), 0.5, 1.0, 0.0, 1.0));
 
     cameraPos.y *= 1.33;
@@ -189,16 +197,16 @@ vec4 fogLuminance(inout vec4 intScattTrans, vec3 pos, vec3 oriStartPos, float st
 
     float inScatter = GetInScatterProbability(height_fraction, density);
 
-    // vec3 lightColor = mix(sunColor, skyColor * 8.0, saturate(0.05 + (1.0 - exp(-worldDis * fogSigmaS * 0.03))));
+    // vec3 lightColor = mix(sunColor, skyColor * 8.0, saturate(0.05 + (1.0 - exp(-worldDis * FOG_SIGMA_S * 0.03))));
     vec3 lightColor = sunColor;
-    vec3 direct = 12.0 * lightColor * attenuation * inScatter * phase;
+    vec3 direct = FOG_DIRECT_INTENSITY * lightColor * attenuation * inScatter * phase;
 
     float height_factor = remapSaturate(pow(height_fraction, 1.5), 0.0, 1.0, 0.5, 1.0);
     float depth_factor = (1.0 - density);
-    vec3 ambient = 4.0 * skyColor * depth_factor * height_factor * saturate(0.05 + saturate(eyeBrightnessSmooth.y / 240.0 - 0.33));
+    vec3 ambient = FOG_AMBIENT_INTENSITY * skyColor * depth_factor * height_factor * saturate(0.05 + saturate(eyeBrightnessSmooth.y / 240.0 - 0.33));
 
     vec3 luminance = direct + ambient;
-    luminance *= fogSigmaS * density;
+    luminance *= FOG_SIGMA_S * density;
 
     float extinction = fogSigmaE * density;
     float opticalDepth = stepSize * extinction;

@@ -189,7 +189,7 @@ vec4 fogLuminance(inout vec4 intScattTrans, vec3 pos, vec3 oriStartPos, float st
 
     float inScatter = GetInScatterProbability(height_fraction, density);
 
-    // vec3 lightColor = mix(sunColor, skyColor * 8.0, saturate(0.05 + (1.0 - exp(-worldDis * fogSigmaS * 0.03))));
+    // vec3 lightColor = mix(sunColor, skyColor * 8.0, saturate(0.05 + (1.0 - exp(-worldDis * FOG_SIGMA_S * 0.03))));
     vec3 lightColor = sunColor;
     vec3 direct = 8.0 * lightColor * attenuation * inScatter * phase;
 
@@ -198,7 +198,7 @@ vec4 fogLuminance(inout vec4 intScattTrans, vec3 pos, vec3 oriStartPos, float st
     vec3 ambient = 4.0 * skyColor * depth_factor * height_factor * saturate(0.05 + saturate(eyeBrightnessSmooth.y / 240.0 - 0.33));
 
     vec3 luminance = direct + ambient;
-    luminance *= fogSigmaS * density;
+    luminance *= FOG_SIGMA_S * density;
 
     float extinction = fogSigmaE * density;
     float opticalDepth = stepSize * extinction;

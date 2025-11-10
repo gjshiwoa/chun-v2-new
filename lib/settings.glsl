@@ -23,7 +23,7 @@
 #define NOON_DURATION 40.0          // [5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0]
 #define NIGHT_DURATION 30.0         // [5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0]
 
-#define NOON_DURATION_SLOW 5.0      // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 6.0 7.0 8.0 9.0 10.0]
+#define NOON_DURATION_SLOW 3.0      // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 6.0 7.0 8.0 9.0 10.0]
 #define NIGHT_DURATION_SLOW 10.0     // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 6.0 7.0 8.0 9.0 10.0]
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -239,13 +239,26 @@ const float fog_startHeight = 0.0;
 
 #define VOLUMETRIC_FOG
 
-const float fogSigmaS = 0.03;
-const float fogSigmaA = 0.01;
-const float fogSigmaE = fogSigmaS + fogSigmaA;
+#define FOG_SIGMA_S 0.03    // [0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1]
+#define FOG_SIGMA_A 0.01    // [0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1]
+const float fogSigmaE = FOG_SIGMA_S + FOG_SIGMA_A;
 
-#define FOG_REF_HEIGHT 64.0
-#define FOG_THICKNESS 200.0
+#define FOG_DIRECT_INTENSITY 12.0        // [0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 15.0 16.0 17.0 18.0 19.0 20.0]
+#define FOG_AMBIENT_INTENSITY 4.0        // [0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 15.0 16.0 17.0 18.0 19.0 20.0]
+
+#define FOG_REF_HEIGHT 64.0     // [0.0 16.0 32.0 48.0 64.0 80.0 96.0 112.0 128.0 144.0 160.0 176.0 192.0 208.0 224.0 240.0 256.0 272.0 288.0 304.0 320.0]
+#define FOG_THICKNESS 200.0     // [0.0 20.0 40.0 60.0 80.0 100.0 120.0 140.0 160.0 180.0 200.0 220.0 240.0 260.0 280.0 300.0 320.0 340.0 360.0 380.0 400.0]
 const vec2 fogHeight = vec2(FOG_REF_HEIGHT - FOG_THICKNESS * 0.5, FOG_REF_HEIGHT + FOG_THICKNESS * 0.5) - 64.0 + CAMERA_HEIGHT;
+
+#define FOG_BASE_COVERAGE_RAIN 0.65         // [0.0 0.1 0.2 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0]
+#define FOG_BASE_COVERAGE_NIGHT 0.65        // [0.0 0.1 0.2 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0]
+#define FOG_BASE_COVERAGE_SUNRISESET 0.65        // [0.0 0.1 0.2 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0]
+#define FOG_BASE_COVERAGE_NOON 0.05        // [0.0 0.1 0.2 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0]
+
+#define FOG_ADD_COVERAGE_RAIN 0.35        // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.7 0.8 0.9 1.0]
+#define FOG_ADD_COVERAGE_NIGHT 0.125        // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.7 0.8 0.9 1.0]
+#define FOG_ADD_COVERAGE_SUNRISESET 0.125        // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.7 0.8 0.9 1.0]
+#define FOG_ADD_COVERAGE_NOON 0.0        // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.7 0.8 0.9 1.0]
 
 
 
@@ -424,6 +437,12 @@ const vec3 waterFogColor = vec3(WATER_FOG_COLOR_RED, WATER_FOG_COLOR_GREEN, WATE
 
 #define BLOOM_AMOUNT 0.02     // [0.0025 0.005 0.00625 0.0075 0.00875 0.01 0.0125 0.015 0.0175 0.02 0.0225 0.025 0.0275 0.03]
 #define RAIN_ADDITIONAL_BLOOM 0.04 // [0.0025 0.005 0.0075 0.01 0.0125 0.015 0.0175 0.02 0.0225 0.025 0.0275 0.03]
+#define NIGHT_ADDITIONAL_BLOOM 0.05 // [0.0 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1]
+#define NETHER_ADDITIONAL_BLOOM 0.25 // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5]
+#define END_ADDITIONAL_BLOOM 0.1 // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5]
+
+
+
 
 
 
