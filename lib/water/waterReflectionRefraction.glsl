@@ -142,7 +142,7 @@ vec3 getScatteredReflection(vec3 reflectDir, float roughness, vec3 normal) {
         return normalize(reflectDir);
     }
 
-    vec3 randVec = rand2_3(texcoord + sin(frameTimeCounter));
+    vec3 randVec = rand2_3(gl_FragCoord.xy * invViewSize + sin(frameTimeCounter));
     
     vec3 tangent = normalize(cross(
         abs(reflectDir.z) < 0.999 ? vec3(0,0,1) : vec3(1,0,0), 

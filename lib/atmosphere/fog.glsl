@@ -249,11 +249,8 @@ vec4 volumtricFog(vec3 startPos, vec3 worldPos){
     float nearLen = max(0.0, nearEnd - tStart);
     float farLen  = max(0.0, tEnd - nearEnd);
 
-    const float NEAR_UNIT = 30.0;
-    const float FAR_UNIT  = 120.0;
-
-    int nNear = (nearLen > 0.01) ? int(ceil(nearLen / NEAR_UNIT)) : 0;
-    int nFar  = (farLen  > 0.01) ? int(ceil(farLen  / FAR_UNIT))  : 0;
+    int nNear = (nearLen > 0.01) ? int(ceil(nearLen / FOG_NEAR_UNIT)) : 0;
+    int nFar  = (farLen  > 0.01) ? int(ceil(farLen  / FOG_FAR_UNIT))  : 0;
 
     vec3 oriStartPos = startPos;
     startPos += worldDir * tStart;

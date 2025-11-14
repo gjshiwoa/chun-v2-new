@@ -239,6 +239,9 @@ const float fog_startHeight = 0.0;
 
 #define VOLUMETRIC_FOG
 
+#define FOG_NEAR_UNIT 30.0    // [5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0]
+#define FOG_FAR_UNIT 120.0    // [30.0 60.0 90.0 120.0 150.0 180.0 210.0 240.0]
+
 #define FOG_SIGMA_S 0.03    // [0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1]
 #define FOG_SIGMA_A 0.01    // [0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1]
 const float fogSigmaE = FOG_SIGMA_S + FOG_SIGMA_A;
@@ -288,7 +291,8 @@ const vec3 artificial_color = vec3(ARTIFICIAL_COLOR_RED, ARTIFICIAL_COLOR_GREEN,
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//#define DISABLE_LEAKAGE_REPAIR
+// #define DISABLE_LEAKAGE_REPAIR
+// #define SHADOWMAP_EXCLUDE_ENTITIES
 
 const float sunPathRotation = -30.0;    // [-80.0 -70.0 -60.0 -50.0 -40.0 -30.0 -20.0 -10.0 0.0 10.0 20.0 30.0 40.0 50.0 60.0 70.0 80.0]
 const bool shadowHardwareFiltering = true;

@@ -55,7 +55,7 @@ void main() {
 	skyColor = texelFetch(gaux4, skyColorUV, 0).rgb;
 	lightColor = artificial_color;
 	#ifdef END
-		sunColor = mix(vec3(1.0), endColor, 0.8) * 5.0;
+		sunColor = mix(vec3(1.0), endColor, 0.8) * 2.0;
 		skyColor = endColor * 0.0;
 		lightColor *= 3.0;
 	#endif

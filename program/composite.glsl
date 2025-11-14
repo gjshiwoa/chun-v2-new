@@ -99,3 +99,6 @@ void main() {
 }
 
 #endif
+
+#ifdef SHADOWMAP_EXCLUDE_ENTITIES
+#endif

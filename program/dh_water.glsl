@@ -1,5 +1,7 @@
 varying vec4 glcolor;
 
+const vec2 texcoord = vec2(0.5);
+
 varying vec4 vViewPos, vWorldPos, vMcPos;
 
 varying float isNoon, isNight, sunRiseSet;
