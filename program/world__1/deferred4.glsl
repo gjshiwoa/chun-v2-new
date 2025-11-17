@@ -43,7 +43,7 @@ varying vec3 sunViewDir, moonViewDir, lightViewDir;
 void main() {
 	vec4 color = texture(colortex0, texcoord);	// albedo
 	vec3 texColor = color.rgb;
-	vec3 albedo = toLinearR(texColor);
+	vec3 albedo = pow(texColor, vec3(2.2));
 	vec3 diffuse = albedo / PI;
 	
 	float depth1 = texture(depthtex1, texcoord).r;

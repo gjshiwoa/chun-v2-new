@@ -50,7 +50,7 @@ void main() {
 	vec4 CT2 = texelFetch(colortex2, ivec2(gl_FragCoord.xy), 0);
 	vec4 color = texture(colortex0, texcoord);	// albedo
 	vec3 texColor = color.rgb;
-	vec3 albedo = toLinearR(texColor);
+	vec3 albedo = pow(texColor, vec3(2.2));
 	vec3 diffuse = albedo / PI;
 
 	vec3 normalV = normalize(normalDecode(normalEnc));

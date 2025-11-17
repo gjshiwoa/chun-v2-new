@@ -223,13 +223,13 @@ const vec2 cloudHeight = vec2(cloudHeightMin, cloudHeightMin + CLOUD_THICKNESS);
 #define CLOUD_COVERAGE 0.45      // [0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9]
 #define CLOUD_RAIN_ADD_COVERAGE 0.3     // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9]
 
-#define CLOUD_SIGMA_S 0.09    // [0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1 0.11 0.12 0.13 0.14 0.15]
+#define CLOUD_SIGMA_S 0.07    // [0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1 0.11 0.12 0.13 0.14 0.15]
 #define CLOUD_SIGMA_A 0.01    // [0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1]
 const float cloudSigmaE = CLOUD_SIGMA_S + CLOUD_SIGMA_A;
 
 #define CLOUD_INSCATTER_POWDER 1.25 // [0.0 0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0 2.5 3.0]
 
-#define CLOUD_BRIGHTNESS_DIRECT 1.4     // [0.2 0.4 0.6 0.8 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+#define CLOUD_BRIGHTNESS_DIRECT 1.4     // [0.2 0.4 0.6 0.8 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 2.2 2.4 2.6 2.8 3.0]
 #define CLOUD_BRIGHTNESS_AMBIENT 0.3    // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
 #define CLOUD_FADE_DISTANCE 9000.0  // [3000.0 4500.0 6000.0 7500.0 9000.0 12000.0 15000.0 18000.0]
