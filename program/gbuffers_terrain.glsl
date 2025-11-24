@@ -1,14 +1,3 @@
-varying vec2 lmcoord, texcoord;
-varying vec4 glcolor;
-
-varying mat3 tbnMatrix;
-
-varying vec4 vViewPos;
-
-varying vec4 vTexCoordAM;
-varying vec2 vTexCoord;
-
-varying vec3 N;
 
 
 
@@ -20,12 +9,19 @@ varying vec3 N;
 #include "/lib/common/position.glsl"
 
 #ifdef FSH
-flat in float blockID;
-flat in vec4 v_tcrange;
-flat in ivec2 textureResolution;
+flat in float blockID, isPlants;
+flat in int textureResolution;
+in vec2 texcoord;
+in vec2 lmcoord;
+in vec4 glcolor;
+in mat3 tbnMatrix;
+in vec4 viewPos;
+in vec3 N;
 
 #include "/lib/antialiasing/anisotropicFiltering.glsl"
 #include "/lib/surface/parallaxMapping.glsl"
+
+
 
 void main() {
 	vec2 texGradX = dFdx(texcoord);
@@ -36,12 +32,12 @@ void main() {
 	vec2 parallaxUV = texcoord;
 	float parallaxShadow = 1.0;
 	#ifdef PARALLAX_MAPPING
-		vec3 viewDirTS = normalize(vViewPos.xyz * tbnMatrix);
+		vec3 viewDirTS = normalize(viewPos.xyz * tbnMatrix);
 		parallaxUV = parallaxMapping(viewDirTS, texGradX, texGradY, parallaxOffset);
 
 		#ifdef PARALLAX_SHADOW
 			vec3 lightDirTS = normalize(shadowLightPosition * tbnMatrix);
-			parallaxOffset -= viewDirTS * 0.005;
+			// parallaxOffset -= viewDirTS * 0.005;
 			parallaxShadow = ParallaxShadow(parallaxOffset, viewDirTS, lightDirTS, texGradX, texGradY);
 		#endif
 	#endif
@@ -79,16 +75,74 @@ void main() {
 	gl_FragData[1] = vec4(pack2x8To16(parallaxShadow, 0.0), pack2x8To16(blockID/ID_SCALE, 0.0), pack4x8To2x16(specularTex));
 	gl_FragData[2] = vec4(normalEncode(normalTex), lmcoord);
 }
-
+ 
 #endif
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////BY ZYPanDa/////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef GSH
+
+layout(triangles) in;
+layout(triangle_strip, max_vertices = 3) out;
+
+in vec2 v_lmcoord[];
+in vec2 v_texcoord[];
+in vec4 v_glcolor[];
+in mat3 v_tbnMatrix[];
+in vec4 v_viewPos[];
+in vec3 v_N[];
+flat in float v_blockID[];
+flat in float v_isPlants[];
+
+out vec2 lmcoord;
+out vec2 texcoord;
+out vec4 glcolor;
+out mat3 tbnMatrix;
+out vec4 viewPos;
+out vec3 N;
+flat out float blockID;
+flat out float isPlants;
+flat out int textureResolution;
+
+void main() {
+	// 参考自 ITT
+    vec2 coordSize = max3(
+		abs(v_texcoord[0] - v_texcoord[1]) / distance(v_viewPos[0], v_viewPos[1]),
+		abs(v_texcoord[1] - v_texcoord[2]) / distance(v_viewPos[1], v_viewPos[2]),
+        abs(v_texcoord[2] - v_texcoord[0]) / distance(v_viewPos[2], v_viewPos[0])
+    );
+    float resolution = floor(max(atlasSize.x * coordSize.x, atlasSize.y * coordSize.y) + 0.5);
+    textureResolution = int(exp2(round(log2(resolution))) + 0.01);
+
+	for(int i = 0; i < 3; ++i){
+		lmcoord = v_lmcoord[i];
+		texcoord = v_texcoord[i];
+		glcolor = v_glcolor[i];
+		tbnMatrix = v_tbnMatrix[i];
+		viewPos = v_viewPos[i];
+		N = v_N[i];
+		blockID = v_blockID[i];
+		isPlants = v_isPlants[i];
+
+		gl_Position = gl_in[i].gl_Position;
+		EmitVertex();
+	}
+	EndPrimitive();
+}
+#endif
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////BY ZYPanDa/////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef VSH
-flat out float blockID, isPlants;
-flat out float noAniso;
-flat out vec4 v_tcrange;
-flat out ivec2 textureResolution;
+out vec2 v_lmcoord, v_texcoord;
+out vec4 v_glcolor;
+out mat3 v_tbnMatrix;
+out vec4 v_viewPos;
+out vec3 v_N;
+flat out float v_blockID, v_isPlants;
 
 attribute vec4 mc_Entity;
 attribute vec4 mc_midTexCoord;
@@ -99,48 +153,48 @@ attribute vec4 at_tangent;
 #include "/lib/wavingPlants.glsl"
 
 void main() {
-	blockID = IDMapping();
-	lmcoord  = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
-	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
-	glcolor = gl_Color;
-	noAniso = blockID == NO_ANISO ? 1.0 : 0.0;
+	v_blockID = IDMapping();
+	v_lmcoord  = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+	v_texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+	v_glcolor = gl_Color;
+	// noAniso = v_blockID == NO_ANISO ? 1.0 : 0.0;
 
 	// 来自滑稽君
-	textureResolution = ivec2(round(abs(gl_MultiTexCoord0.xy - mc_midTexCoord.xy) * atlasSize * 2.0));
-    v_tcrange.zw = textureResolution / vec2(atlasSize);
-    v_tcrange.xy = mc_midTexCoord.xy - v_tcrange.zw * 0.5;
+	// textureResolution = ivec2(round(abs(gl_MultiTexCoord0.xy - mc_midTexCoord.xy) * atlasSize * 2.0));
+    // v_tcrange.zw = textureResolution / vec2(atlasSize);
+    // v_tcrange.xy = mc_midTexCoord.xy - v_tcrange.zw * 0.5;
 
 	// 来自BSL
 	vec2 midCoord = (gl_TextureMatrix[0] *  mc_midTexCoord).st;
-	vec2 texMinMidCoord = texcoord - midCoord;
-	vTexCoordAM.pq  = abs(texMinMidCoord) * 2;
-	vTexCoordAM.st  = min(texcoord, midCoord - texMinMidCoord);
-	vTexCoord.xy    = sign(texMinMidCoord) * 0.5 + 0.5;
+	vec2 texMinMidCoord = v_texcoord - midCoord;
+	// vTexCoordAM.pq  = abs(texMinMidCoord) * 2;
+	// vTexCoordAM.st  = min(v_texcoord, midCoord - texMinMidCoord);
+	// vTexCoord.xy    = sign(texMinMidCoord) * 0.5 + 0.5;
 
-	N = normalize(gl_NormalMatrix * gl_Normal);
+	v_N = normalize(gl_NormalMatrix * gl_Normal);
 	vec3 B = normalize(gl_NormalMatrix * cross(at_tangent.xyz, gl_Normal.xyz) * at_tangent.w);
 	vec3 T = normalize(gl_NormalMatrix * at_tangent.xyz);
-	tbnMatrix = mat3(T, B, N);
+	v_tbnMatrix = mat3(T, B, v_N);
 
 	// 坐标
-	vViewPos = gl_ModelViewMatrix * gl_Vertex;
-	vec4 vWorldPos = viewPosToWorldPos(vViewPos);
+	v_viewPos = gl_ModelViewMatrix * gl_Vertex;
+	vec4 vWorldPos = viewPosToWorldPos(v_viewPos);
 	vec4 vMcPos = vec4(vWorldPos.xyz + cameraPosition, 1.0);
 
-	isPlants = 0.0;
-	if(blockID == PLANTS_SHORT || blockID == LEAVES || blockID == PLANTS_TALL_L || blockID == PLANTS_TALL_U){
-		isPlants = 1.0;
+	v_isPlants = 0.0;
+	if(v_blockID == PLANTS_SHORT || v_blockID == LEAVES || v_blockID == PLANTS_TALL_L || v_blockID == PLANTS_TALL_U){
+		v_isPlants = 1.0;
 	}
 	#ifdef WAVING_PLANTS
 		const float waving_rate = WAVING_RATE;
-		if(blockID == PLANTS_SHORT && gl_MultiTexCoord0.t < mc_midTexCoord.t){
+		if(v_blockID == PLANTS_SHORT && gl_MultiTexCoord0.t < mc_midTexCoord.t){
 			// pos, normal, A, B, D_amount, y_waving_amount
 			vMcPos.xyz = wavingPlants(vMcPos.xyz, PLANTS_SHORT_AMPLITUDE, waving_rate, 0.0, 0.0);
 		}
-		if(blockID == LEAVES){
+		if(v_blockID == LEAVES){
 			vMcPos.xyz = wavingPlants(vMcPos.xyz, LEAVES_AMPLITUDE, waving_rate, 0.0, 1.0);
 		}
-		if((blockID == PLANTS_TALL_L && gl_MultiTexCoord0.t < mc_midTexCoord.t) || blockID == PLANTS_TALL_U){
+		if((v_blockID == PLANTS_TALL_L && gl_MultiTexCoord0.t < mc_midTexCoord.t) || v_blockID == PLANTS_TALL_U){
 			vMcPos.xyz = wavingPlants(vMcPos.xyz, PLANTS_TALL_AMPLITUDE, waving_rate, 0.0, 0.0);
 		}
 	#endif
@@ -153,5 +207,6 @@ void main() {
     gl_Position.xy += jitter * TAA_JITTER_AMOUNT;
     gl_Position.xyz *= gl_Position.w;
 }
-
+ 
 #endif
+

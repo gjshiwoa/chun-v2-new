@@ -36,6 +36,8 @@ void main() {
 		
 		if(useFilter){
 			fogColor = JointBilateralFiltering_hrr_Horizontal();
+			fogColor.rgb = max(fogColor.rgb, vec3(0.0));
+			fogColor.a = saturate(fogColor.a);
 			CT1 = fogColor;
 		}
 	#endif

@@ -1,6 +1,6 @@
 // GeForceLegend: Anisotropic filter 
 // https://www.shadertoy.com/view/McVXWR
-vec2 R = textureResolution;
+vec2 R = vec2(textureResolution);
 
 vec4 textureAniso(sampler2D T, vec2 p, vec2 oriP) {
     mat2 J = inverse(mat2(dFdx(p),dFdy(p)));       // dFdxy: pixel footprint in texture space
@@ -18,7 +18,7 @@ vec4 textureAniso(sampler2D T, vec2 p, vec2 oriP) {
     float r = ANISOTROPIC_FILTERING_QUALITY / 2.0;
     float c = 0.0;
     for (float i = -r + 0.5; i < r; i++){                       // sample x16 along main axis at LOD min-radius
-        O.rgb += textureLod(T, offsetCoord(p + (i/(r*2.0))*A, v_tcrange), l).rgb;
+        O.rgb += textureLod(T, GetParallaxCoord((i/(r*2.0))*A, texcoord, textureResolution), l).rgb;
         ++c;
     }
     return vec4(O.rgb/c, sampleA.a);
@@ -43,7 +43,7 @@ vec4 textureAniso2(sampler2D T, vec2 p, vec2 oriP) {
     float r = ANISOTROPIC_FILTERING_QUALITY / 2.0;
     float c = 0.0;
     for (float i = -r + 0.5; i < r; i++){
-        O.rgb += textureLod(T, offsetCoord(p + (i/(r*2.0))*A, v_tcrange), l).rgb;
+        O.rgb += textureLod(T, GetParallaxCoord((i/(r*2.0))*A, texcoord, textureResolution), l).rgb;
         ++c;
     }
     return vec4(O.rgb/c, sampleA.a);

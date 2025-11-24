@@ -133,14 +133,14 @@ vec3 sunLuminance(vec3 pos, float VoL, float iVoL, float extinction){
     float height_fraction = getHeightFractionForPoint(pos.y, cloudHeight);
     
     float lightPathOpticalDepth = computeLightPathOpticalDepth(pos, lightWorldDir, 10.0, 4);
-    float attenuation = GetAttenuationProbability(lightPathOpticalDepth, VoL, 0.7, 0.7, 0.15 + 0.15 * sunRiseSetS, 0.75);
+    float attenuation = GetAttenuationProbability(lightPathOpticalDepth, saturate(VoL), 0.7, 0.7, 0.15 + 0.15 * sunRiseSetS, 0.75);
 
     float upPathOpticalDepth = computeLightPathOpticalDepth(pos, upWorldDir, 10.0, 2);
     float upAttenuation = GetAttenuationProbability(upPathOpticalDepth, 0.15, 0.7);
     attenuation += 0.15 * upAttenuation * isNoonS;
 
     float phase = GetDirectScatterProbability(VoL, 0.2, 0.75, 0.25);
-    float phase1 = GetDirectScatterProbability(iVoL, 0.3, 0.0, 0.0) * 0.6;
+    float phase1 = GetDirectScatterProbability(iVoL, 0.3, 0.0, 0.0) * 0.5;
     phase = max(phase, phase1);
 
     float inScatter = GetInScatterProbability(height_fraction, density, attenuation, VoL);

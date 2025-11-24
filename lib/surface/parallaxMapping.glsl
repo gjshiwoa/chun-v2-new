@@ -16,17 +16,17 @@ vec2 parallaxMapping(vec3 viewVector, vec2 texGradX, vec2 texGradY, out vec3 par
     float slicesNum = PARALLAX_SAMPPLES;
 
     float dHeight = 1.0 / slicesNum;
-    vec2 dUV = PARALLAX_HEIGHT * (viewVector.xy / viewVector.z) / slicesNum;
+    vec2 dUV = 0.02 * PARALLAX_HEIGHT * (viewVector.xy / viewVector.z) / slicesNum;
 
     vec2 currUVOffset = vec2(0.0);
     float rayHeight = 1.0;
     float weight = 0.0;
-    float prevHeight = getParallaxHeight(offsetCoord1(vTexCoord, vTexCoordAM), texGradX, texGradY);
+    float prevHeight = getParallaxHeight(GetParallaxCoord(vec2(0.0), texcoord.st, textureResolution), texGradX, texGradY);
     float currHeight = prevHeight;
     if(prevHeight < 1.0){
         rayHeight = 1.0 - dHeight;
         currUVOffset -= dUV;
-        currHeight = getParallaxHeight(offsetCoord1(vTexCoord + currUVOffset, vTexCoordAM), texGradX, texGradY);
+        currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset, texcoord.st, textureResolution), texGradX, texGradY);
         for(int i = 0; i < slicesNum; ++i){
             if(currHeight > rayHeight){
                 break;
@@ -34,7 +34,7 @@ vec2 parallaxMapping(vec3 viewVector, vec2 texGradX, vec2 texGradY, out vec3 par
             prevHeight = currHeight;
             currUVOffset -= dUV;
             rayHeight -= dHeight;
-            currHeight = getParallaxHeight(offsetCoord1(vTexCoord + currUVOffset, vTexCoordAM), texGradX, texGradY);
+            currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset, texcoord.st, textureResolution), texGradX, texGradY);
         }
 
         float currDeltaHeight = currHeight - rayHeight;
@@ -47,7 +47,7 @@ vec2 parallaxMapping(vec3 viewVector, vec2 texGradX, vec2 texGradY, out vec3 par
         lerpOffset = weight * dUV;
     #endif
     parallaxOffset = vec3(currUVOffset + lerpOffset, rayHeight);
-    return offsetCoord1(vTexCoord + currUVOffset + lerpOffset, vTexCoordAM);
+    return GetParallaxCoord(currUVOffset + lerpOffset, texcoord.st, textureResolution);
 }
 
 
@@ -67,48 +67,23 @@ float ParallaxShadow(vec3 parallaxOffset, vec3 viewDirTS, vec3 lightDirTS, vec2 
         float rayHeight = parallaxHeight + dHeight;
         float dist = dDist;
 
-        float prevHeight = getParallaxHeight(offsetCoord1(vTexCoord + parallaxOffset.st, vTexCoordAM), texGradX, texGradY);
+        float prevHeight = getParallaxHeight(GetParallaxCoord(parallaxOffset.st, texcoord.st, textureResolution), texGradX, texGradY);
         vec2 currUVOffset = parallaxOffset.st + dUV;
-        float currHeight = getParallaxHeight(offsetCoord1(vTexCoord + currUVOffset, vTexCoordAM), texGradX, texGradY);
+        float currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset, texcoord.st, textureResolution), texGradX, texGradY);
 
         for (int i = 1; i < slicesNum && rayHeight < 1.0; i++){
-            // #ifdef PARALLAX_LERP
                 if (currHeight > rayHeight){
                     shadow = max(shadow, (currHeight - rayHeight) / dist * shadowSoftening);
                     if(1.0 == shadow) break;
                 }
                 rayHeight += dHeight;
                 dist += dDist;
-            // #else
-            //     if(abs(prevHeight - currHeight) > 0.001 && currHeight > rayHeight){
-            //         shadow = 1.0;
-            //         break;
-            //     }
-            // #endif
             
             currUVOffset += dUV;
             prevHeight = currHeight;
-            currHeight = getParallaxHeight(offsetCoord1(vTexCoord + currUVOffset, vTexCoordAM), texGradX, texGradY);
+            currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset, texcoord.st, textureResolution), texGradX, texGradY);
         }
 
-        // #ifndef PARALLAX_LERP
-        //     if(shadow <= 0.01){
-        //         float prevHeight = getParallaxHeight(offsetCoord1(vTexCoord + parallaxOffset.st, vTexCoordAM), texGradX, texGradY);
-        //         dUV *= 2.0;
-        //         vec2 currUVOffset = parallaxOffset.st - dUV;
-        //         float currHeight = getParallaxHeight(offsetCoord1(vTexCoord + currUVOffset, vTexCoordAM), texGradX, texGradY);
-
-        //         for(int i = 0; i < 12; i++){
-        //             if(abs(prevHeight - currHeight) > 0.001){
-        //                 if(currHeight < prevHeight) shadow = 1.0;
-        //                 break;
-        //             }
-        //             currUVOffset -= dUV;
-        //             prevHeight = currHeight;
-        //             currHeight = getParallaxHeight(offsetCoord1(vTexCoord + currUVOffset, vTexCoordAM), texGradX, texGradY);
-        //         }
-        //     }
-        // #endif
     }
 
     return saturate(1.0 - shadow);
