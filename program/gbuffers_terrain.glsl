@@ -37,7 +37,7 @@ void main() {
 
 		#ifdef PARALLAX_SHADOW
 			vec3 lightDirTS = normalize(shadowLightPosition * tbnMatrix);
-			// parallaxOffset -= viewDirTS * 0.005;
+			parallaxOffset += vec3(0.0, 0.0, 1.0) * 0.05;
 			parallaxShadow = ParallaxShadow(parallaxOffset, viewDirTS, lightDirTS, texGradX, texGradY);
 		#endif
 	#endif
@@ -171,9 +171,11 @@ void main() {
 	// vTexCoordAM.st  = min(v_texcoord, midCoord - texMinMidCoord);
 	// vTexCoord.xy    = sign(texMinMidCoord) * 0.5 + 0.5;
 
-	v_N = normalize(gl_NormalMatrix * gl_Normal);
-	vec3 B = normalize(gl_NormalMatrix * cross(at_tangent.xyz, gl_Normal.xyz) * at_tangent.w);
-	vec3 T = normalize(gl_NormalMatrix * at_tangent.xyz);
+	v_N = gl_NormalMatrix * normalize(gl_Normal);
+	vec3 T = gl_NormalMatrix * normalize(at_tangent.xyz);
+	const float inf = uintBitsToFloat(0x7f800000u);
+	float handedness = clamp(at_tangent.w * inf, -1.0, 1.0);
+	vec3 B = cross(T, v_N) * handedness;
 	v_tbnMatrix = mat3(T, B, v_N);
 
 	// 坐标
