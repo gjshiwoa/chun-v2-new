@@ -12,7 +12,7 @@ vec2 GetParallaxCoord(vec2 offsetNormalized) {
     return tileStart + wrappedRelativeCoord;
 }
 
-float getParallaxHeight(vec2 uv, vec2 texGradX, vec2 texGradY){
+float getParallaxHeight(vec2 uv){
     float baseAlpha = texture(tex, uv).a;
     
     vec2 tileSizeNormalized = vec2(float(textureResolution)) / atlasSize;
@@ -47,7 +47,7 @@ float getParallaxHeight(vec2 uv, vec2 texGradX, vec2 texGradY){
     float h01 = texelFetch(normals, p01, 0).a;
     float h11 = texelFetch(normals, p11, 0).a;
 
-    float thresh = 0.9 / 255.0;
+    float thresh = 0.5 / 255.0;
     vec4 hh = vec4(h00, h10, h01, h11);
     hh = mix(vec4(1.0), hh, step(vec4(thresh), hh));
     h00 = hh.x; h10 = hh.y; h01 = hh.z; h11 = hh.w;
@@ -71,12 +71,12 @@ vec2 parallaxMapping(vec3 viewVector, vec2 texGradX, vec2 texGradY, out vec3 par
     vec2 currUVOffset = vec2(0.0);
     float rayHeight = 1.0;
     float weight = 0.0;
-    float prevHeight = getParallaxHeight(GetParallaxCoord(vec2(0.0)), texGradX, texGradY);
+    float prevHeight = getParallaxHeight(GetParallaxCoord(vec2(0.0)));
     float currHeight = prevHeight;
-    if(prevHeight < 1.0){
+    if(prevHeight < 254.5 / 255.0){
         rayHeight = 1.0 - dHeight;
         currUVOffset -= dUV;
-        currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset), texGradX, texGradY);
+        currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset)); 
         for(int i = 0; i < slicesNum; ++i){
             if(currHeight > rayHeight){
                 break;
@@ -84,7 +84,7 @@ vec2 parallaxMapping(vec3 viewVector, vec2 texGradX, vec2 texGradY, out vec3 par
             prevHeight = currHeight;
             currUVOffset -= dUV;
             rayHeight -= dHeight;
-            currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset), texGradX, texGradY);
+            currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset)); 
         }
 
         float currDeltaHeight = currHeight - rayHeight;
@@ -94,32 +94,28 @@ vec2 parallaxMapping(vec3 viewVector, vec2 texGradX, vec2 texGradY, out vec3 par
 
     vec2 lerpOffset = weight * dUV;
     parallaxOffset = vec3(currUVOffset + lerpOffset, rayHeight);
-    return GetParallaxCoord(currUVOffset + lerpOffset);
+    return GetParallaxCoord(parallaxOffset.xy);
 }
 
 vec3 computeNormalFromHeight(vec2 parallaxUV, vec2 texGradX, vec2 texGradY) {
-    ivec2 atlasPxSizeI = textureSize(normals, 0);
-    vec2 atlasPxSize = vec2(atlasPxSizeI);
-    vec2 oneTexelUV = 0.02 * (vec2(textureResolution) / vec2(atlasPxSize));
+    const float sampleSpanTexels = 1.5;
+    vec2 dUV = vec2(sampleSpanTexels) / vec2(atlasSize);
 
-    float parallaxHeight = PARALLAX_HEIGHT * 0.025;
-    float hc = mix(1.0, getParallaxHeight(parallaxUV, texGradX, texGradY), parallaxHeight);
+    float hc = getParallaxHeight(parallaxUV);
 
-    vec2 offX = vec2(oneTexelUV.x, 0.0);
-    vec2 offY = vec2(0.0, oneTexelUV.y);
+    vec2 leftUV  = GetParallaxCoord(vec2(-dUV.x,0.0), parallaxUV, textureResolution);
+    vec2 rightUV = GetParallaxCoord(vec2(dUV.x, 0.0), parallaxUV, textureResolution);
+    vec2 downUV  = GetParallaxCoord(vec2(0.0, -dUV.y), parallaxUV, textureResolution);
+    vec2 upUV    = GetParallaxCoord(vec2(0.0,  dUV.y), parallaxUV, textureResolution);
 
-    vec2 leftUV  = GetParallaxCoord(-offX, parallaxUV, textureResolution);
-    vec2 rightUV = GetParallaxCoord( offX, parallaxUV, textureResolution);
-    vec2 downUV  = GetParallaxCoord( vec2(0.0, -oneTexelUV.y), parallaxUV, textureResolution);
-    vec2 upUV    = GetParallaxCoord( vec2(0.0,  oneTexelUV.y), parallaxUV, textureResolution);
+    float hl = getParallaxHeight(leftUV);
+    float hr = getParallaxHeight(rightUV);
+    float hd = getParallaxHeight(downUV);
+    float hu = getParallaxHeight(upUV);
 
-    float hl = mix(1.0, getParallaxHeight(leftUV, texGradX, texGradY), parallaxHeight);
-    float hr = mix(1.0, getParallaxHeight(rightUV, texGradX, texGradY), parallaxHeight);
-    float hd = mix(1.0, getParallaxHeight(downUV, texGradX, texGradY), parallaxHeight);
-    float hu = mix(1.0, getParallaxHeight(upUV, texGradX, texGradY), parallaxHeight);
-
-    float dhdu = (hr - hl) / (2.0 * oneTexelUV.x);
-    float dhdv = (hu - hd) / (2.0 * oneTexelUV.y);
+    float spanUV = sampleSpanTexels / float(textureResolution);
+    float dhdu = (hr - hl) / (2.0 * spanUV);
+    float dhdv = (hu - hd) / (2.0 * spanUV);
 
     vec3 n = normalize(vec3(-PARALLAX_HEIGHT * dhdu, -PARALLAX_HEIGHT * dhdv, 1.0));
 
@@ -138,11 +134,12 @@ float ParallaxShadow(vec3 parallaxOffset, vec3 viewDirTS, vec3 lightDirTS, vec2 
         float dHeight = (1.0 - parallaxHeight) / slicesNum;
         vec2 dUV = vec2(textureResolution)/vec2(atlasSize) * PARALLAX_HEIGHT * dHeight * lightDirTS.xy / lightDirTS.z;
 
+        float dither = temporalBayer64(ivec2(gl_FragCoord.xy));
         float rayHeight = parallaxHeight + dHeight;
         float dist = dDist;
 
         vec2 currUVOffset = parallaxOffset.st + dUV;
-        float currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset), texGradX, texGradY);
+        float currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset));
 
         for (int i = 1; i < slicesNum && rayHeight < 1.0; i++){
                 if (currHeight > rayHeight){
@@ -153,7 +150,7 @@ float ParallaxShadow(vec3 parallaxOffset, vec3 viewDirTS, vec3 lightDirTS, vec2 
                 dist += dDist;
             
             currUVOffset += dUV;
-            currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset), texGradX, texGradY);
+            currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset));
         }
 
     }

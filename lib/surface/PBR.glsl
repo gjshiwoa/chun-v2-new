@@ -68,7 +68,7 @@ MaterialParams MapMaterialParams(vec4 specularMap) {
     }
     
     params.emissiveness = specularMap.a;
-    if(params.emissiveness * 255.0 > 254.3) {
+    if(params.emissiveness * 255.0 > 254.1) {
         params.emissiveness = 0.0;
     }
     

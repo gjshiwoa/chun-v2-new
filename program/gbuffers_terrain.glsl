@@ -18,6 +18,7 @@ in mat3 tbnMatrix;
 in vec4 viewPos;
 in vec3 N;
 
+#include "/lib/common/noise.glsl"
 #include "/lib/antialiasing/anisotropicFiltering.glsl"
 #include "/lib/surface/parallaxMapping.glsl"
 
@@ -40,8 +41,8 @@ void main() {
 
 		#ifdef PARALLAX_SHADOW
 			vec3 lightDirTS = normalize(shadowLightPosition * tbnMatrix);
-			parallaxOffset += normalize(normalFH) * 0.5;
-			parallaxShadow = min(saturate(dot(normalFH, lightDirTS)), ParallaxShadow(parallaxOffset, viewDirTS, lightDirTS, texGradX, texGradY));
+			parallaxOffset += vec3(0.5 * normalFH.xy / vec2(atlasSize), saturate(15.0 * normalFH.z / 255.0));
+			parallaxShadow = ParallaxShadow(parallaxOffset, viewDirTS, lightDirTS, texGradX, texGradY);
 		#endif
 	#endif
 
@@ -63,12 +64,17 @@ void main() {
 			#endif
 		#endif
 	}
+
+	
 	
 	vec4 color = texColor * glcolor;
-	vec3 normalTex = normalize(tbnMatrix * (textureGrad(normals, parallaxUV, texGradX, texGradY).rgb * 2.0 - 1.0));
-	normalTex = normalize(tbnMatrix * normalFH);
+	vec3 normalTex = N;
+	#ifdef PARALLAX_MAPPING
+		normalTex = normalize(tbnMatrix * (textureGrad(normals, parallaxUV, texGradX, texGradY).rgb * 2.0 - 1.0));
+		normalTex = mix(normalTex, tbnMatrix * normalFH, 0.5);
+	#endif
 	vec4 specularTex = saturate(textureGrad(specular, parallaxUV, texGradX, texGradY));
-	specularTex.g = saturate(specularTex.g + 0.5 / 255.0);
+	specularTex.g = saturate(specularTex.g);
 
 /* DRAWBUFFERS:045 */
 	gl_FragData[0] = vec4(color.rgb, color.a);

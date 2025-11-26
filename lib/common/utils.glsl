@@ -176,11 +176,11 @@ vec2 offsetCoord1(vec2 coord, vec4 vTexCoordAM){
     return fract(coord) * vTexCoordAM.pq + vTexCoordAM.st;
 }
 
-vec2 GetParallaxCoord(vec2 offsetNormalized, vec2 texcoord, int textureResolution) {
+vec2 GetParallaxCoord(vec2 offsetNormalized, vec2 uv, int textureResolution) {
     vec2 tileSizeNormalized = vec2(float(textureResolution)) / vec2(atlasSize);
-    vec2 tileStart = floor(texcoord / tileSizeNormalized) * tileSizeNormalized;
+    vec2 tileStart = floor(uv / tileSizeNormalized) * tileSizeNormalized;
 
-    vec2 targetCoord = texcoord + offsetNormalized;
+    vec2 targetCoord = uv + offsetNormalized;
     vec2 relativeCoord = targetCoord - tileStart;
     vec2 wrappedRelativeCoord = mod(relativeCoord, tileSizeNormalized);
 

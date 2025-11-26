@@ -4,7 +4,7 @@ profile.Comfortable = 舒适
 profile.Bright = 明亮
 profile.Vivid = 鲜艳
 profile.Native = 原生
-profile.comment = 平衡：默认画面参数. 舒适：改用helj色调映射，并降低bloom强度，画面更清新舒适. 明亮：在平衡的基础上提高画面整体亮度. 鲜艳：在平衡的基础上调节亮度、对比度、饱和度. 原生：更接近无画面调节时的效果
+profile.comment = 平衡：默认画面参数. 舒适：改用hejl色调映射，并降低bloom强度，画面更清新舒适. 明亮：在平衡的基础上提高画面整体亮度. 鲜艳：在平衡的基础上调节亮度、对比度、饱和度. 原生：更接近无画面调节时的效果
 
 screen.Lighting = 光照
 option.DISABLE_LEAKAGE_REPAIR = 禁用漏光修复
