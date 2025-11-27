@@ -74,8 +74,8 @@ vec2 parallaxMapping(vec3 viewVector, vec2 texGradX, vec2 texGradY, out vec3 par
     float prevHeight = getParallaxHeight(GetParallaxCoord(vec2(0.0)));
     float currHeight = prevHeight;
     if(prevHeight < 254.5 / 255.0){
-        rayHeight = 1.0 - dHeight;
-        currUVOffset -= dUV;
+        rayHeight = 1.0 - dither * dHeight;
+        currUVOffset -= dither * dUV;
         currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset)); 
         for(int i = 0; i < slicesNum; ++i){
             if(currHeight > rayHeight){
@@ -134,11 +134,10 @@ float ParallaxShadow(vec3 parallaxOffset, vec3 viewDirTS, vec3 lightDirTS, vec2 
         float dHeight = (1.0 - parallaxHeight) / slicesNum;
         vec2 dUV = vec2(textureResolution)/vec2(atlasSize) * PARALLAX_HEIGHT * dHeight * lightDirTS.xy / lightDirTS.z;
 
-        float dither = temporalBayer64(ivec2(gl_FragCoord.xy));
-        float rayHeight = parallaxHeight + dHeight;
+        float rayHeight = parallaxHeight + dither * dHeight;
         float dist = dDist;
 
-        vec2 currUVOffset = parallaxOffset.st + dUV;
+        vec2 currUVOffset = parallaxOffset.st + dither * dUV;
         float currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset));
 
         for (int i = 1; i < slicesNum && rayHeight < 1.0; i++){

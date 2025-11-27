@@ -19,6 +19,7 @@ in vec4 viewPos;
 in vec3 N;
 
 #include "/lib/common/noise.glsl"
+float dither = temporalBayer64(ivec2(gl_FragCoord.xy));
 #include "/lib/antialiasing/anisotropicFiltering.glsl"
 #include "/lib/surface/parallaxMapping.glsl"
 
