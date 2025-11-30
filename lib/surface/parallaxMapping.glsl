@@ -59,7 +59,7 @@ float getParallaxHeight(vec2 uv){
     return height;
 }
 
-vec2 parallaxMapping(vec3 viewVector, vec2 texGradX, vec2 texGradY, out vec3 parallaxOffset){
+vec2 parallaxMapping(vec3 viewVector, out vec3 parallaxOffset){
     // const float slicesMin = 60.0;
     // const float slicesMax = 60.0;
     // float slicesNum = ceil(lerp(slicesMax, slicesMin, abs(dot(vec3(0, 0, 1), viewVector))));
@@ -126,36 +126,38 @@ float ParallaxShadow(vec3 parallaxOffset, vec3 viewDirTS, vec3 lightDirTS){
     float parallaxHeight = parallaxOffset.z;
     float shadow = 0.0;
 
-    if(parallaxHeight < 0.99){  
-        const float shadowSoftening = PARALLAX_SHADOW_SOFTENING;
-        float slicesNum = PARALLAX_SHADOW_SAMPPLES;
-        
-        float dDist = 1.0 / slicesNum;
-        float dHeight = (1.0 - parallaxHeight) / slicesNum;
-        vec2 dUV = vec2(textureResolution)/vec2(atlasSize) * PARALLAX_HEIGHT * dHeight * lightDirTS.xy / lightDirTS.z;
+    if(parallaxHeight > 254.5 / 255.0){  
+        return 1.0;
+    }
 
-        float rayHeight = parallaxHeight + dither * dHeight;
-        float dist = dDist;
+    const float shadowSoftening = PARALLAX_SHADOW_SOFTENING;
+    float slicesNum = PARALLAX_SHADOW_SAMPPLES;
+    
+    float dDist = 1.0 / slicesNum;
+    float dHeight = (1.0 - parallaxHeight) / slicesNum;
+    vec2 dUV = vec2(textureResolution)/vec2(atlasSize) * PARALLAX_HEIGHT * dHeight * lightDirTS.xy / lightDirTS.z;
 
-        vec2 currUVOffset = parallaxOffset.st + dither * dUV;
-        float currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset));
+    float rayHeight = parallaxHeight + dither * dHeight;
+    float dist = dDist;
 
-        for (int i = 1; i < slicesNum && rayHeight < 1.0; i++){
-                if (currHeight > rayHeight){
-                    shadow = max(shadow, (currHeight - rayHeight) / dist * shadowSoftening);
-                    if(1.0 == shadow) break;
-                }
-                rayHeight += dHeight;
-                dist += dDist;
-            
-            currUVOffset += dUV;
-            currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset));
+    vec2 currUVOffset = parallaxOffset.st + dither * dUV;
+    float currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset));
+
+    for (int i = 1; i < slicesNum && rayHeight < 1.0; i++){
+        if (currHeight > rayHeight){
+            shadow = max(shadow, (currHeight - rayHeight) / dist * shadowSoftening);
+            if(1.0 == shadow) break;
         }
-
+        rayHeight += dHeight;
+        dist += dDist;
+        
+        currUVOffset += dUV;
+        currHeight = getParallaxHeight(GetParallaxCoord(currUVOffset));
     }
 
     return saturate(1.0 - shadow);
 }
+
 
 
 float getVoxelHeightTexel(ivec2 texelIndex, ivec2 tileStartPx){
@@ -257,6 +259,7 @@ vec2 voxelParallaxMapping(vec3 viewVector, out vec3 parallaxOffset, out vec3 vox
 
         float tTop = 1.0 - hCurr;
 
+        // 顶部碰撞
         if (tTop >= tEnter && tTop <= tExitClamped) {
             hit       = true;
             hitSide   = false;
@@ -294,6 +297,7 @@ vec2 voxelParallaxMapping(vec3 viewVector, out vec3 parallaxOffset, out vec3 vox
         float hMin = min(hCurr, hNext);
         float hMax = max(hCurr, hNext);
 
+        // 侧面碰撞
         if (heightB >= hMin && heightB <= hMax) {
             hit       = true;
             hitSide   = true;
@@ -400,7 +404,7 @@ float getVoxelHeight(vec2 uv){
 float voxelParallaxShadow(vec3 parallaxOffset, vec3 viewDirTS, vec3 lightDirTS){
     float parallaxHeight = parallaxOffset.z;
 
-    if (parallaxHeight >= 0.999) return 1.0;
+    if (parallaxHeight >= 254.5 / 255.0) return 1.0;
 
     const int SAMPLES = int(PARALLAX_SHADOW_SAMPPLES);
     const float SOFTENING = PARALLAX_SHADOW_SOFTENING * 5.0;
