@@ -163,7 +163,7 @@ vec3 temporal_Reflection(vec3 color_c, int samples, float r){
     #endif
 
     float cameraDisplacementWeight = clamp(1.2 - length(cameraPosition - previousCameraPosition) * 20.0 / depth_c, 0.5, 1.0);
-    float rWeight = remapSaturate(r, 0.0, 0.2 - 0.1 * blur, 0.8, 1.0);
+    float rWeight = remapSaturate(r, 0.0, 0.1, 0.8, 1.0);
     float sampleWeight = exp2(-float(samples - 1) * 0.05);
     float commonWeight = cameraDisplacementWeight * rWeight * sampleWeight;
 
@@ -186,7 +186,7 @@ vec3 temporal_Reflection(vec3 color_c, int samples, float r){
     }
     }
 
-    color_c = mix(color_c.rgb, c_s.rgb, w_s * (0.9 + 0.05 * blur) * commonWeight);
+    color_c = mix(color_c.rgb, c_s.rgb, w_s * 0.95 * commonWeight);
     return color_c;
 }
 
@@ -199,7 +199,7 @@ vec3 JointBilateralFiltering_Refl_Horizontal(){
     float z0      = linearizeDepth(curGD.g);
 
     const float radius  = 4.0;
-    const float quality = 4.0;
+    const float quality = 6.0;
     const float sigma   = radius * 0.5;
     const float invSigma2 = 1.0 / (2.0 * sigma * sigma);
     float d = 2.0 * radius / quality;
@@ -241,7 +241,7 @@ vec3 JointBilateralFiltering_Refl_Vertical(){
     float z0      = linearizeDepth(curGD.g);
 
     const float radius  = 4.0;
-    const float quality = 4.0;
+    const float quality = 6.0;
     const float sigma   = radius * 0.5;
     const float invSigma2 = 1.0 / (2.0 * sigma * sigma);
     float d = 2.0 * radius / quality;

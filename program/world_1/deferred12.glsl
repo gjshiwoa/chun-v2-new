@@ -32,7 +32,7 @@ void main() {
 	vec4 viewPos1 = screenPosToViewPos(vec4(unTAAJitter(texcoord), depth1, 1.0));
 
 #ifdef PBR_REFLECTIVITY
-	if(specularMap.r + wetness > 0.5 / 255.0){
+	if(specularMap.r + rainStrength > 0.5 / 255.0){
 		
 		vec3 viewDir = normalize(viewPos1.xyz);
 
@@ -59,7 +59,7 @@ void main() {
 		color.rgb += reflectColor * BRDF * ao;
 
 		#ifdef RAINY_GROUND_WET_ENABLE
-			color.rgb = mix(color.rgb, reflectColor, F_Schlick(NdotV, vec3(0.02)) * smoothstep(0.90, 0.95, mcLightmap.y) * wetness * 0.75);
+			color.rgb = mix(color.rgb, reflectColor, F_Schlick(NdotV, vec3(0.02)) * smoothstep(0.90, 0.95, mcLightmap.y) * rainStrength * 0.75);
 		#endif
 	}
 #endif

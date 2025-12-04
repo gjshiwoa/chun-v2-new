@@ -26,7 +26,7 @@
 #define NOON_DURATION_SLOW 3.0      // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 6.0 7.0 8.0 9.0 10.0]
 #define NIGHT_DURATION_SLOW 10.0     // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 6.0 7.0 8.0 9.0 10.0]
 
-const float wetnessHalflife = 10.0;
+const float wetnessHalflife = 600.0;
 const float drynessHalflife = 10.0;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -332,7 +332,7 @@ const float shadowDistance = 160.0;    // [40.0 80.0 120.0 160.0 200.0 240.0 280
 
 float shadowMapScale = (120.0 / shadowDistance) * (shadowMapResolution / 2048.0);
 
-#define DIRECT_LUMINANCE 1.5 // [0.5 0.75 1.0 1.25 1.5 1.75 2.0 2.25 2.5 2.75 3.0]
+#define DIRECT_LUMINANCE 1.75 // [0.5 0.75 1.0 1.25 1.5 1.75 2.0 2.25 2.5 2.75 3.0]
 
 
 

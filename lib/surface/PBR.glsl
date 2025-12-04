@@ -90,6 +90,15 @@ float SchlickGGX(float NoV, float NoL, float roughness){
     return SchlickGGX_UE4(NoV, roughness) * SchlickGGX_UE4(NoL, roughness);
 }
 
+float GGX(float NoV, float k){
+    return NoV / (NoV * (1.0 - k) + k + + 0.000001);
+}
+
+float G_Smith(float NoV, float NoL, float roughness){
+    float k = pow(roughness + 1.0, 2.0) / 8.0;
+    return GGX(NoV, k) * GGX(NoL, k);
+}
+
 vec3 F_Schlick(float VoH, vec3 F0){
     float f = pow(1.0 - VoH, 5.0);
     return F0 + (1.0 - F0) * f;
@@ -143,7 +152,7 @@ mat2x3 CalculatePBR(vec3 viewDir, vec3 N, vec3 L, vec3 albedo, MaterialParams pa
     vec3 F0 = vec3(params.metalness);
     F0 = mix(vec3(0.04), albedo, params.metalness);
 
-    vec3 F = fresnelSchlickRoughness(VoH, F0, params.roughness);
+    vec3 F = F_Schlick(VoH, F0);
 
     float D = D_GGX(NoH, params.roughness);
     float G = SchlickGGX(NoV, NoL, params.roughness);
@@ -212,7 +221,8 @@ vec3 getScatteredReflection(vec3 reflectDir, vec3 normal, float roughness, float
         return normalize(reflectDir);
     }
 
-    vec3 randVec = rand2_3(texcoord + sin(frameTimeCounter) + sampleIndex * GOLDEN_RATIO);
+    vec3 randVec = psuedoB(vec3(gl_FragCoord.xy, float((frameCounter + 1) % 2048)) + sampleIndex * GOLDEN_RATIO).xyz;
+    // vec3 randVec = rand2_3(texcoord + sin(frameTimeCounter) + sampleIndex * GOLDEN_RATIO);
     
     vec3 tangent = normalize(cross(
         abs(reflectDir.z) < 0.999 ? vec3(0,0,1) : vec3(1,0,0), 

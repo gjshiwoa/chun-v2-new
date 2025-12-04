@@ -74,7 +74,7 @@ void main() {
 			
 		}
 		if(worldDis1 > shadowDistance * 0.75){
-			RTShadow = 0.85 * screenSpaceShadow(viewPos1.xyz, normalW, shadow);
+			RTShadow = 0.9 * screenSpaceShadow(viewPos1.xyz, normalW, shadow);
 		}
 		CT4.r = pack2x8To16(shadow, RTShadow);
 	}

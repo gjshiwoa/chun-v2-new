@@ -112,6 +112,49 @@ vec3 rand3_3(vec3 p) {
     return fract((p.xxy + p.yxx) * p.zyx);
 }
 
+// Zentient: Psuedo Spatiotemporal Blue noise 
+// https://www.shadertoy.com/view/wfjcz3
+vec4 hash43(vec3 inp){
+	uint pg = uint(viewSize.x * viewSize.x * inp.z) % 0xFFFFFFu + uint(viewSize.x * inp.y + inp.x);
+	uint state = pg * 747796405u + 2891336453u;
+	uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+	uvec4 RGBA = uvec4(0xFFu) & uvec4(word) >> uvec4(0,8,16,24); 
+	return vec4(RGBA) / float(0xFFu);
+}
+//https://www.shadertoy.com/view/4djSRW
+vec2 hash21(float p){
+	vec3 p3 = fract(vec3(p) * vec3(.1031, .1030, .0973));
+	p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.xx+p3.yz)*p3.zy);
+}
+
+//Note, use whatever 2d hash you want
+vec4 hash42(vec2 inp){
+    uint pg = uint(viewSize.x * inp.y + inp.x);
+	uint state = pg * 747796405u + 2891336453u;
+	uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+	uvec4 RGBA = uvec4(0xFFu) & uvec4(word) >> uvec4(0,8,16,24); 
+	vec4 b = vec4(RGBA) / float(0xFFu);
+    return b;
+}
+
+//interestingly, it seems to resolve faster than running blue noise through r2 directly
+vec4 psuedoB(vec3 xyz){
+    vec2 g = vec2(0.75487766624, 0.56984029099); 
+    //applies r2 along the z axis before refining
+    vec4 noise = fract(hash42(xyz.xy) + xyz.z * 0.618033989);
+    vec4 bl = vec4(-4.5);
+    for(int i; i < 9; i++){   
+        vec2 offset = vec2(floor(float(i) / 3.0), i % 3) - 1.0;
+        bl += fract(hash42(xyz.xy + offset) + xyz.z * 0.618033989);
+    }
+    bl = bl / 9.0;
+    noise -= bl;
+    //reflects values outside the normalized range, fractional looked nasty
+    noise = abs(1.0 - abs(noise));
+    return fract(noise);
+}
+
 
 // iq: Texture - Better Filtering  
 // https://www.shadertoy.com/view/XsfGDn
