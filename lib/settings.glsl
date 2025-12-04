@@ -26,6 +26,9 @@
 #define NOON_DURATION_SLOW 3.0      // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 6.0 7.0 8.0 9.0 10.0]
 #define NIGHT_DURATION_SLOW 10.0     // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 6.0 7.0 8.0 9.0 10.0]
 
+const float wetnessHalflife = 10.0;
+const float drynessHalflife = 10.0;
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const int noiseTextureResolution = 64;
 
