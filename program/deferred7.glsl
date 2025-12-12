@@ -158,7 +158,9 @@ void main() {
 
 		vec3 artificial = lightmap.x * artificial_color * (1. + GLOWING_BRIGHTNESS * glowingB) * diffuse;
 		artificial += saturate(materialParams.emissiveness - lightmap.x) * diffuse * EMISSIVENESS_BRIGHTNESS;
-		artificial += 1 * lightningBolt;
+		
+		if(lightningBolt > 0.5) color.rgb = vec3(1.0, 0.0, 0.0);
+		// artificial += 1 * lightningBolt;
 
 		
 

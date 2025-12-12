@@ -81,11 +81,13 @@ void main() {
 	
 
 	
+	float rainFactor = 0.0;
 	#ifdef RAINY_GROUND_WET_ENABLE
-		float rainFactor = smoothstep(0.88, 0.95, lmcoord.y) * rainStrength;
+		rainFactor = smoothstep(0.88, 0.95, lmcoord.y) * rainStrength;
 		float noiseSample = texture(depthtex2, mcPos.xz * 0.01).r;
 		float smoothedNoise = pow(smoothstep(0.0, 0.75, noiseSample), 0.5);
-		float noiseFactor = dot(N, upViewDir) > 0.95 ? smoothedNoise : 0.95;
+		bool upFace = dot(N, upViewDir) > 0.95;
+		float noiseFactor = upFace ? smoothedNoise : 0.95;
 		rainFactor *= noiseFactor;
 	#endif
 
@@ -101,6 +103,7 @@ void main() {
 		#else
 			float verticalness = dot(normalFH, vec3(0.0, 0.0, 1.0));
 			const float VERTICAL_THRESHOLD = 0.95;
+			normalTex = mix(normalTex, N, saturate(max(PARALLAX_NORMAL_MIX_WEIGHT, rainFactor * float(upFace))));
 			#ifdef PARALLAX_FORCE_NORMAL_VERTICAL
 				normalTex = verticalness > VERTICAL_THRESHOLD ? normalTex : (heightBasedNormal);
 			#else
@@ -109,15 +112,15 @@ void main() {
 		#endif
 	#endif
 
-#if !defined(PARALLAX_MAPPING) || PARALLAX_TYPE == 0
-	normalTex = mix(normalTex, N, rainFactor);
-#endif
-
 	vec4 specularTex = saturate(textureGrad(specular, parallaxUV, texGradX, texGradY));
-	
+
+	#if !defined(PARALLAX_MAPPING) || PARALLAX_TYPE == 0
+		normalTex = mix(normalTex, N, saturate(rainFactor * float(upFace) * (1.0 - specularTex.g)));
+	#endif
+
 	#ifdef RAINY_GROUND_WET_ENABLE
-		specularTex.r = saturate(specularTex.r + 0.9 * rainFactor);
-		specularTex.g = saturate(specularTex.g + 0.02 * rainFactor);
+		specularTex.r = max(specularTex.r, 0.95 * rainFactor);
+		specularTex.g = max(specularTex.g, 0.02 * rainFactor);
 		specularTex = saturate(specularTex);
 	#endif
 

@@ -155,7 +155,7 @@ option.STARS_DENSITY = 星星密度
 option.STARS_SIZE = 星星大小
 option.STARS_BRIGHTNESS = 星星亮度
 
-screen.Water = 水
+screen.Water = 水和半透明
 screen.wave = 波浪
 screen.water_fog = 水雾
 screen.water_reflection_refraction = 水反射折射
@@ -246,7 +246,8 @@ option.PARALLAX_LERP = 视差插值
 option.PARALLAX_SHADOW = 视差阴影
 option.PARALLAX_SHADOW_SAMPPLES = 视差阴影采样数
 option.PARALLAX_SHADOW_SOFTENING = 视差阴影柔化程度
-option.PARALLAX_NORMAL_MIX_WEIGHT = （平滑）视差混入高度图法线的权重
+option.PARALLAX_SHADOW_SOFTENING.comment = 数值越小，阴影越软
+option.PARALLAX_NORMAL_MIX_WEIGHT = 视差混入高度图法线的权重
 option.PARALLAX_FORCE_NORMAL_VERTICAL = （体素）视差顶面启用纹理法线
 
 option.PBR_REFLECTIVITY = PBR反射
