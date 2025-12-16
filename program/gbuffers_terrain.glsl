@@ -8,6 +8,7 @@
 #include "/lib/common/normal.glsl"
 #include "/lib/common/position.glsl"
 #include "/lib/common/noise.glsl"
+#include "/lib/camera/filter.glsl"
 
 #ifdef FSH
 flat in float blockID, isPlants;
@@ -48,6 +49,7 @@ void main() {
 	float parallaxShadow = 1.0;
 	vec3 normalFH = vec3(0.0, 0.0, 1.0);
 	vec3 parallaxOffset = vec3(0.0, 0.0, 1.0);
+
 	#ifdef PARALLAX_MAPPING
 		vec3 viewDirTS = normalize(viewPos.xyz * tbn);
 		vec3 lightDirTS = normalize(shadowLightPosition * tbn);
@@ -79,55 +81,66 @@ void main() {
 			texColor = texture(tex,parallaxUV);
 		#endif
 	#endif
-	
+	if(texColor.a < 0.005) discard;
+	vec4 color = texColor * glcolor;
+
+
 
 	
-	float rainFactor = 0.0;
+
+
+
+	float wetFactor = 0.0;
 	bool upFace = dot(N, upViewDir) > 0.95;
 	bool isRain = rainStrength > 0.001;
+
 	#ifdef RAINY_GROUND_WET_ENABLE
-		rainFactor = smoothstep(0.88, 0.95, lmcoord.y) * rainStrength;
-		float noiseSample = texture(colortex8, mcPos.xz * 0.01).r;
-		float smoothedNoise = pow(smoothstep(0.0, 0.75, noiseSample), 0.5);
-		float noiseFactor = upFace ? smoothedNoise : 0.95;
-		rainFactor *= noiseFactor * float(biome_precipitation == 1);
+		if(isRain){
+			wetFactor = smoothstep(0.88, 0.95, lmcoord.y) * rainStrength;
+			float noiseSample = texture(colortex8, mcPos.xz * 0.01).r;
+			float smoothedNoise = pow(smoothstep(0.0, 0.75, noiseSample), 0.5);
+			float noiseFactor = upFace ? smoothedNoise : 0.95;
+			wetFactor *= noiseFactor * float(biome_precipitation == 1);
+		}
 	#endif
 
-	vec4 color = texColor * glcolor;
-	vec3 normalTex = N;
-	float worldDis = length(viewPos);
-	if(upFace && worldDis < 20.0 && isRain && rainFactor > 0.0001) 
-		N = mix(N, 
-				mat3(gbufferModelView) * RippleNormalWS(mcPos.xz), 
-				rainFactor * remapSaturate(worldDis, 10.0, 20.0, 1.0, 0.0));
-	vec3 sampledNormal = textureGrad(normals, parallaxUV, texGradX, texGradY).rgb * 2.0 - 1.0;
-	normalTex = normalize(tbn * sampledNormal);
+	vec3 normalFinal = normalize(tbn * (textureGrad(normals, parallaxUV, texGradX, texGradY).rgb * 2.0 - 1.0));
+
+	vec3 N1 = N;
+	#ifdef RIPPLE
+		float worldDis = length(viewPos);
+		if(upFace && worldDis < RIPPLE_DISTANCE && isRain && wetFactor > 0.0001) 
+			N1 = mix(N, mat3(gbufferModelView) * RippleNormalWS(mcPos.xz), 
+				wetFactor * remapSaturate(worldDis, RIPPLE_DISTANCE * 0.66, RIPPLE_DISTANCE, 1.0, 0.0));
+	#endif
+
 	#ifdef PARALLAX_MAPPING
 		vec3 heightBasedNormal = tbn * normalFH;
+
 		#if PARALLAX_TYPE == 0
-			normalTex = mix(normalTex, heightBasedNormal, PARALLAX_NORMAL_MIX_WEIGHT);
+			normalFinal = mix(normalFinal, heightBasedNormal, PARALLAX_NORMAL_MIX_WEIGHT);
 		#else
-			float verticalness = dot(normalFH, vec3(0.0, 0.0, 1.0));
-			const float VERTICAL_THRESHOLD = 0.95;
-				normalTex = mix(normalTex, N, 
-								saturate(max(PARALLAX_NORMAL_MIX_WEIGHT, rainFactor * float(upFace))));
+			normalFinal = mix(normalFinal, N1, 
+						saturate(max(PARALLAX_NORMAL_MIX_WEIGHT, wetFactor * float(upFace))));
+
 			#ifdef PARALLAX_FORCE_NORMAL_VERTICAL
-				normalTex = verticalness > VERTICAL_THRESHOLD ? normalTex : (heightBasedNormal);
+				float verticalness = dot(normalFH, vec3(0.0, 0.0, 1.0));
+				normalFinal = verticalness > 0.95 ? normalFinal : (heightBasedNormal);
 			#else
-				normalTex = heightBasedNormal;
+				normalFinal = heightBasedNormal;
 			#endif
 		#endif
 	#endif
 
 	vec4 specularTex = saturate(textureGrad(specular, parallaxUV, texGradX, texGradY));
-	if(isRain && rainFactor > 0.0001){
+	if(isRain && wetFactor > 0.0001){
 		#if !defined(PARALLAX_MAPPING) || PARALLAX_TYPE == 0
-			normalTex = mix(normalTex, N, saturate(rainFactor * float(upFace) * (1.0 - specularTex.g)));
+			normalFinal = mix(normalFinal, N1, saturate(wetFactor * float(upFace) * (1.0 - specularTex.g)));
 		#endif
 
 		#ifdef RAINY_GROUND_WET_ENABLE
-			specularTex.r = max(specularTex.r, 0.95 * rainFactor);
-			specularTex.g = max(specularTex.g, 0.02 * rainFactor);
+			specularTex.r = max(specularTex.r, 0.95 * wetFactor);
+			specularTex.g = max(specularTex.g, 0.02 * wetFactor);
 		#endif
 	}
 	specularTex = saturate(specularTex);
@@ -135,22 +148,21 @@ void main() {
 
 	// vec2 lmCoord = lmcoord;
 	// float heldBlockLight = max(heldBlockLightValue, heldBlockLightValue2) / 15.0;
-	// heldBlockLight *= remapSaturate(worldDis, 0.0, 20.0, 1.0, 0.0) * pow(saturate(dot(normalTex, -normalize(vec3(viewPos.xy, viewPos.z)))), 0.5) - 0.05;
+	// heldBlockLight *= remapSaturate(worldDis, 0.0, 20.0, 1.0, 0.0) * pow(saturate(dot(normalFinal, -normalize(vec3(viewPos.xy, viewPos.z)))), 0.5) - 0.05;
 	// heldBlockLight = pow(saturate(heldBlockLight), 1.0);
 	// lmCoord.x = max(lmCoord.x, heldBlockLight);
 
 	// vec2 noiseCoord = mcPos.xz;
 	// noiseCoord = rotate2D(noiseCoord, 0.45);
     // noiseCoord = vec2(noiseCoord.x * 3.0, noiseCoord.y);
-	// noiseCoord.x += frameTimeCounter * 8.0;
-	// noiseCoord /= 8.0 * noiseTextureResolution;
-    // vec3 noise = texture(noisetex, noiseCoord).rgb;
-	// color.rgb = vec3(noise.r);
+	// noiseCoord.x += frameTimeCounter * 32.0;
+	// noiseCoord /=64.0 * noiseTextureResolution;
+    // color.rgb = vec3(textureBicubic(noisetex, noiseCoord, noiseTextureResolution).g);
 
 /* DRAWBUFFERS:045 */
 	gl_FragData[0] = vec4(color.rgb, color.a);
 	gl_FragData[1] = vec4(pack2x8To16(parallaxShadow, 0.0), pack2x8To16(blockID/ID_SCALE, 0.0), pack4x8To2x16(specularTex));
-	gl_FragData[2] = vec4(normalEncode(normalTex), lmcoord);
+	gl_FragData[2] = vec4(normalEncode(normalFinal), lmcoord);
 }
  
 #endif
@@ -227,7 +239,6 @@ attribute vec4 mc_midTexCoord;
 attribute vec4 at_tangent;
 
 #include "/lib/common/materialIdMapper.glsl"
-#include "/lib/camera/filter.glsl"
 #include "/lib/wavingPlants.glsl"
 
 void main() {
@@ -243,7 +254,6 @@ void main() {
 	vec3 B = cross(T, v_N) * handedness;
 	v_tbnMatrix = mat3(T, B, v_N);
 
-	// 坐标
 	v_viewPos = gl_ModelViewMatrix * gl_Vertex;
 	vec4 vWorldPos = viewPosToWorldPos(v_viewPos);
 	float worldDis = length(vWorldPos.xyz);
@@ -253,7 +263,6 @@ void main() {
 		if(worldDis < 60.0){
 			const float waving_rate = WAVING_RATE;
 			if(v_blockID == PLANTS_SHORT && gl_MultiTexCoord0.t < mc_midTexCoord.t){
-				// pos, normal, A, B, D_amount, y_waving_amount
 				mcPos.xyz = wavingPlants(mcPos.xyz, 1.0, 1.0, 0.0, 1.0);
 			}
 			if(v_blockID == LEAVES){

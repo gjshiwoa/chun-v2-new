@@ -87,11 +87,13 @@ void main() {
 		vec3 waveViewNormal = normalize(tbnMatrix * getWaveNormal(waveParallaxUV));
 		vec3 waveWorldNormal = viewPosToWorldPos(vec4(waveViewNormal, 0.0)).xyz;
  
-		bool upFace = dot(normalVO, upViewDir) > 0.01;
-		if(upFace && rainStrength > 0.001 && biome_precipitation == 1){
-			waveWorldNormal = RipplePerturbNormalWS(waveParallaxUV, waveWorldNormal, worldDis0);
-			waveViewNormal = mat3(gbufferModelView) * waveWorldNormal;
-		}
+		#ifdef RIPPLE
+			bool upFace = dot(normalVO, upViewDir) > 0.01;
+			if(upFace && rainStrength > 0.001 && biome_precipitation == 1){
+				waveWorldNormal = RipplePerturbNormalWS(waveParallaxUV, waveWorldNormal, worldDis0);
+				waveViewNormal = mat3(gbufferModelView) * waveWorldNormal;
+			}
+		#endif
 
 
 

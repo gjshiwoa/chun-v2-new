@@ -99,10 +99,20 @@ const int noiseTextureResolution = 64;
 #define MIRROR_INTENSITY 0.5        // [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.25 1.5 1.75 2.0]
 #define PBR_REFLECTION_DIR_COUNT 1  // [1 2 3 4 5 6 8 10 12 14 16 18 20]
 // #define PBR_REFLECTION_BLUR
-#define RAINY_GROUND_WET_ENABLE
 #define TRANSLUCENT_ROUGHNESS 0.75  // [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95]
 #define TRANSLUCENT_F0 0.75         // [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95]
 // #define TRANSLUCENT_USE_REASOURCESPACK_PBR
+
+#define RIPPLE
+#define RAINY_GROUND_WET_ENABLE
+#define RIPPLE_DISTANCE 20.0
+#define RIPPLE_MAX_RADIUS 1
+#define RIPPLE_UV_SCALE 3.0
+#define RIPPLE_TIME_SPEED 1.2
+#define RIPPLE_WAVE_FREQ 1.25
+#define RIPPLE_RING_INNER -0.3
+#define RIPPLE_RING_OUTER -0.15
+#define RIPPLE_NORMAL_STRENGTH 1.0
 
 
 
@@ -295,9 +305,10 @@ const vec2 fogHeight = vec2(FOG_REF_HEIGHT - FOG_THICKNESS * 0.5, FOG_REF_HEIGHT
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ARTIFICIAL_LIGHT_FALLOFF 2.0    // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 #define SKY_LIGHT_FALLOFF 2.0           // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
-
 #define SUN_SKY_BLEND 0.97          // [0.9 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.0]
 
+#define HELD_BLOCK_DYNAMIC_LIGHT
+#define DYNAMIC_LIGHT_DISTANCE 10.0
 #define GLOWING_BRIGHTNESS 2.0      // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 #define SKY_LIGHT_BRIGHTNESS 4.0    // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 5.5 6.0 6.5 7.0 7.5 8.0 8.5 9.0 9.5 10.0]
 #define ARTIFICIAL_COLOR_RED 0.9    // [0.0 0.025 0.05 0.075 0.1 0.125 0.15 0.175 0.2 0.225 0.25 0.275 0.3 0.325 0.35 0.375 0.4 0.425 0.45 0.475 0.5 0.525 0.55 0.575 0.6 0.625 0.65 0.675 0.7 0.725 0.75 0.775 0.8 0.825 0.85 0.875 0.9 0.925 0.95 0.975 1.0]

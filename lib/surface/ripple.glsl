@@ -1,19 +1,6 @@
 // Zavie: Rainier mood 
 // https://www.shadertoy.com/view/ldfyzl
 
-#define RIPPLE_MAX_RADIUS 1
-
-#define RIPPLE_UV_SCALE 3.0
-
-#define RIPPLE_TIME_SPEED 1.2
-
-#define RIPPLE_WAVE_FREQ 1.25
-
-#define RIPPLE_RING_INNER -0.3
-#define RIPPLE_RING_OUTER -0.15
-
-#define RIPPLE_NORMAL_STRENGTH 1.0
-
 float ripple_profile(float d){
     float band = smoothstep(RIPPLE_RING_INNER, RIPPLE_RING_OUTER, d)
                * smoothstep(0.0, RIPPLE_RING_OUTER, d);
@@ -82,7 +69,7 @@ vec3 RipplePerturbNormalWS(vec2 posXZ, vec3 baseNWS, float dis){
     if(dis > 20.0) return N;
 
     vec2 slope = RippleSlopeXZ_WS(posXZ) * rainStrength * 0.25
-        * remapSaturate(dis, 10.0, 20.0, 1.0, 0.0);
+        * remapSaturate(dis, RIPPLE_DISTANCE * 0.66, RIPPLE_DISTANCE, 1.0, 0.0);
 
     vec3 worldX = vec3(1.0, 0.0, 0.0);
     vec3 worldZ = vec3(0.0, 0.0, 1.0);

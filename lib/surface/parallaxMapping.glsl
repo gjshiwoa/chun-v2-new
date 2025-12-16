@@ -86,7 +86,7 @@ vec3 computeNormalFromHeight(vec2 parallaxUV) {
     return n;
 }
 
-vec2 parallaxMapping(vec3 viewVector, out vec3 parallaxOffset, out vec3 normalTS){
+vec2 parallaxMapping(vec3 viewVector, inout vec3 parallaxOffset, inout vec3 normalTS){
     // const float slicesMin = 60.0;
     // const float slicesMax = 60.0;
     // float slicesNum = ceil(lerp(slicesMax, slicesMin, abs(dot(vec3(0, 0, 1), viewVector))));
@@ -123,7 +123,10 @@ vec2 parallaxMapping(vec3 viewVector, out vec3 parallaxOffset, out vec3 normalTS
 
     parallaxOffset = vec3(currUVOffset + lerpOffset, rayHeight);
     vec2 parallaxUV = GetParallaxCoord(parallaxOffset.xy);
-    normalTS = computeNormalFromHeight(parallaxUV);
+    
+    if(PARALLAX_NORMAL_MIX_WEIGHT > 0.0001){
+        normalTS = computeNormalFromHeight(parallaxUV);
+    }
 
     return parallaxUV;
 }
@@ -153,7 +156,7 @@ float getVoxelHeightTexel(ivec2 texelIndex, ivec2 tileStartPx){
     return h;
 }
 
-vec2 voxelParallaxMapping(vec3 viewVector, out vec3 parallaxOffset, out vec3 voxelNormalTS){
+vec2 voxelParallaxMapping(vec3 viewVector, inout vec3 parallaxOffset, inout vec3 voxelNormalTS){
     vec2 tileSizeNormalized = vec2(float(textureResolution)) / vec2(atlasSize);
     
     vec2 tileStart = floor(texcoord / tileSizeNormalized) * tileSizeNormalized;

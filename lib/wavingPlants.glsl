@@ -4,8 +4,8 @@ vec3 wavingPlants(vec3 mcPos, float A, float B, float yW, float ns){
     vec2 noiseCoord = mcPos.xz;
 	noiseCoord = rotate2D(noiseCoord, 0.45);
     noiseCoord = vec2(noiseCoord.x * 3.0, noiseCoord.y);
-	noiseCoord.x += frameTimeCounter * 4.0;
-	noiseCoord /= ns * 16.0 * noiseTextureResolution;
+	noiseCoord.x += frameTimeCounter * 32.0;
+	noiseCoord /= ns * 64.0 * noiseTextureResolution;
     vec3 noise = textureBicubic(noisetex, noiseCoord, noiseTextureResolution).rgb;
 
     vec3 rand0 = texture(noisetex, mcPos.xz / (ns * 4.0 * noiseTextureResolution)).rgb;
