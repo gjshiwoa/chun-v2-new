@@ -19,10 +19,6 @@ ivec3 relWorldToVoxelCoord(vec3 relPos) {
     return deltaBlock + VOXEL_HALF;
 }
 
-int voxelCoordToLinearIndex(ivec3 v) {
-    return v.x + VOXEL_DIM.x * (v.y + VOXEL_DIM.y * v.z);
-}
-
 vec3 voxelUVWToRelWorld(vec3 uvw) {
     vec3 camFract01 = getCameraFract01();
     vec3 s = uvw * vec3(VOXEL_DIM) - vec3(VOXEL_HALF);

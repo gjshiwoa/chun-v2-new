@@ -255,6 +255,7 @@ void main() {
 	// color.rgb = vec3(1.0 - texture(colortex3, texcoord * 0.5).a);
 	
 	// if(dhTerrain > 0.5) color.rgb = vec3(1.0 - texture(colortex1, texcoord * 0.5).a);
+	color.rgb = texture(colortex10, texcoord * 0.5).rgb;
 
 	// color.rgb = toLinearR(texelFetch(customimg0, ivec3(relWorldToVoxelCoord(worldPos1.xyz - 0.1 * normalW)), 0).rgb);
 	

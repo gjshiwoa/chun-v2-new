@@ -34,6 +34,9 @@ option.ARTIFICIAL_COLOR_GREEN = 人工光源_绿色
 option.ARTIFICIAL_COLOR_BLUE = 人工光源_蓝色
 option.ARTIFICIAL_COLOR_ALPHA = 人工光源_亮度
 option.NIGHT_VISION_BRIGHTNESS = 夜视状态亮度
+option.HELD_BLOCK_DYNAMIC_LIGHT = 手持动态光源
+option.HELD_BLOCK_NORMAL_AFFECT = 动态光源法线影响
+option.DYNAMIC_LIGHT_DISTANCE = 动态光源照亮距离
 
 option.DIRECT_LUMINANCE = 直接光照强度
 option.SHADOWMAP_EXCLUDE_ENTITIES = 排除实体的阴影贴图

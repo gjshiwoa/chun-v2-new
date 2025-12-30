@@ -50,6 +50,7 @@ vec2 SSRT(vec3 viewPos, vec3 reflectViewDir, vec3 normalTex){
             vec4 dhViewPos = screenPosToViewPosDH(vec4(testScreenPos.xy, dhDepth, 1.0));
             closest = min(closest, viewPosToScreenPos(dhViewPos).z);
         #endif
+        vec3 ivalueTestScreenPos = vec3(testScreenPos.xy, closest);
 
         if (testScreenPos.z > closest){
             isHit = true;
@@ -74,7 +75,7 @@ vec2 SSRT(vec3 viewPos, vec3 reflectViewDir, vec3 normalTex){
                 sig = sign(closestB - testScreenPos.z);
             }
 
-            vec3 newTestPos = screenPosToViewPos(vec4(vec3(testScreenPos.xy, closestB), 1.0)).xyz;
+            vec3 newTestPos = screenPosToViewPos(vec4(ivalueTestScreenPos, 1.0)).xyz;
             float tp_dist = distance(curTestPos, newTestPos);
             float ds_len = length(ds);
             float cosA = dot(reflectViewDir, normalize(normalTex));

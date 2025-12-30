@@ -174,12 +174,12 @@ float estimateRsmLeakAO_voxel(vec3 mainDir, vec3 worldPos, vec3 normalW){
     worldPos += normalW * 0.05;
     const float N_SAMPLES = 10.0;
 
-    for(int j = 0; j < N_SAMPLES; ++j){
+    for(int j = 1; j < N_SAMPLES; ++j){
         vec3 wp = worldPos + stepVec * float(j);
         ivec3 vp = relWorldToVoxelCoord(wp);
         vec4 sampleCol = texelFetch(customimg0, vp.xyz, 0);
         if(abs(sampleCol.a - 0.5) < 0.05){
-            wp -= stepVec;
+            wp -= 0.9 * stepVec;
             vec3 shadowPos = getShadowPos(vec4(wp, 1.0)).xyz;
             float psd = texture(shadowtex1, shadowPos.xy).r;
             if (psd < shadowPos.z + 0.00005) ao = 0.0;

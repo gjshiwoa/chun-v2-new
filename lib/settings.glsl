@@ -322,7 +322,7 @@ const float voxelDistance = 128.0;
 
 #define HELD_BLOCK_DYNAMIC_LIGHT
 #define HELD_BLOCK_NORMAL_AFFECT
-#define DYNAMIC_LIGHT_DISTANCE 10.0
+#define DYNAMIC_LIGHT_DISTANCE 10.0     // [5.0 7.5 10.0 12.5 15.0 20.0 15.0 30.0]
 
 #define GLOWING_BRIGHTNESS 2.0      // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 #define SKY_LIGHT_BRIGHTNESS 4.0    // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 5.5 6.0 6.5 7.0 7.5 8.0 8.5 9.0 9.5 10.0]

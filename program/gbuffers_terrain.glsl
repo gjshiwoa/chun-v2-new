@@ -20,10 +20,12 @@ in mat3 tbnMatrix;
 in vec4 viewPos;
 in vec3 N;
 in vec3 mcPos;
+in vec4 texCoordAM;
+in vec2 texCoordLocal;
 
 float dither = temporalBayer64(ivec2(gl_FragCoord.xy));
-#include "/lib/antialiasing/anisotropicFiltering.glsl"
 #include "/lib/surface/parallaxMapping.glsl"
+#include "/lib/antialiasing/anisotropicFiltering.glsl"
 #include "/lib/surface/ripple.glsl"
 
 
@@ -185,6 +187,8 @@ in mat3 v_tbnMatrix[];
 in vec4 v_viewPos[];
 in vec3 v_N[];
 in vec3 v_mcPos[];
+in vec4 v_texCoordAM[];
+in vec2 v_texCoord[];
 flat in float v_blockID[];
 
 out vec2 lmcoord;
@@ -194,6 +198,8 @@ out mat3 tbnMatrix;
 out vec4 viewPos;
 out vec3 N;
 out vec3 mcPos;
+out vec4 texCoordAM;
+out vec2 texCoordLocal;
 flat out float blockID;
 flat out int textureResolution;
 
@@ -215,6 +221,8 @@ void main() {
 		viewPos = v_viewPos[i];
 		N = v_N[i];
 		mcPos = v_mcPos[i];
+		texCoordAM = v_texCoordAM[i];
+		texCoordLocal = v_texCoord[i];
 		blockID = v_blockID[i];
 
 		gl_Position = gl_in[i].gl_Position;
@@ -234,6 +242,8 @@ out mat3 v_tbnMatrix;
 out vec4 v_viewPos;
 out vec3 v_N;
 out vec3 v_mcPos;
+out vec4 v_texCoordAM;
+out vec2 v_texCoord;
 flat out float v_blockID;
 
 attribute vec4 mc_Entity;
@@ -248,6 +258,13 @@ void main() {
 	v_lmcoord  = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
 	v_texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
 	v_glcolor = gl_Color;
+
+	// From BSL
+	vec2 midCoord = (gl_TextureMatrix[0] *  mc_midTexCoord).st;
+	vec2 texMinMidCoord = v_texcoord - midCoord;
+	v_texCoordAM.pq  = abs(texMinMidCoord) * 2;
+	v_texCoordAM.st  = min(v_texcoord, midCoord - texMinMidCoord);
+	v_texCoord.xy    = sign(texMinMidCoord) * 0.5 + 0.5;
 
 	const float inf = uintBitsToFloat(0x7f800000u);
 	float handedness = clamp(at_tangent.w * inf, -1.0, 1.0);
