@@ -61,10 +61,18 @@ void main() {
 	normalFinal = normalize(normalFinal);
 	specularTex = saturate(specularTex);
 
+#ifdef PATH_TRACING
+/* DRAWBUFFERS:0459 */
+	gl_FragData[0] = vec4(color.rgb, color.a);
+	gl_FragData[1] = vec4(pack2x8To16(1.0, 0.0), pack2x8To16(BLOCK / ID_SCALE, 0.0), pack4x8To2x16(specularTex));
+	gl_FragData[2] = vec4(normalEncode(normalFinal), lmcoord);
+	gl_FragData[3] = vec4(0.0, 0.0, normalEncode(N));
+#else
 /* DRAWBUFFERS:045 */
 	gl_FragData[0] = vec4(color.rgb, color.a);
 	gl_FragData[1] = vec4(pack2x8To16(1.0, 0.0), pack2x8To16(BLOCK / ID_SCALE, 0.0), pack4x8To2x16(specularTex));
 	gl_FragData[2] = vec4(normalEncode(normalFinal), lmcoord);
+#endif
 }
 
 #endif
@@ -77,6 +85,8 @@ void main() {
 attribute vec4 mc_Entity;
 attribute vec4 mc_midTexCoord;
 attribute vec4 at_tangent;
+attribute vec4 at_midBlock;
+
 
 void main() {
 	gl_Position = ftransform();
@@ -98,6 +108,9 @@ void main() {
 	T_tbnMatrix = transpose(tbnMatrix);
 
 	lmcoord  = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+	#if defined PATH_TRACING || defined COLORED_LIGHT
+		lmcoord.x = ((at_midBlock.a - 1.0)) / 15.0;
+	#endif
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
 	glcolor = gl_Color;
 }

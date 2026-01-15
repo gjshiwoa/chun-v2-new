@@ -8,7 +8,9 @@ float IDMapping(){
         case 18:            return LEAVES;
         case 10176:         return PLANTS_OTHER;
         case 10:            return NO_ANISO;
+        case 20:            return NO_VOXEL;
         case 89:            return GLOWING_BLOCK;
+        case 61:            return USE_ART_COL;
 
         default:            return 0.0;
     }

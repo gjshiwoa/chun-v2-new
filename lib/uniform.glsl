@@ -44,6 +44,9 @@ uniform sampler2D shadowcolor0;
 uniform sampler2D shadowcolor1;
 
 uniform sampler3D customimg0;
+uniform usampler3D customimg3;
+uniform sampler3D customimg4;
+uniform sampler3D customimg5;
 
 uniform float alphaTestRef; 
 

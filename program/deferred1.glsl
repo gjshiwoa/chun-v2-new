@@ -42,6 +42,17 @@ void main() {
 	if(ivec2(gl_FragCoord.xy) == skyColorUV)
 		CT7.rgb = skyColor;
 
+	if(ivec2(gl_FragCoord.xy) == rightLitPreUV){
+		vec4 newColor = texelFetch(colortex7, rightLitUV, 0);
+		vec4 preColor = texelFetch(colortex7, rightLitPreUV, 0);
+		CT7 = mix(preColor, newColor, 0.05);
+	}
+		
+	if(ivec2(gl_FragCoord.xy) == LeftLitPreUV){
+		vec4 newColor = texelFetch(colortex7, LeftLitUV, 0);
+		vec4 preColor = texelFetch(colortex7, LeftLitPreUV, 0);
+		CT7 = mix(preColor, newColor, 0.05);
+	}
 
 
 /* DRAWBUFFERS:7 */

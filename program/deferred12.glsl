@@ -3,6 +3,8 @@ varying vec2 texcoord;
 varying vec3 sunWorldDir, moonWorldDir, lightWorldDir;
 varying vec3 sunViewDir, moonViewDir, lightViewDir;
 
+varying vec3 sunColor, skyColor;
+
 #include "/lib/uniform.glsl"
 #include "/lib/settings.glsl"
 #include "/lib/common/utils.glsl"
@@ -22,6 +24,7 @@ const bool shadowtex1Mipmap = false;
 const bool shadowcolor0Mipmap = false;
 const bool shadowcolor1Mipmap = false;
 #include "/lib/lighting/lightmap.glsl"
+#include "/lib/lighting/pathTracing.glsl"
 #include "/lib/water/waterReflectionRefraction.glsl"
 #include "/lib/surface/PBR.glsl"
 
@@ -62,6 +65,9 @@ void main() {
 				float sampleLightmapY = lightmap.y * smoothstep(-1.0, 1.0, NdotU);
 
 				bool ssrTargetSampled = false;
+				#ifdef PATH_TRACING
+					hrrNormalV = normalize(normalDecode(texelFetch(colortex9, ivec2(gl_FragCoord.xy * 2.0 - viewSize), 0).ba));
+				#endif
 				vec3 sampleColor = reflection(colortex2, hrrViewPos.xyz, sampleReflectWorldDir, sampleReflectViewDir, sampleLightmapY, hrrNormalV, 1.0, ssrTargetSampled);
 				sampleColor = clamp(sampleColor, 0.001, 10.0);
 				accumulatedReflectColor += sampleColor;
@@ -95,6 +101,9 @@ void main() {
 	sunWorldDir = normalize(viewPosToWorldPos(vec4(sunPosition, 0.0)).xyz);
     moonWorldDir = normalize(viewPosToWorldPos(vec4(moonPosition, 0.0)).xyz);
     lightWorldDir = normalize(viewPosToWorldPos(vec4(shadowLightPosition, 0.0)).xyz);
+
+	sunColor = getSunColor();
+	skyColor = getSkyColor();
 
 	gl_Position = ftransform();
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;

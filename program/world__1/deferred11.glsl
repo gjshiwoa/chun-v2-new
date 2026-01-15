@@ -3,7 +3,7 @@ varying vec2 texcoord;
 varying vec3 sunWorldDir, moonWorldDir, lightWorldDir;
 varying vec3 sunViewDir, moonViewDir, lightViewDir;
 
-// varying vec3 sunColor, skyColor;
+varying vec3 sunColor, skyColor;
 
 varying float isNoon, isNight, sunRiseSet;
 varying float isNoonS, isNightS, sunRiseSetS;

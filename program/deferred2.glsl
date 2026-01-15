@@ -65,63 +65,63 @@ void main() {
 		}
 	}
 
+	#ifndef PATH_TRACING
+		vec2 hrrUV = texcoord * 2.0;
+		float hrrZ = CT6.g;
+		vec3 rsm = BLACK;
+		float ao = 1.0;
 
-	vec2 hrrUV = texcoord * 2.0;
-	float hrrZ = CT6.g;
-	vec3 rsm = BLACK;
-	float ao = 1.0;
-
-	float dhTerrainHrr = 0.0;
-	float depthHrr1 = texelFetch(depthtex1, ivec2(hrrUV * viewSize), 0).r;
-	#if defined DISTANT_HORIZONS && !defined NETHER && !defined END
-		float dhDepth = texture(dhDepthTex0, hrrUV).r;
-		dhTerrainHrr = depthHrr1 == 1.0 && dhDepth < 1.0 ? 1.0 : 0.0;
-	#endif
-
-	bool isTerrainHrr = depthHrr1 < 1.0 || dhTerrainHrr > 0.5;
-
-	if(!outScreen(hrrUV) && isTerrainHrr){
-		vec4 hrrScreenPos = vec4(unTAAJitter(hrrUV), hrrZ, 1.0);
-		vec4 hrrViewPos = screenPosToViewPos(hrrScreenPos);
+		float dhTerrainHrr = 0.0;
+		float depthHrr1 = texelFetch(depthtex1, ivec2(hrrUV * viewSize), 0).r;
 		#if defined DISTANT_HORIZONS && !defined NETHER && !defined END
-			if(dhTerrainHrr > 0.5){
-				hrrViewPos = screenPosToViewPosDH(vec4(unTAAJitter(hrrUV), dhDepth, 1.0));
-			}
-		#endif
-		
-		vec4 hrrWorldPos = viewPosToWorldPos(hrrViewPos);
-
-		vec3 hrrNormalW = unpackNormal(CT6.r);
-		vec3 hrrNormal = normalize(mat3(gbufferModelView) * hrrNormalW);
-
-		float rsmAO = 1.0;
-		#ifdef RSM_ENABLED
-			if(isNoon > 0.001 && isEyeInWater == 0.0) {
-				vec3 mainDir = vec3(0.0);
-				rsm = RSM(hrrWorldPos, hrrNormalW, mainDir);	
-				#ifdef RSM_LEAK_FIX
-					// rsmAO = estimateRsmLeakAO(mainDir, hrrViewPos.xyz);
-					rsmAO = estimateRsmLeakAO_voxel(mainDir, hrrWorldPos.xyz, hrrNormalW);
-					rsm *= rsmAO;
-				#endif
-			}
-			rsm = max(BLACK, rsm);
+			float dhDepth = texture(dhDepthTex0, hrrUV).r;
+			dhTerrainHrr = depthHrr1 == 1.0 && dhDepth < 1.0 ? 1.0 : 0.0;
 		#endif
 
-		#ifdef AO_ENABLED
-			ao = saturate(1.0 - GTAO(hrrViewPos.xyz, hrrNormal, dhTerrainHrr));
-			// ao = 0.0;
-		#endif
+		bool isTerrainHrr = depthHrr1 < 1.0 || dhTerrainHrr > 0.5;
 
-		vec4 gi = vec4(rsm, ao);
-		#if defined RSM_ENABLED || defined AO_ENABLED
-			gi = temporal_RSM(gi);
-			gi = max(vec4(0.0), gi);
-			// CT1 = gi;
-			CT3 = gi;
-		#endif
-	}
+		if(!outScreen(hrrUV) && isTerrainHrr){
+			vec4 hrrScreenPos = vec4(unTAAJitter(hrrUV), hrrZ, 1.0);
+			vec4 hrrViewPos = screenPosToViewPos(hrrScreenPos);
+			#if defined DISTANT_HORIZONS && !defined NETHER && !defined END
+				if(dhTerrainHrr > 0.5){
+					hrrViewPos = screenPosToViewPosDH(vec4(unTAAJitter(hrrUV), dhDepth, 1.0));
+				}
+			#endif
+			
+			vec4 hrrWorldPos = viewPosToWorldPos(hrrViewPos);
 
+			vec3 hrrNormalW = unpackNormal(CT6.r);
+			vec3 hrrNormal = normalize(mat3(gbufferModelView) * hrrNormalW);
+
+			
+			float rsmAO = 1.0;
+			#ifdef RSM_ENABLED
+				if(isNoon > 0.001 && isEyeInWater == 0.0) {
+					vec3 mainDir = vec3(0.0);
+					rsm = RSM(hrrWorldPos, hrrNormalW, mainDir);	
+					#ifdef RSM_LEAK_FIX
+						rsmAO = estimateRsmLeakAO(mainDir, hrrViewPos.xyz);
+						// rsmAO = estimateRsmLeakAO_voxel(mainDir, hrrWorldPos.xyz, hrrNormalW);
+						rsm *= rsmAO;
+					#endif
+				}
+				rsm = max(BLACK, rsm);
+			#endif
+
+			#ifdef AO_ENABLED
+				ao = saturate(1.0 - GTAO(hrrViewPos.xyz, hrrNormal, dhTerrainHrr));
+			#endif
+
+			vec4 gi = vec4(rsm, ao);
+			#if defined RSM_ENABLED || defined AO_ENABLED
+				gi = temporal_RSM(gi);
+				gi = max(vec4(0.0), gi);
+				CT3 = gi;
+			#endif
+		}
+	#endif
+	
 /* DRAWBUFFERS:13 */
 	gl_FragData[0] = CT1;
 	gl_FragData[1] = CT3;

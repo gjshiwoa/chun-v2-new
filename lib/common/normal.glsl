@@ -61,6 +61,10 @@ vec3 getNormal(vec2 uv){
 vec3 getNormalH(vec2 uv){
     return normalize(normalDecode(texelFetch(colortex5, ivec2(uv * viewSize), 0).rg));
 }
+
+vec3 getNH(vec2 uv){
+    return normalize(normalDecode(texelFetch(colortex9, ivec2(uv * viewSize), 0).ba));
+}
 #endif
 
 #endif // COMMON_NORMAL_GLSL

@@ -12,7 +12,7 @@ vec2 waterRefractionCoord(vec3 normalTex, vec3 worldNormal, float worldDis0, flo
 }
 #include "/lib/common/octahedralMapping.glsl"
 
-vec2 SSRT(vec3 viewPos, vec3 reflectViewDir, vec3 normalTex){
+vec2 SSRT(vec3 viewPos, vec3 reflectViewDir, vec3 normalTex, out vec3 outMissPos){
     float curStep = REFLECTION_STEP_SIZE;
 
     vec3 startPos = viewPos;
@@ -30,13 +30,18 @@ vec2 SSRT(vec3 viewPos, vec3 reflectViewDir, vec3 normalTex){
     vec3 preTestPos = startPos;
     bool isHit = false;
 
+    outMissPos = vec3(0.0);
+
+    vec3 curTestPos = startPos;
+
     for (int i = 0; i < int(REFLECTION_SAMPLES); ++i){
         cumUnjittered += curStep;
         float adjustedDist = cumUnjittered - jitter * curStep;
-        vec3 curTestPos = startPos + reflectViewDir * adjustedDist;
+        curTestPos = startPos + reflectViewDir * adjustedDist;
         testScreenPos = viewPosToScreenPos(vec4(curTestPos, 1.0)).xyz;
 
         if (outScreen(testScreenPos.xy)){
+            outMissPos = preTestPos;
             return vec2(-1.0);
         }
 
@@ -82,6 +87,7 @@ vec2 SSRT(vec3 viewPos, vec3 reflectViewDir, vec3 normalTex){
             if (tp_dist < ds_len * saturate(sqrt(1.0 - cosA * cosA))){
                 return testScreenPos.st;
             }
+            outMissPos = preTestPos;
             break;
         }
 
@@ -98,8 +104,12 @@ vec2 SSRT(vec3 viewPos, vec3 reflectViewDir, vec3 normalTex){
         #endif
     #endif
 
-    if (!isHit && depthCondition){
-        return vec2(testScreenPos.xy);
+    if (!isHit){
+        if(depthCondition) return vec2(testScreenPos.xy);
+        else{ 
+            outMissPos = curTestPos;
+            return vec2(-1.0);
+        }
     }
 
     return vec2(-1.0);
@@ -121,9 +131,12 @@ vec3 skyReflection(vec3 reflectWorldDir){
 vec3 reflection(sampler2D tex, vec3 viewPos, vec3 reflectWorldDir, vec3 reflectViewDir, 
                 float lightmap, vec3 normalTex, float colorScale, inout bool ssrTargetSampled){
     vec3 reflectColor = vec3(0.0);
+    vec3 NW = mat3(gbufferModelViewInverse) * normalTex;
+    vec3 worldPos = viewPosToWorldPos(vec4(viewPos, 1.0)).xyz;
 
-    vec2 testScreenPos = SSRT(viewPos, reflectViewDir, normalTex);
+    vec3 missPos = vec3(0.0);
 
+    vec2 testScreenPos = SSRT(viewPos, reflectViewDir, normalTex, missPos);
     vec2 velocity = texture(colortex9, testScreenPos.xy).xy;
     testScreenPos.xy = testScreenPos.xy - velocity;
 
@@ -132,10 +145,49 @@ vec3 reflection(sampler2D tex, vec3 viewPos, vec3 reflectWorldDir, vec3 reflectV
         
         reflectColor = texture(tex, testScreenPos.xy).rgb * colorScale;
     }else{
-        if(isEyeInWater == 0){
-            reflectColor = skyReflection(reflectWorldDir);
-            reflectColor = reflectColor * lightmap;
-        }
+        #ifdef PATH_TRACING_REFLECTION
+        #endif
+        #if defined PATH_TRACING_REFLECTION && defined PATH_TRACING
+            vec3 roRel = viewPosToWorldPos(vec4(missPos, 1.0)).xyz;
+            vec3 hitPosRel;
+            ivec3 hitVoxel;
+            vec3 hitNormal;
+            bool vxHit = voxelDDA_Raycast(
+                roRel, reflectWorldDir, 128.0, 512,
+                worldPos - 0.1 * NW,
+                hitPosRel, hitVoxel, hitNormal
+            );
+
+            if(!vxHit){
+                reflectColor = skyReflection(reflectWorldDir) * float(dot(reflectWorldDir, upWorldDir) > 0.01);
+            } else{
+                #ifdef PATH_TRACING_REFLECTION_VOXEL
+                    vec3 shadowPos = getShadowPos(vec4(hitPosRel, 1.0)).xyz;
+                    float hitShadow = textureLod(shadowtex0, shadowPos, 0).r;
+
+                    vec4 hitCol = texelFetch(customimg0, hitVoxel, 0);
+                    vec3 hitAlbedo  = pow(hitCol.rgb, vec3(2.2));
+                    vec3 hitDiffuse = hitAlbedo / PI;
+
+                    float hitLoN = saturate(dot(hitNormal, lightWorldDir));
+                    reflectColor += DIRECT_LUMINANCE * sunColor * hitShadow * hitDiffuse * hitLoN;
+
+                    // float hitLMC_y = texelFetch(customimg4, hitVoxel, 0).x;
+                    // hitLMC_y = saturate(pow(hitLMC_y, 2.2 + SKY_LIGHT_FALLOFF) * lightmap);
+                    // reflectColor += hitLMC_y * mix(sunColor, skyColor, mix(0.5, 1.0, hitLMC_y)) * 
+                    //                 SKY_LIGHT_BRIGHTNESS * 0.5 * hitDiffuse;
+                    // reflectColor += hitCol.a * hitDiffuse;
+                #else
+                    reflectColor = vec3(0.0);
+                #endif
+            }
+        #else
+            if(isEyeInWater == 0){
+                reflectColor = skyReflection(reflectWorldDir);
+                reflectColor = reflectColor * lightmap;
+            }
+        #endif
+        
     }
 
     return max(reflectColor, BLACK);

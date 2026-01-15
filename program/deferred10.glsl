@@ -7,6 +7,8 @@ varying float isNoon, isNight, sunRiseSet;
 varying float isNoonS, isNightS, sunRiseSetS;
 
 varying vec3 sunColor, skyColor;
+varying vec3 LeftLitDiff, RightLitDiff;
+
 
 
 #include "/lib/uniform.glsl"
@@ -41,7 +43,7 @@ const bool shadowcolor1Mipmap = false;
 
 #include "/lib/atmosphere/fog.glsl"
 #include "/lib/atmosphere/celestial.glsl"
-// #include "/lib/atmosphere/volumetricClouds.glsl"
+#include "/lib/lighting/pathTracing.glsl"
 
 
 
@@ -91,14 +93,8 @@ void main() {
 
 	if(isTerrain){	
 		vec2 lightmap = AdjustLightmap(mcLightmap);
-		#ifdef HELD_BLOCK_DYNAMIC_LIGHT
-			float heldBlockLight = max(heldBlockLightValue, heldBlockLightValue2) / 15.0;
-			heldBlockLight *= pow(remapSaturate(worldDis1, 0.0, DYNAMIC_LIGHT_DISTANCE, 1.0, 0.0), ARTIFICIAL_LIGHT_FALLOFF);
-			#ifdef HELD_BLOCK_NORMAL_AFFECT
-				heldBlockLight *= saturate(dot(normalV, -normalize(vec3(viewPos1.xyz))));
-			#endif
-			lightmap.x = max(lightmap.x, heldBlockLight);
-		#endif
+		float lightMask = pow(smoothstep(0.0, 0.1, lightmap.y), 0.45);
+		
 
 		MaterialParams materialParams = MapMaterialParams(specularMap);
 		#ifdef PBR_REFLECTIVITY
@@ -121,29 +117,27 @@ void main() {
 		if(plants > 0.5) sssWrap = 20.0;
 		cos_theta = saturate((cos_theta_O + sssWrap) / (1 + sssWrap));
 
+		#ifndef PATH_TRACING
+			float noRSM = hand > 0.5 ? 1.0 : 0.0;
+			float UoN = dot(normalW, upWorldDir);
+			vec3 skyLight = lightmap.y * BRDF_D
+						* mix(sunColor, skyColor, SUN_SKY_BLEND - 0.05 * noRSM * lightmap.y)
+						* mix(1.0, UoN * 0.5 + 0.5, 0.75);
+			
 
-		float noRSM = hand > 0.5 ? 1.0 : 0.0;
-		float lightMask = pow(smoothstep(0.0, 0.1, lightmap.y), 0.45);
-		float UoN = dot(normalW, upWorldDir);
-		vec3 skyLight = lightmap.y * BRDF_D
-					* mix(sunColor, skyColor, SUN_SKY_BLEND - 0.05 * noRSM * lightmap.y)
-					* mix(1.0, UoN * 0.5 + 0.5, 0.75);
-		
-
-		vec4 gi = getGI(depth1, normalW);
-		gi.a = 1.0 - gi.a;
-		if(noRSM < 0.5) {
-			L2 = sunColor * BRDF_D * gi.rgb;
-			#ifdef AO_ENABLED
-				#ifdef AO_MULTI_BOUNCE
-					ao = AOMultiBounce(albedo, saturate(gi.a));
-				#else 
-					ao = vec3(saturate(gi.a));
+			vec4 gi = getGI(depth1, normalW);
+			gi.a = 1.0 - gi.a;
+			if(noRSM < 0.5) {
+				L2 = sunColor * BRDF_D * gi.rgb;
+				#ifdef AO_ENABLED
+					#ifdef AO_MULTI_BOUNCE
+						ao = AOMultiBounce(albedo, saturate(gi.a));
+					#else 
+						ao = vec3(saturate(gi.a));
+					#endif
 				#endif
-			#endif
-		}
-
-
+			}
+		#endif
 
 		float shadow = 1.0;
 		vec3 colorShadow = vec3(0.0);
@@ -160,39 +154,72 @@ void main() {
 
 
 
-		vec3 artificial = lightmap.x * artificial_color * (1. + GLOWING_BRIGHTNESS * glowingB) * diffuse;
-		artificial += saturate(materialParams.emissiveness - lightmap.x) * diffuse * EMISSIVENESS_BRIGHTNESS;
-		
-		if(lightningBolt > 0.5) color.rgb = vec3(1.0, 0.0, 0.0);
-		artificial += 1 * lightningBolt;
+		vec3 gi_PT = vec3(0.0);
+		#if defined PATH_TRACING || defined COLORED_LIGHT
+			gi_PT = getGI_PT(depth1, normalW).rgb * BRDF_D * PI;
+		#endif
 
-		// vec3 artificial = float(all(greaterThan(
-		// 			texelFetch(customimg0, ivec3(relWorldToVoxelCoord(worldPos1.xyz - 0.1 * normalW)), 0).rgb
-		// 			, vec3(0.01)))) * diffuse * 1.0;
+		vec3 artificial = vec3(0.0);
 
-		
+		float heldBlockLight = 0.5 * ARTIFICIAL_COLOR_ALPHA * 
+					pow(remapSaturate(worldDis1, 0.0, DYNAMIC_LIGHT_DISTANCE, 1.0, 0.0), ARTIFICIAL_LIGHT_FALLOFF);
+		#ifdef HELD_BLOCK_NORMAL_AFFECT
+			heldBlockLight *= saturate(dot(normalV, -normalize(vec3(viewPos1.xyz))));
+		#endif
 
-		
-		
-		
+		#if defined PATH_TRACING || defined COLORED_LIGHT
+			#ifdef COLORED_LIGHT
+				artificial = gi_PT;
+			#endif
+
+			artificial += (LeftLitDiff + RightLitDiff) * heldBlockLight * diffuse;
+
+			artificial += max(lightmap.x, materialParams.emissiveness) * diffuse * 2.0;
+		#else
+			float heldLightIntensity = max(heldBlockLightValue, heldBlockLightValue2) / 15.0;
+			lightmap.x = max(lightmap.x, heldLightIntensity * heldBlockLight);
+
+			artificial = lightmap.x * artificial_color * (1.0 + GLOWING_BRIGHTNESS * glowingB) * diffuse;
+			artificial += saturate(materialParams.emissiveness - lightmap.x) * diffuse * EMISSIVENESS_BRIGHTNESS;
+			
+			if (lightningBolt > 0.5) {
+				color.rgb = vec3(1.0);
+				artificial += 1.0 * lightningBolt;
+			}
+		#endif
+
+
+
+
+
 		#ifdef DISABLE_LEAKAGE_REPAIR
 			lightMask = 1.0;
 		#endif
-		color.rgb = albedo * 0.01;
-		color.rgb += skyLight * SKY_LIGHT_BRIGHTNESS;
-		color.rgb += nightVision * diffuse * NIGHT_VISION_BRIGHTNESS;
-		color.rgb += L2 * lightMask * RSM_BRIGHTNESS;
-		color.rgb *= ao;
+
+		#ifdef PATH_TRACING
+			color.rgb = albedo * 0.001 
+						+ nightVision * diffuse * NIGHT_VISION_BRIGHTNESS 
+						+ gi_PT;
+		#else
+			color.rgb = (albedo * 0.01 
+						+ nightVision * diffuse * NIGHT_VISION_BRIGHTNESS 
+						+ skyLight * SKY_LIGHT_BRIGHTNESS 
+						+ L2 * lightMask * RSM_BRIGHTNESS) * ao;
+		#endif
+
 		color.rgb += direct * lightMask * DIRECT_LUMINANCE;
 
-		if(isEyeInWater == 1){
-			vec3 underWaterTransmit = saturate(exp(-(vec3(1.0) - waterFogColor) * (1.25 - lightmap.y) * 3));
-			color.rgb *= underWaterTransmit * 1.0;
+		if (isEyeInWater == 1) {
+			color.rgb *= saturate(exp((waterFogColor - 1.0) * (3.75 - 3.0 * lightmap.y)));
 		}
-		
+
 		color.rgb += artificial;
+
 		// color.rgb = sunColor * gi.rgb + lightmap.y * mix(sunColor, skyColor, SUN_SKY_BLEND - 0.05 * noRSM * lightmap.y) * mix(1.0, UoN * 0.5 + 0.5, 0.75);
 		// color.rgb *= vec3(ao);
+		// color.rgb = vec3(shadow);
+		// color.rgb = gi_PT;
+		// color.rgb = RightLitDiff * 1.0;
 
 	}else{
 		float d_p2a = RaySphereIntersection(earthPos, worldDir, vec3(0.0), earth_r + atmosphere_h).y;
@@ -255,7 +282,7 @@ void main() {
 	// color.rgb = vec3(1.0 - texture(colortex3, texcoord * 0.5).a);
 	
 	// if(dhTerrain > 0.5) color.rgb = vec3(1.0 - texture(colortex1, texcoord * 0.5).a);
-	color.rgb = texture(colortex10, texcoord * 0.5).rgb;
+	// color.rgb = texture(colortex11, texcoord * 0.5).rgb;
 
 	// color.rgb = toLinearR(texelFetch(customimg0, ivec3(relWorldToVoxelCoord(worldPos1.xyz - 0.1 * normalW)), 0).rgb);
 	
@@ -293,6 +320,11 @@ void main() {
 
 	sunColor = getSunColor();
 	skyColor = getSkyColor();
+
+	vec4 LeftLitCol = texelFetch(colortex7, LeftLitPreUV, 0);
+	vec4 RightLitCol = texelFetch(colortex7, rightLitPreUV, 0);
+	LeftLitDiff = toLinearR(LeftLitCol.rgb * LeftLitCol.a);
+	RightLitDiff = toLinearR(RightLitCol.rgb * RightLitCol.a);
 
 	gl_Position = ftransform();
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;

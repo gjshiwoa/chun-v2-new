@@ -18,8 +18,6 @@ const bool shadowtex1Mipmap = false;
 const bool shadowcolor0Mipmap = false;
 const bool shadowcolor1Mipmap = false;
 
-// #include "/lib/common/gbufferData.glsl"
-// #include "/lib/common/materialIdMapper.glsl"
 
 void main() {
 	vec4 CT6 = texelFetch(colortex6, ivec2(gl_FragCoord.xy), 0);

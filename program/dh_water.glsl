@@ -29,6 +29,7 @@ flat in float isWater;
 #include "/lib/surface/PBR.glsl"
 #include "/lib/water/waterNormal.glsl"
 #include "/lib/water/waterFog.glsl"
+#include "/lib/lighting/pathTracing.glsl"
 #include "/lib/water/waterReflectionRefraction.glsl"
 #include "/lib/water/translucentLighting.glsl"
 #include "/lib/atmosphere/celestial.glsl"

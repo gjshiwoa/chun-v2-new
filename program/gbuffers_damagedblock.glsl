@@ -29,10 +29,18 @@ void main() {
 	vec3 normalTex = normalize(tbnMatrix * (textureGrad(normals, parallaxUV, texGradX, texGradY).rgb * 2.0 - 1.0));
 	vec4 specularTex = texture(specular, texcoord);
 
+#ifdef PATH_TRACING
+/* DRAWBUFFERS:0459 */
+	gl_FragData[0] = vec4(color.rgb, color.a);
+	gl_FragData[1] = vec4(pack2x8To16(1.0, 0.0), 0.0, pack4x8To2x16(specularTex));
+	gl_FragData[2] = vec4(normalEncode(N), lmcoord);
+	gl_FragData[3] = vec4(0.0, 0.0, normalEncode(N));
+#else
 /* DRAWBUFFERS:045 */
 	gl_FragData[0] = vec4(color.rgb, color.a);
 	gl_FragData[1] = vec4(pack2x8To16(1.0, 0.0), 0.0, pack4x8To2x16(specularTex));
 	gl_FragData[2] = vec4(normalEncode(N), lmcoord);
+#endif
 }
 
 #endif

@@ -20,8 +20,8 @@
 #define atan2 atan
 #define rsqrt inversesqrt
 
-#define NOON_DURATION 40.0          // [5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0]
-#define NIGHT_DURATION 30.0         // [5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0]
+#define NOON_DURATION 20.0          // [5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0]
+#define NIGHT_DURATION 10.0         // [5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0]
 
 #define NOON_DURATION_SLOW 3.0      // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 6.0 7.0 8.0 9.0 10.0]
 #define NIGHT_DURATION_SLOW 10.0     // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 6.0 7.0 8.0 9.0 10.0]
@@ -51,6 +51,8 @@ const int noiseTextureResolution = 64;
 #define GLOWING_BLOCK   21.0
 
 #define NO_ANISO        31.0
+#define NO_VOXEL        32.0
+#define USE_ART_COL     33.0
 
 #define ENTITIES        51.0
 #define LIGHTNING_BOLT  52.0
@@ -101,8 +103,8 @@ const int noiseTextureResolution = 64;
 #define MIRROR_INTENSITY 0.5        // [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.25 1.5 1.75 2.0]
 #define PBR_REFLECTION_DIR_COUNT 1  // [1 2 3 4 5 6 8 10 12 14 16 18 20]
 // #define PBR_REFLECTION_BLUR
-#define TRANSLUCENT_ROUGHNESS 0.75  // [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95]
-#define TRANSLUCENT_F0 0.75         // [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95]
+#define TRANSLUCENT_ROUGHNESS 0.9  // [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95]
+#define TRANSLUCENT_F0 0.5         // [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95]
 // #define TRANSLUCENT_USE_REASOURCESPACK_PBR
 
 
@@ -121,6 +123,8 @@ const int noiseTextureResolution = 64;
 #define RIPPLE_RING_INNER -0.6
 #define RIPPLE_RING_OUTER -0.3
 #define RIPPLE_NORMAL_STRENGTH 0.05 // [0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1 0.15 0.2]
+
+
 
 
 
@@ -168,7 +172,7 @@ const vec3 MieSigma = vec3(3.996) * 1e-6;
 const vec3 MieAbsorptionSigma = vec3(4.4) * 1e-6;
 const vec3 OzoneAbsorptionSigma = vec3(0.650, 1.881, 0.085) * 1e-6;
 
-#define Information CHUN_v2_2025_12_BY_ZY     //     [CHUN_v2_2025_12_BY_ZY]
+#define Information CHUN_v2_2026_01_BY_ZY     //     [CHUN_v2_2025_01_BY_ZY]
 
 const float H_R = 8500.0;
 const float H_M = 1200.0;
@@ -322,12 +326,12 @@ const float voxelDistance = 128.0;
 
 #define HELD_BLOCK_DYNAMIC_LIGHT
 #define HELD_BLOCK_NORMAL_AFFECT
-#define DYNAMIC_LIGHT_DISTANCE 10.0     // [5.0 7.5 10.0 12.5 15.0 20.0 15.0 30.0]
+#define DYNAMIC_LIGHT_DISTANCE 15.0     // [5.0 7.5 10.0 12.5 15.0 20.0 15.0 30.0]
 
 #define GLOWING_BRIGHTNESS 2.0      // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 #define SKY_LIGHT_BRIGHTNESS 4.0    // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 5.5 6.0 6.5 7.0 7.5 8.0 8.5 9.0 9.5 10.0]
 #define ARTIFICIAL_COLOR_RED 0.9    // [0.0 0.025 0.05 0.075 0.1 0.125 0.15 0.175 0.2 0.225 0.25 0.275 0.3 0.325 0.35 0.375 0.4 0.425 0.45 0.475 0.5 0.525 0.55 0.575 0.6 0.625 0.65 0.675 0.7 0.725 0.75 0.775 0.8 0.825 0.85 0.875 0.9 0.925 0.95 0.975 1.0]
-#define ARTIFICIAL_COLOR_GREEN 0.32 // [0.0 0.025 0.05 0.075 0.1 0.125 0.15 0.175 0.2 0.225 0.25 0.275 0.3 0.325 0.35 0.375 0.4 0.425 0.45 0.475 0.5 0.525 0.55 0.575 0.6 0.625 0.65 0.675 0.7 0.725 0.75 0.775 0.8 0.825 0.85 0.875 0.9 0.925 0.95 0.975 1.0]
+#define ARTIFICIAL_COLOR_GREEN 0.4  // [0.0 0.025 0.05 0.075 0.1 0.125 0.15 0.175 0.2 0.225 0.25 0.275 0.3 0.325 0.35 0.375 0.4 0.425 0.45 0.475 0.5 0.525 0.55 0.575 0.6 0.625 0.65 0.675 0.7 0.725 0.75 0.775 0.8 0.825 0.85 0.875 0.9 0.925 0.95 0.975 1.0]
 #define ARTIFICIAL_COLOR_BLUE 0.06  // [0.0 0.025 0.05 0.075 0.1 0.125 0.15 0.175 0.2 0.225 0.25 0.275 0.3 0.325 0.35 0.375 0.4 0.425 0.45 0.475 0.5 0.525 0.55 0.575 0.6 0.625 0.65 0.675 0.7 0.725 0.75 0.775 0.8 0.825 0.85 0.875 0.9 0.925 0.95 0.975 1.0]
 #define ARTIFICIAL_COLOR_ALPHA 1.0  // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 const vec3 artificial_color = vec3(ARTIFICIAL_COLOR_RED, ARTIFICIAL_COLOR_GREEN, ARTIFICIAL_COLOR_BLUE) * ARTIFICIAL_COLOR_ALPHA;
@@ -366,6 +370,7 @@ float shadowMapScale = (120.0 / shadowDistance) * (shadowMapResolution / 2048.0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #define RSM_ENABLED
 #define RSM_NORMAL_WEIGHT_TYPE 0     // [0 1]
 #define RSM_DIST_WEIGHT_TYPE 0  // [0 1]
@@ -402,6 +407,22 @@ const float ambientOcclusionLevel = 0.0;  // [0.0 0.05 0.2 0.4 0.6 0.8 1.0 1.2 1
 
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// #define PATH_TRACING
+#define PATH_TRACING_QUALITY 0 // [0 1 2 3]
+// #define PATH_TRACING_REFLECTION
+#define PATH_TRACING_REFLECTION_VOXEL
+// #define STRICT_LEAK_PREVENTION
+// #define COLORED_LIGHT
+
+
+const ivec2 rightLitUV = ivec2(1 + 20, 256 + 10);
+const ivec2 LeftLitUV = ivec2(1 + 30, 256 + 10);
+const ivec2 rightLitPreUV = ivec2(1 + 40, 256 + 10);
+const ivec2 LeftLitPreUV = ivec2(1 + 50, 256 + 10);
+
+
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define COLOR_UI_SCALE 4.0
@@ -409,7 +430,7 @@ const float ambientOcclusionLevel = 0.0;  // [0.0 0.05 0.2 0.4 0.6 0.8 1.0 1.2 1
 #define WAVE_TYPE 1                    // [0 1]
 #define WAVE_SPEED 1.5      // [0.5 0.75 1.0 1.25 1.5 1.75 2.0 2.25 2.5 2.75 3.0]
 #define WAVE_FREQUENCY 1.0 // [0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0 2.25 2.5 2.75 3.0]
-#define WAVE_HEIGHT 0.2     // [0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define WAVE_HEIGHT 0.2     // [0.0 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 #define WAVE_PARALLAX
 #define WAVE_PARALLAX_HEIGHT 2.0    // [0.5 0.75 1.0 1.25 1.5 1.75 2.0 2.25 2.5 2.75 3.0 3.25 3.5 3.75 4.0 4.5 5.0]
 #define WAVE_PARALLAX_MIN_SAMPLES 5.0   // [5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0]
@@ -492,7 +513,7 @@ const vec3 waterFogColor = vec3(WATER_FOG_COLOR_RED, WATER_FOG_COLOR_GREEN, WATE
 #define BLOOM_AMOUNT 0.02     // [0.0025 0.005 0.00625 0.0075 0.00875 0.01 0.0125 0.015 0.0175 0.02 0.0225 0.025 0.0275 0.03]
 #define RAIN_ADDITIONAL_BLOOM 0.04 // [0.0025 0.005 0.0075 0.01 0.0125 0.015 0.0175 0.02 0.0225 0.025 0.0275 0.03]
 #define NIGHT_ADDITIONAL_BLOOM 0.05 // [0.0 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1]
-#define NETHER_ADDITIONAL_BLOOM 0.25 // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5]
+#define NETHER_ADDITIONAL_BLOOM 0.1 // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5]
 #define END_ADDITIONAL_BLOOM 0.1 // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5]
 
 

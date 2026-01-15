@@ -42,7 +42,7 @@ void main() {
 	vec2 hrrUV = texcoord * 2.0;
 	float hrrZ = CT6.g;
 	vec3 diffuse = BLACK;
-	float ao = 0.0;
+	float accumSpeedPrev = 0.0;
 
 	float dhTerrainHrr = 0.0;
 	float depthHrr1 = texelFetch(depthtex1, ivec2(hrrUV * viewSize), 0).r;
@@ -66,14 +66,16 @@ void main() {
 		vec3 hrrNormalW = unpackNormal(CT6.r);
 		vec3 hrrNormal = normalize(mat3(gbufferModelView) * hrrNormalW);
 
-		diffuse.rgb = pathTracing(hrrViewPos.xyz, hrrWorldPos.xyz, hrrNormal, hrrNormalW);
-
-		vec4 gi = max(vec4(diffuse, ao), vec4(0.0));
-		#if defined RSM_ENABLED || defined AO_ENABLED
-			gi = temporal_RT(gi);
-			gi = max(vec4(0.0), gi);
-			CT10 = gi;
+		#ifdef PATH_TRACING
+			diffuse.rgb = pathTracing(hrrViewPos.xyz, hrrWorldPos.xyz, hrrNormal, hrrNormalW);
+		#elif defined COLORED_LIGHT
+			diffuse.rgb = coloredLight(hrrWorldPos.xyz, hrrNormal, hrrNormalW);
 		#endif
+
+		vec4 gi = max(vec4(diffuse, accumSpeedPrev), vec4(0.0));
+		gi = temporal_RT(gi);
+		gi = max(vec4(0.0), gi);
+		CT10 = gi;
 	}
 
 /* RENDERTARGETS: 10 */

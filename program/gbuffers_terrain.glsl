@@ -20,7 +20,7 @@ in mat3 tbnMatrix;
 in vec4 viewPos;
 in vec3 N;
 in vec3 mcPos;
-in vec4 texCoordAM;
+flat in vec4 texCoordAM;
 in vec2 texCoordLocal;
 
 float dither = temporalBayer64(ivec2(gl_FragCoord.xy));
@@ -53,29 +53,39 @@ void main() {
 	vec3 parallaxOffset = vec3(0.0, 0.0, 1.0);
 
 	#ifdef PARALLAX_MAPPING
+		vec2 pq  = max(texCoordAM.pq, vec2(1e-8));
+		float ref = max(pq.x, pq.y);
+		vec2 scale = ref / pq;
+
 		vec3 viewDirTS = normalize(viewPos.xyz * tbn);
+		viewDirTS.xy *= scale;
 		vec3 lightDirTS = normalize(shadowLightPosition * tbn);
+		lightDirTS.xy *= scale;
 
 		#if PARALLAX_TYPE == 0
-			parallaxUV = parallaxMapping(viewDirTS, parallaxOffset, normalFH);
+			parallaxUV = parallaxMapping(normalize(viewDirTS), parallaxOffset, normalFH);
 			#ifdef PARALLAX_SHADOW
-				parallaxShadow = ParallaxShadow(parallaxOffset, lightDirTS);
+				parallaxShadow = ParallaxShadow(parallaxOffset, normalize(lightDirTS));
 			#endif
 		#else
-			parallaxUV = voxelParallaxMapping(viewDirTS, parallaxOffset, normalFH);
+			parallaxUV = voxelParallaxMapping(normalize(viewDirTS), parallaxOffset, normalFH);
 			#ifdef PARALLAX_SHADOW
-				parallaxShadow = voxelParallaxShadow(parallaxOffset, lightDirTS);
+				parallaxShadow = voxelParallaxShadow(parallaxOffset, normalize(lightDirTS));
 			#endif
 		#endif
 	#endif
 
 	vec4 texColor;
 	#ifdef ANISOTROPIC_FILTERING
-		#if ANISOTROPIC_FILTERING_MODE == 0
-			texColor = textureAniso2(tex, parallaxUV, texcoord);
-		#else
-			texColor = textureAniso(tex, parallaxUV, texcoord);
-		#endif
+		if(abs(blockID - NO_ANISO) > 0.5){
+			#if ANISOTROPIC_FILTERING_MODE == 0
+				texColor = textureAniso2(tex, parallaxUV, texcoord);
+			#else
+				texColor = textureAniso(tex, parallaxUV, texcoord);
+			#endif
+		} else {
+			texColor = texture(tex, parallaxUV);
+		}
 	#else
 		#ifdef PARALLAX_MAPPING
 			texColor = textureGrad(tex, parallaxUV, texGradX, texGradY);
@@ -149,13 +159,6 @@ void main() {
 	normalFinal = normalize(normalFinal);
 	specularTex = saturate(specularTex);
 
-
-	// vec2 lmCoord = lmcoord;
-	// float heldBlockLight = max(heldBlockLightValue, heldBlockLightValue2) / 15.0;
-	// heldBlockLight *= remapSaturate(worldDis, 0.0, 20.0, 1.0, 0.0) * pow(saturate(dot(normalFinal, -normalize(vec3(viewPos.xy, viewPos.z)))), 0.5) - 0.05;
-	// heldBlockLight = pow(saturate(heldBlockLight), 1.0);
-	// lmCoord.x = max(lmCoord.x, heldBlockLight);
-
 	// vec2 noiseCoord = mcPos.xz;
 	// noiseCoord = rotate2D(noiseCoord, 0.45);
     // noiseCoord = vec2(noiseCoord.x * 3.0, noiseCoord.y);
@@ -163,10 +166,18 @@ void main() {
 	// noiseCoord /=64.0 * noiseTextureResolution;
     // color.rgb = vec3(textureBicubic(noisetex, noiseCoord, noiseTextureResolution).g);
 
+#ifdef PATH_TRACING
+/* DRAWBUFFERS:0459 */
+	gl_FragData[0] = vec4(color.rgb, color.a);
+	gl_FragData[1] = vec4(pack2x8To16(parallaxShadow, 0.0), pack2x8To16(blockID/ID_SCALE, 0.0), pack4x8To2x16(specularTex));
+	gl_FragData[2] = vec4(normalEncode(normalFinal), lmcoord);
+	gl_FragData[3] = vec4(0.0, 0.0, normalEncode(N));
+#else
 /* DRAWBUFFERS:045 */
 	gl_FragData[0] = vec4(color.rgb, color.a);
 	gl_FragData[1] = vec4(pack2x8To16(parallaxShadow, 0.0), pack2x8To16(blockID/ID_SCALE, 0.0), pack4x8To2x16(specularTex));
 	gl_FragData[2] = vec4(normalEncode(normalFinal), lmcoord);
+#endif
 }
  
 #endif
@@ -187,8 +198,8 @@ in mat3 v_tbnMatrix[];
 in vec4 v_viewPos[];
 in vec3 v_N[];
 in vec3 v_mcPos[];
-in vec4 v_texCoordAM[];
-in vec2 v_texCoord[];
+flat in vec4 v_texCoordAM[];
+in vec2 v_texCoordLocal[];
 flat in float v_blockID[];
 
 out vec2 lmcoord;
@@ -198,7 +209,7 @@ out mat3 tbnMatrix;
 out vec4 viewPos;
 out vec3 N;
 out vec3 mcPos;
-out vec4 texCoordAM;
+flat out vec4 texCoordAM;
 out vec2 texCoordLocal;
 flat out float blockID;
 flat out int textureResolution;
@@ -222,7 +233,7 @@ void main() {
 		N = v_N[i];
 		mcPos = v_mcPos[i];
 		texCoordAM = v_texCoordAM[i];
-		texCoordLocal = v_texCoord[i];
+		texCoordLocal = v_texCoordLocal[i];
 		blockID = v_blockID[i];
 
 		gl_Position = gl_in[i].gl_Position;
@@ -242,13 +253,15 @@ out mat3 v_tbnMatrix;
 out vec4 v_viewPos;
 out vec3 v_N;
 out vec3 v_mcPos;
-out vec4 v_texCoordAM;
-out vec2 v_texCoord;
+flat out vec4 v_texCoordAM;
+out vec2 v_texCoordLocal;
+out vec2 midCoord;
 flat out float v_blockID;
 
 attribute vec4 mc_Entity;
 attribute vec4 mc_midTexCoord;
 attribute vec4 at_tangent;
+attribute vec4 at_midBlock;
 
 #include "/lib/common/materialIdMapper.glsl"
 #include "/lib/wavingPlants.glsl"
@@ -256,15 +269,18 @@ attribute vec4 at_tangent;
 void main() {
 	v_blockID = IDMapping();
 	v_lmcoord  = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+	#if defined PATH_TRACING || defined COLORED_LIGHT
+		v_lmcoord.x = ((at_midBlock.a - 1.0)) / 15.0;
+	#endif
 	v_texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
 	v_glcolor = gl_Color;
 
 	// From BSL
-	vec2 midCoord = (gl_TextureMatrix[0] *  mc_midTexCoord).st;
+	midCoord = (gl_TextureMatrix[0] *  mc_midTexCoord).st;
 	vec2 texMinMidCoord = v_texcoord - midCoord;
 	v_texCoordAM.pq  = abs(texMinMidCoord) * 2;
 	v_texCoordAM.st  = min(v_texcoord, midCoord - texMinMidCoord);
-	v_texCoord.xy    = sign(texMinMidCoord) * 0.5 + 0.5;
+	v_texCoordLocal.xy    = sign(texMinMidCoord) * 0.5 + 0.5;
 
 	const float inf = uintBitsToFloat(0x7f800000u);
 	float handedness = clamp(at_tangent.w * inf, -1.0, 1.0);

@@ -1,5 +1,7 @@
 varying vec2 lmcoord;
 varying vec2 texcoord;
+varying vec3 N;
+
 
 varying vec4 glcolor;
 
@@ -45,11 +47,18 @@ void main() {
 		lightmapCoord = vec2(0.0, 1.0);
 	}
 
-	
+#ifdef PATH_TRACING
+/* DRAWBUFFERS:0459 */
+	gl_FragData[0] = vec4(color.rgb, color.a);
+	gl_FragData[1] = vec4(pack2x8To16(1.0, 0.0), pack2x8To16(entityIdMap / ID_SCALE, 0.0), pack4x8To2x16(specularTex));
+	gl_FragData[2] = vec4(normalEncode(normalTex), lightmapCoord);
+	gl_FragData[3] = vec4(0.0, 0.0, normalEncode(N));
+#else
 /* DRAWBUFFERS:045 */
 	gl_FragData[0] = vec4(color.rgb, color.a);
 	gl_FragData[1] = vec4(pack2x8To16(1.0, 0.0), pack2x8To16(entityIdMap / ID_SCALE, 0.0), pack4x8To2x16(specularTex));
 	gl_FragData[2] = vec4(normalEncode(normalTex), lightmapCoord);
+#endif
 }
 
 #endif
@@ -63,6 +72,7 @@ attribute vec4 mc_Entity;
 attribute vec4 mc_midTexCoord;
 attribute vec4 at_tangent;
 attribute vec3 at_velocity;
+attribute vec4 at_midBlock;
 
 #include "/lib/common/materialIdMapper.glsl"
 #include "/lib/common/noise.glsl"
@@ -78,13 +88,16 @@ void main() {
     gl_Position.xyz *= gl_Position.w;
 
 	// TBN Mat 参考自 BSL shader
-	vec3 N = normalize(gl_NormalMatrix * gl_Normal);
+	N = normalize(gl_NormalMatrix * gl_Normal);
 	vec3 B = normalize(gl_NormalMatrix * cross(at_tangent.xyz, gl_Normal.xyz) * at_tangent.w);
 	vec3 T = normalize(gl_NormalMatrix * at_tangent.xyz);
 	tbnMatrix = mat3(T, B, N);
 	// T_tbnMatrix = transpose(tbnMatrix);
 
 	lmcoord  = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+	#if defined PATH_TRACING || defined COLORED_LIGHT
+		lmcoord.x = ((at_midBlock.a - 1.0)) / 15.0;
+	#endif
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
 	glcolor = gl_Color;
 }

@@ -15,7 +15,7 @@ const int colortex5Format = RGBA16F;
 const int colortex6Format = RG32F;
 const int colortex7Format = RGBA16F;
 const int colortex8Format = RGBA16F;
-const int colortex9Format = RG16F;
+const int colortex9Format = RGBA16F;
 const int colortex10Format = RGBA16F;
 const int colortex11Format = RGBA16F;
 
@@ -36,9 +36,14 @@ const bool colortex10Clear = false;
 4: r:parallax shadow/ao		g:blockID/gbufferID		ba:specular		(df10)rg:albedo/ao	(df15)rgba:color
 5: rg:normal				ba:lmcoord													(df15)rgba:TAA pre color									
 6: hrr normal/depth (pre/cur)
-7: sky box/T1/MS/sunColor/skyColor
+7: sky box/T1/MS/sunColor/skyColor/handColor
 8: custom texture(MS/noise3d low)														
-9: rg:velocity
+9: rg:velocity				ba:N
+10:rgba:path tracing temporal
+11:rgba:path tracing filter
+
+ci0:rgb:voxel color			a:voxel bri
+ci1-3:SDF
 */
 #define CPS
 

@@ -235,7 +235,7 @@ vec3 getScatteredReflection(vec3 reflectDir, vec3 normal, float roughness, float
     vec3 bitangent = cross(reflectDir, tangent);
     mat3 tbn = mat3(tangent, bitangent, reflectDir);
 
-    float a = roughness * roughness;
+    float a = roughness;
     float phi = _2PI * randVec.x;
     
     float cosTheta = sqrt((1.0 - randVec.y) / (1.0 + (a*a - 1.0) * randVec.y));

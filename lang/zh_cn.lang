@@ -14,6 +14,7 @@ screen.lightmap = 原版光照贴图
 screen.shadow = 阴影
 screen.RSM = 反射阴影映射（RSM）
 screen.SSAO = 屏幕空间环境光遮蔽（SSAO）
+screen.path_tracing_colored_light = 光线追踪和彩色光源（图一乐/仅iris可用）
 
 option.INCOMING_LIGHT_RED = 入射光_红色
 option.INCOMING_LIGHT_GREEN = 入射光_绿色
@@ -81,6 +82,22 @@ option.GTAO_DIRECTION_SAMPLE_COUNT = GTAO方向采样数量
 option.GTAO_INTENSITY = GTAO强度
 option.GTAO_SEARCH_RADIUS = GTAO搜索半径
 option.AO_MULTI_BOUNCE = AO多重弹射模拟
+
+option.PATH_TRACING = 光线追踪漫反射
+option.PATH_TRACING.comment = 试验性功能，存在很多bug，且消耗大量性能. 不推荐开启材质包使用，如需开启材质包请提高“光线追踪质量”
+option.PATH_TRACING_QUALITY = 光线追踪质量
+option.PATH_TRACING_QUALITY.comment = 推荐设置为4
+value.PATH_TRACING_QUALITY.0 = 1根光线
+value.PATH_TRACING_QUALITY.1 = 2根光线
+value.PATH_TRACING_QUALITY.2 = 4根光线
+value.PATH_TRACING_QUALITY.3 = 8根光线
+option.PATH_TRACING_REFLECTION = 光线追踪镜面反射
+option.PATH_TRACING_REFLECTION.comment = 如果不开启该选项，如果屏幕空间反射没能成功命中，将会直接使用该反射方向的天空色. 必须开启“光线追踪漫反射”才可生效
+option.PATH_TRACING_REFLECTION_VOXEL = 光线追踪反射体素颜色
+option.PATH_TRACING_REFLECTION_VOXEL.comment = 开启后，如果屏幕空间反射没能成功命中，但成功命中体素空间的物体，将使用体素颜色（纯色块），如果关闭该选项将使用黑色。都未命中则使用天空色
+option.STRICT_LEAK_PREVENTION = 严格避免漏光
+option.COLORED_LIGHT = 彩色光源
+option.COLORED_LIGHT.comment = 警告：不能和“光线追踪漫反射”同时开启！请通过调整“光线追踪质量“来调整彩色光源的质量
 
 screen.Atmosphere = 大气
 option.CAMERA_HEIGHT = 相机高度

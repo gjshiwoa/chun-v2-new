@@ -78,19 +78,19 @@ void main() {
 		vec3 direct = vec3(0.0);
 
 		MaterialParams materialParams = MapMaterialParams(specularMap);
-		diffuse = mix(diffuse, vec3(getLuminance(diffuse)), 0.5);
-		vec3 artificial = lightmap.x * netherColor * (1. + GLOWING_BRIGHTNESS * glowingB) * diffuse;
-		artificial += saturate(materialParams.emissiveness - lightmap.x) * diffuse * EMISSIVENESS_BRIGHTNESS;
-
+		// vec3 artificial = lightmap.x * netherColor * (1. + GLOWING_BRIGHTNESS * glowingB) * diffuse;
+		// artificial += saturate(materialParams.emissiveness - lightmap.x) * diffuse * EMISSIVENESS_BRIGHTNESS;
+		vec3 artificial = max(lightmap.x, materialParams.emissiveness) * diffuse * 1.0;
 		
 		
 		color.rgb = albedo * 0.005;
-		color.rgb += skyLight * SKY_LIGHT_BRIGHTNESS;
-		color.rgb *= ao /*+ aoMultiBounce * 0.2*/;
-		color.rgb += direct;
+		// color.rgb += skyLight * SKY_LIGHT_BRIGHTNESS;
+		// color.rgb *= ao /*+ aoMultiBounce * 0.2*/;
+		// color.rgb += direct;
 		color.rgb += artificial;
+		color.rgb += gi.rgb * diffuse * 6.0;
 
-		// color.rgb = vec3(ao);
+		// color.rgb = vec3(texture(colortex1, texcoord * 0.5).rgb);
 	}
 
 	// color.rgb = vec3(texture(colortex1, texcoord * 0.5).rgb);

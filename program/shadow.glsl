@@ -64,7 +64,7 @@ in vec4 v_mcPos[];
 in vec4 worldPos[];
 in vec4 midBlock[];
 in vec2 midTexCoord[];
-flat in float v_isWater[];
+flat in float v_isWater[], v_noVoxel[], v_useArtCol[];
 
 out vec4 texcoord;
 out vec4 lmcoord;
@@ -76,11 +76,61 @@ flat out float isWater;
 #include "/lib/lighting/voxelization.glsl"
 
 layout(rgba8) uniform image3D voxel;
+layout(rgba8) uniform image3D voxelLitSky;
 
 void main(){
     float maxLength = max3(distance(worldPos[0].xyz, worldPos[1].xyz), 
                             distance(worldPos[1].xyz, worldPos[2].xyz), 
                             distance(worldPos[2].xyz, worldPos[0].xyz));
+    float avgLMC = (v_lmcoord[0].y + v_lmcoord[1].y + v_lmcoord[2].y) / 3.0;
+
+    #if defined PATH_TRACING || defined COLORED_LIGHT
+        if(maxLength > 0.5){
+            vec3 relBlockCenter = worldPos[0].xyz + midBlock[0].xyz / 64.0;
+            ivec3 vc = relWorldToVoxelCoord(relBlockCenter);
+            bool is_terrain = any(equal(ivec3(renderStage), ivec3(MC_RENDER_STAGE_TERRAIN_SOLID, 
+            /*MC_RENDER_STAGE_TERRAIN_TRANSLUCENT,*/ MC_RENDER_STAGE_TERRAIN_CUTOUT, MC_RENDER_STAGE_TERRAIN_CUTOUT_MIPPED)));
+            
+            if (voxelInBounds(vc) && is_terrain) {
+                float lightBri = (midBlock[0].w) / 15.0;
+                float spe = texture(specular, midTexCoord[0].xy).a;
+                lightBri = saturate(max(lightBri, spe < 254.1 / 255.0 ? spe : 0.0));
+
+                vec2 bias = abs(v_texcoord[0].xy - midTexCoord[0]) * 0.5;
+                const vec2 biasArr[7] = vec2[](
+                    vec2(0.0, 0.0),
+                    vec2(bias.x, bias.y),
+                    vec2(-bias.x, bias.y),
+                    vec2(-bias.x, -bias.y),
+                    vec2(bias.x, -bias.y),
+                    vec2(0.0, bias.y * 1.9),
+                    vec2(0.0, -bias.y * 1.9)
+                );
+                vec3 lightCol = vec3(0.0);
+                float weight = 0.0;
+                for(int j = 0; j < 7; j++){
+                    vec4 litTexCol = texture(tex, midTexCoord[0] + biasArr[j]);
+                    lightCol += litTexCol.rgb * litTexCol.a;
+                    weight += litTexCol.a;
+                }
+                lightCol /= max(weight, 0.01);
+
+                vec3 outCol = lightCol * v_glColor[0].rgb;
+                if(dot(outCol, vec3(0.3333)) < 0.01 && lightBri > 0.1)
+                    outCol = vec3(0.66);
+                
+                lightBri = clamp(lightBri, 0.0, 0.94);
+
+                if(lightBri > 0.1 && v_useArtCol[0] > 0.5)
+                    outCol = artificial_color.rgb;
+
+                if(v_noVoxel[0] < 0.5){
+                    imageStore(voxel, vc, vec4(outCol, lightBri));
+                    imageStore(voxelLitSky, vc, vec4(avgLMC, 0.0, 0.0, 0.0));
+                }
+            }
+        }
+    #endif
 
     for(int i = 0; i < 3; ++i){
         texcoord = v_texcoord[i];
@@ -89,46 +139,6 @@ void main(){
         normal = v_normal[i];
         mcPos = v_mcPos[i];
         isWater = v_isWater[i];
-
-        if(i == 0){
-            if(maxLength > 0.5){
-                vec3 relBlockCenter = worldPos[0].xyz + midBlock[0].xyz / 64.0;
-                ivec3 vc = relWorldToVoxelCoord(relBlockCenter);
-                // From Photon
-                bool is_terrain = any(equal(ivec4(renderStage), ivec4(MC_RENDER_STAGE_TERRAIN_SOLID, 
-                MC_RENDER_STAGE_TERRAIN_TRANSLUCENT, MC_RENDER_STAGE_TERRAIN_CUTOUT, MC_RENDER_STAGE_TERRAIN_CUTOUT_MIPPED)));
-                
-                if (voxelInBounds(vc) && is_terrain) {
-                    float lightBri = (midBlock[0].w - 1.0) / 15.0;
-                    float spe = texture(specular, midTexCoord[0].xy).a;
-                    lightBri = saturate(max(lightBri, spe < 254.1 / 255.0 ? spe : 0.0));
-
-                    vec2 bias = abs(v_texcoord[0].xy - midTexCoord[0]) * 0.5;
-                    const vec2 biasArr[5] = vec2[](
-                        vec2(0.0, 0.0),
-                        vec2(bias.x, bias.y),
-                        vec2(-bias.x, bias.y),
-                        vec2(-bias.x, -bias.y),
-                        vec2(bias.x, -bias.y)
-                    );
-                    vec3 lightCol = vec3(0.0);
-                    float weight = 0.0;
-                    for(int i = 0; i < 5; i++){
-                        vec4 litTexCol = texture(tex, midTexCoord[0] + biasArr[i]);
-                        lightCol += litTexCol.rgb * litTexCol.a;
-                        weight += litTexCol.a;
-                    }
-                    lightCol /= max(weight, 0.01);
-
-                    vec3 outCol = vec3(lightCol * glColor[0] * lightBri);
-                    if(dot(outCol, vec3(0.3333)) < 0.01 && lightBri > 0.1)
-                        outCol = vec3(0.66);
-                    lightBri = saturate(lightBri - 0.05);
-
-                    imageStore(voxel, vc, vec4(outCol, 0.5));
-                }
-            }
-        }
 
         gl_Position = gl_in[i].gl_Position;
         EmitVertex();
@@ -155,15 +165,12 @@ out vec3 v_normal;
 out vec4 v_mcPos;
 out vec4 worldPos;
 out vec4 midBlock;
-flat out float v_isWater;
+flat out float v_isWater, v_noVoxel, v_useArtCol;
 out vec2 midTexCoord;
-
 
 
 #include "/lib/common/materialIdMapper.glsl"
 #include "/lib/wavingPlants.glsl"
-
-layout(rgba8) uniform image3D voxel;
 
 void main(){
     v_texcoord = gl_TextureMatrix[0] * gl_MultiTexCoord0;
@@ -183,6 +190,8 @@ void main(){
     v_mcPos = vec4(worldPos.xyz + cameraPosition, 1.0);
 
     v_isWater = translucencyID == WATER ? 1.0 : 0.0;
+    v_noVoxel = abs(blockID - NO_VOXEL) < 0.1 ? 1.0 : 0.0;
+    v_useArtCol = abs(blockID - USE_ART_COL) < 0.1 ? 1.0 : 0.0;
 
     #ifdef WAVING_PLANTS
         if(worldDis < 60.0){

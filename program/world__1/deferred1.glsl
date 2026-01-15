@@ -33,13 +33,16 @@ const bool shadowcolor1Mipmap = false;
 #include "/lib/lighting/RSM.glsl"
 #include "/lib/lighting/SSAO.glsl"
 
+const vec3 sunColor = vec3(0.0);
+#include "/lib/lighting/pathTracing.glsl"
+
 void main() {
 	vec4 CT1 = texture(colortex1, texcoord);
 	vec4 CT3 = texture(colortex3, texcoord);
 
 	vec2 hrrUV = texcoord * 2.0;
 	float hrrZ = texture(depthtex1, hrrUV).x;
-	vec3 rsm = BLACK;
+	vec3 diffuse = BLACK;
 	float ao = 1.0;
 	if(!outScreen(hrrUV) && hrrZ < 1.0){
 		vec4 hrrScreenPos = vec4(unTAAJitter(hrrUV), hrrZ, 1.0);
@@ -49,17 +52,18 @@ void main() {
 		vec3 hrrNormal = getNormal(hrrUV);
 		vec3 hrrNormalW = normalize(viewPosToWorldPos(vec4(hrrNormal, 0.0)).xyz);
 
+		diffuse = coloredLight(hrrWorldPos.xyz, hrrNormal, hrrNormalW);
+
 		#ifdef AO_ENABLED
 			ao = AO_TYPE(hrrViewPos.xyz, hrrNormal, 0.0);
 		#endif
 
-		vec4 gi = vec4(rsm, ao);
-		#if defined RSM_ENABLED || defined AO_ENABLED
+		vec4 gi = vec4(diffuse, ao);
+		// #if defined RSM_ENABLED || defined AO_ENABLED
 			gi = temporal_RSM(gi);
 			gi = max(vec4(0.0), gi);
-			CT1 = gi;
 			CT3 = gi;
-		#endif
+		// #endif
 	}
 
 	// if(ivec2(gl_FragCoord.xy) == SUN_COLOR_UV){
@@ -79,9 +83,8 @@ void main() {
 	// }
 
 
-/* DRAWBUFFERS:13 */
-	gl_FragData[0] = CT1;
-	gl_FragData[1] = CT3;
+/* DRAWBUFFERS:3 */
+	gl_FragData[0] = CT3;
 }
 
 #endif
