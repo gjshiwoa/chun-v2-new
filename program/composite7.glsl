@@ -36,7 +36,7 @@ void main() {
 	#ifdef NETHER
 		nowColor = pow(nowColor, vec3(1.0)) * 1.5;
 	#elif defined END
-		nowColor = pow(nowColor, vec3(1.25)) * 0.6;
+		nowColor = pow(nowColor, vec3(1.0)) * 1.0;
 	#else
 		nowColor = nowColor * (1.0 - 0.15 * isNight);
 
@@ -66,9 +66,21 @@ void main() {
     moonWorldDir = normalize(viewPosToWorldPos(vec4(moonPosition, 0.0)).xyz);
     lightWorldDir = normalize(viewPosToWorldPos(vec4(shadowLightPosition, 0.0)).xyz);
 
+	#ifdef END
+		sunWorldDir = normalize(vec3(0.0, 1.0, tan(-sunPathRotation * PI / 180.0)));
+		moonWorldDir = sunWorldDir;
+		lightWorldDir = sunWorldDir;
+
+		sunViewDir = normalize((gbufferModelView * vec4(sunWorldDir, 0.0)).xyz);
+		moonViewDir = sunViewDir;
+		lightViewDir = sunViewDir;
+	#endif
+
 	isNoon = saturate(dot(sunWorldDir, upWorldDir) * NOON_DURATION);
 	isNight = saturate(dot(moonWorldDir, upWorldDir) * NIGHT_DURATION);
 	sunRiseSet = saturate(1 - isNoon - isNight);
+
+	
 
 	gl_Position = ftransform();
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;

@@ -41,35 +41,7 @@ const bool shadowcolor1Mipmap = false;
 #include "/lib/lighting/SSAO.glsl"
 #include "/lib/surface/PBR.glsl"
 #include "/lib/water/translucentLighting.glsl"
-
-float fakeCaustics(vec3 pos){
-    float height = 64.0;
-
-    // 点积向上向量和光照方向向量得到cos值   预定高度和实际高度的高度差
-    float cosUpSunpos = abs(dot(vec3(0.0,1.0,0.0), lightWorldDir));
-    float hDiff = abs(height - pos.y);
-
-    // 高度差 * （1除以cos）得到斜边长度   sqrt（斜边的平方-邻边的平方）得到对边长度
-    float hyp = hDiff * (1 / cosUpSunpos + 0.01);
-    float dist = sqrt(hyp * hyp - hDiff * hDiff);
-
-    // 单位化光照向量，乘上对边长度得到偏移向量
-    vec3 unit = normalize(vec3(lightWorldDir.x, 0.0, lightWorldDir.z));
-    vec3 offset = dist * unit;
-
-    vec2 waveUV = vec2(0.0);
-    if(pos.y < 64){
-        waveUV = pos.xz + offset.xz;
-    }else{
-        waveUV = pos.xz - offset.xz;
-    }
-
-    // worley 伪造焦散，最后用pow值调整曲线
-    float caustics  = texture(colortex8, vec3(waveUV * 0.015, 0.0) + frameTimeCounter * 0.025).g;
-
-
-    return caustics;
-}
+#include "/lib/atmosphere/endFog.glsl"
 
 void main() {
 	vec4 color = texture(colortex0, texcoord);
@@ -97,14 +69,15 @@ void main() {
 		#ifdef PBR_REFLECTIVITY
 			mat2x3 PBR = CalculatePBR(viewDir, normalV, lightViewDir, albedo, materialParams);
 			vec3 BRDF = PBR[0] + PBR[1];
-			vec3 BRDF_D = PBR[0];
+			vec3 BRDF_D = reflectDiffuse(viewDir, normalV, albedo, materialParams);
 		#else
 			vec3 BRDF = albedo / PI;
 			vec3 BRDF_D = BRDF;
 		#endif
 
-		float noRSM = entities + block + hand > 0.5 ? 1.0 : 0.0;
-		vec3 skyLight = 0.0625 * endColor * albedo;
+		float noRSM = hand > 0.5 ? 1.0 : 0.0;
+		float UoN = dot(normalW, upWorldDir);
+		vec3 skyLight = lightmap.y * 0.25 * endColor * BRDF_D * mix(1.0, UoN * 0.5 + 0.5, 0.5);
 		
 		vec4 gi = getGI(depth1, normalW);
 		if(noRSM < 0.5) {
@@ -117,8 +90,10 @@ void main() {
 			#endif
 		}
 
-		float shade = shadowMappingTranslucent(worldPos1, normalW, 0.5, 5.0);
-		vec3 direct = 2.0 * BRDF * endColor * shade * pow(fakeCaustics(worldPos1.xyz + cameraPosition), 1.0)* saturate(dot(lightViewDir, normalV));
+		float shade = 1.0;
+		if(worldDis1 < shadowDistance)
+			shade = shadowMappingTranslucent(worldPos1, normalW, 0.5, 5.0);
+		vec3 direct = 1.5 * BRDF * endColor * shade * pow(fakeCaustics(worldPos1.xyz + cameraPosition), 1.0)* saturate(dot(lightViewDir, normalV));
 
 		// diffuse = mix(diffuse, vec3(getLuminance(diffuse)), 0.5);
 		vec3 artificial = lightmap.x * artificial_color * diffuse;
@@ -127,7 +102,7 @@ void main() {
 
 		
 		
-		color.rgb = (endColor * 0.33333 + albedo) * 0.05;
+		color.rgb = albedo * 0.05;
 		color.rgb += skyLight * SKY_LIGHT_BRIGHTNESS;
 		color.rgb *= ao /*+ aoMultiBounce * 0.2*/;
 		color.rgb += direct;
@@ -166,9 +141,6 @@ void main() {
 	sunViewDir = normalize((gbufferModelView * vec4(sunWorldDir, 0.0)).xyz);
 	moonViewDir = sunViewDir;
 	lightViewDir = sunViewDir;
-
-	// sunColor = getSunColor();
-	// skyColor = getSkyColor();
 
 	gl_Position = ftransform();
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;

@@ -98,7 +98,9 @@ void main() {
 	
 	skyColor = zenithColor;
 	skyColor *= 3.0;
+	skyColor *= mix(vec3(1.0), vec3(1.25, 0.9, 1.0), sunRiseSetS);
 	skyColor *= 1.0 - 0.3 * rainStrength;
+	
 }
 
 #endif

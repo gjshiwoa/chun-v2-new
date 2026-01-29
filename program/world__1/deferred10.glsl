@@ -105,16 +105,17 @@ void main() {
 
 			artificial += (LeftLitDiff + RightLitDiff) * heldBlockLight * BRDF_D;
 
-			artificial += max(lightmap.x, materialParams.emissiveness) * diffuse * 2.0;
+			artificial += max(lightmap.x, materialParams.emissiveness) * diffuse * GLOWING_BRIGHTNESS;
 		#else
 			float heldLightIntensity = max(heldBlockLightValue, heldBlockLightValue2) / 15.0;
 			lightmap.x = max(lightmap.x, heldLightIntensity * heldBlockLight);
 
-			artificial = lightmap.x * artificial_color * (1.0 + GLOWING_BRIGHTNESS * glowingB) * BRDF_D;
+			artificial = lightmap.x * artificial_color * BRDF_D;
+			artificial += lightmap.x * artificial_color * GLOWING_BRIGHTNESS * glowingB * diffuse;
 			artificial += saturate(materialParams.emissiveness - lightmap.x) * diffuse * EMISSIVENESS_BRIGHTNESS;
 		#endif
 		
-		color.rgb = albedo * 0.005;
+		color.rgb = albedo * 0.01;
 		color.rgb += skyLight * SKY_LIGHT_BRIGHTNESS;
 		color.rgb *= ao;
 		color.rgb += artificial;

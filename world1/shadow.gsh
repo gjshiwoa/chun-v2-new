@@ -1,7 +1,7 @@
 #version 450 compatibility  
-  
-#define VSH
+
+#define GSH
 #define SHD
-#define NETHER
+#define END
 
 #include "/program/shadow.glsl"

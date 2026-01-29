@@ -91,13 +91,13 @@ void main() {
 #ifdef VSH
 
 void main() {
-	sunViewDir = normalize(sunPosition);
-	moonViewDir = normalize(moonPosition);
-	lightViewDir = normalize(shadowLightPosition);
+	sunWorldDir = normalize(vec3(0.0, 1.0, tan(-sunPathRotation * PI / 180.0)));
+    moonWorldDir = sunWorldDir;
+    lightWorldDir = sunWorldDir;
 
-	sunWorldDir = normalize(viewPosToWorldPos(vec4(sunPosition, 0.0)).xyz);
-    moonWorldDir = normalize(viewPosToWorldPos(vec4(moonPosition, 0.0)).xyz);
-    lightWorldDir = normalize(viewPosToWorldPos(vec4(shadowLightPosition, 0.0)).xyz);
+	sunViewDir = normalize((gbufferModelView * vec4(sunWorldDir, 0.0)).xyz);
+	moonViewDir = sunViewDir;
+	lightViewDir = sunViewDir;
 
 	isNoon = saturate(dot(sunWorldDir, upWorldDir) * NOON_DURATION);
 	isNight = saturate(dot(moonWorldDir, upWorldDir) * NIGHT_DURATION);

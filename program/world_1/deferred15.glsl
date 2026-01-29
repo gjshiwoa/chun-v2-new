@@ -86,7 +86,7 @@ void main() {
 
 	// vec3 worldDir = normalize(mat3(gbufferModelViewInverse) * viewPos1.xyz);
 	// color.rgb = texture(colortex7, clamp(0.5 * directionToOctahedral(worldDir), 0.0, 0.5 - 1.0 / 512.0)).rgb;
-	// color.rgb = vec3(texture(colortex1, texcoord * 0.5 + vec2(0.5, 0.0)).rgb);
+	// color.rgb = vec3(texture(colortex7, texcoord).rgb);
 	// color.rgb = texture(colortex3, texcoord).rgb;
 
 
@@ -106,13 +106,16 @@ void main() {
 #ifdef VSH
 
 void main() {
-	sunViewDir = normalize(sunPosition);
-	moonViewDir = normalize(moonPosition);
-	lightViewDir = normalize(shadowLightPosition);
+	sunWorldDir = normalize(vec3(0.0, 1.0, tan(-sunPathRotation * PI / 180.0)));
+    moonWorldDir = sunWorldDir;
+    lightWorldDir = sunWorldDir;
 
-	sunWorldDir = normalize(viewPosToWorldPos(vec4(sunPosition, 0.0)).xyz);
-    moonWorldDir = normalize(viewPosToWorldPos(vec4(moonPosition, 0.0)).xyz);
-    lightWorldDir = normalize(viewPosToWorldPos(vec4(shadowLightPosition, 0.0)).xyz);
+	sunViewDir = normalize((gbufferModelView * vec4(sunWorldDir, 0.0)).xyz);
+	moonViewDir = sunViewDir;
+	lightViewDir = sunViewDir;
+
+	sunColor = endColor * 1.5;
+	skyColor = endColor * 0.2 + vec3(0.2);
 
 	gl_Position = ftransform();
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;

@@ -174,12 +174,13 @@ void main() {
 
 			artificial += (LeftLitDiff + RightLitDiff) * heldBlockLight * BRDF_D;
 
-			artificial += max(lightmap.x, materialParams.emissiveness) * diffuse * 2.0;
+			artificial += max(lightmap.x, materialParams.emissiveness) * diffuse * GLOWING_BRIGHTNESS;
 		#else
 			float heldLightIntensity = max(heldBlockLightValue, heldBlockLightValue2) / 15.0;
 			lightmap.x = max(lightmap.x, heldLightIntensity * heldBlockLight);
 
-			artificial = lightmap.x * artificial_color * (1.0 + GLOWING_BRIGHTNESS * glowingB) * BRDF_D;
+			artificial = lightmap.x * artificial_color * BRDF_D;
+			artificial += lightmap.x * artificial_color * GLOWING_BRIGHTNESS * glowingB * diffuse;
 			artificial += saturate(materialParams.emissiveness - lightmap.x) * diffuse * EMISSIVENESS_BRIGHTNESS;
 			
 			if (lightningBolt > 0.5) {
@@ -244,6 +245,11 @@ void main() {
 		#endif
 
 		vec3 skyBaseColor = texture(colortex1, texcoord * 0.5 + 0.5).rgb * SKY_BASE_COLOR_BRIGHTNESS;
+		float skyMixFac = remapSaturate(dot(worldDir, upWorldDir), 0.0, 0.33, 1.0, 0.0);
+		vec3 skyMixCol = mix(sunColor, skyColor, 0.9);
+		float highFac = remapSaturate(camera.y, 2000.0, 2500.0, 1.0, 0.0);
+		skyBaseColor = mix(skyBaseColor, skyMixCol, skyMixFac * sunRiseSetS * highFac);
+		skyBaseColor *= mix(vec3(1.0), vec3(1.25, 0.9, 1.0), sunRiseSetS * highFac);
 		vec3 celestial = drawCelestial(worldDir, cloudTransmittance, true);
 
 		color.rgb = skyBaseColor;	
@@ -266,8 +272,9 @@ void main() {
 						// mix(saturate(pow(getLuminance(cloudScattering), 1.0 - 0.45 * phase * sunRiseSetS)), 
 						// 	exp(-cloudHitLength / (CLOUD_FADE_DISTANCE * (1.0 + 1.0 * phase * sunRiseSetS))) * 1.0, 
 						// 	0.66)
-						pow(exp(-cloudHitLength / (CLOUD_FADE_DISTANCE * (1.0 + 1.0 * phase * sunRiseSetS))), 
-								remapSaturate(1.0 - saturate(getLuminance(cloudScattering - 0.5) + 0.05), 0.0, 1.0, 1.0, 2.0))
+						pow(exp(-cloudHitLength / ((1.0 - 0.66 * sunRiseSetS) * CLOUD_FADE_DISTANCE * (1.0 + 1.0 * phase * sunRiseSetS))), 
+								remapSaturate(1.0 - saturate(getLuminance(cloudScattering - 0.5) + 0.05)
+											, 0.0, 1.0, 1.0, 2.0))
 					)
 				);
 			
@@ -276,7 +283,6 @@ void main() {
 					* remapSaturate(camera.y, 600.0, 1000.0, 1.0, 0.0);
 		// color.rgb = vec3(computeCrepuscularLight(viewPos1));
 		// color.rgb = vec3(crepuscularLight);
-		// color.rgb = normalize(normalDecode(texelFetch(colortex9, ivec2(gl_FragCoord.xy * 2.0 - viewSize), 0).ba));
 	}
 	
 	color.rgb = max(BLACK, color.rgb);

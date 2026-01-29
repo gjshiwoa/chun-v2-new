@@ -91,10 +91,15 @@ float sampleFogDensityLow(vec3 cameraPos, float height_fraction){
                                 + FOG_ADD_COVERAGE_SUNRISESET * sunRiseSetS 
                                 + FOG_ADD_COVERAGE_NOON * isNoonS
                                 + 0.05);
+    #ifdef END
+        fogBaseCoverage *= 0.66;
+        fogAddCoverage *= 0.66;
+    #endif
     coverage = saturate(1.0 - fogBaseCoverage * coverage - fogAddCoverage
                         + 0.15 * remapSaturate(pow(height_fraction, 1.0), 0.5, 1.0, 0.0, 1.0));
 
     cameraPos.y *= 1.33;
+    
 
     vec4 low_frequency_noise = texture(colortex8, cameraPos * 0.0025 + vec3(0.0, 0.9, 0.0));
     float perlin3d = low_frequency_noise.r;
@@ -359,7 +364,7 @@ vec4 getFog(float depth){
         float weight = 1.0;
         ivec2 offset = ivec2(offsetUV5[i]);
         ivec2 curUV = uv + offset;
-        if(outScreen((curUV * invViewSize) * 2.0 + vec2(0.0, -1.0))) continue;
+        if(outScreen((curUV * invViewSize) * 2.0 + vec2(0.0, -1.0))) return vec4(0.0, 0.0, 0.0, 1.0);
 
         vec4 curData = texelFetch(colortex6, curUV, 0);
 

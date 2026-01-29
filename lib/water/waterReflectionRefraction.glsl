@@ -96,13 +96,13 @@ vec2 SSRT(vec3 viewPos, vec3 reflectViewDir, vec3 normalTex, out vec3 outMissPos
     }
 
     bool depthCondition = true;
-    #if !defined END && !defined NETHER
+    // #if !defined END && !defined NETHER
         #ifdef DISTANT_HORIZONS
             depthCondition = texture(dhDepthTex0, testScreenPos.xy).r < 1.0 || texture(depthtex1, testScreenPos.xy).r < 1.0;
         #else
             depthCondition = texture(depthtex1, testScreenPos.xy).r < 1.0;
         #endif
-    #endif
+    // #endif
 
     if (!isHit){
         if(depthCondition) return vec2(testScreenPos.xy);
@@ -116,9 +116,9 @@ vec2 SSRT(vec3 viewPos, vec3 reflectViewDir, vec3 normalTex, out vec3 outMissPos
 }
 
 vec3 skyReflection(vec3 reflectWorldDir){
-    #if defined END || defined NETHER
-        return vec3(0.0);
-    #endif
+    // #if defined END || defined NETHER
+    //     return vec3(0.0);
+    // #endif
     #ifndef GBF
         vec3 reflectSkyColor = texture(colortex7, clamp(directionToOctahedral(reflectWorldDir) * 0.5, 0.0, 0.5 - 1.0 / 512.0)).rgb;
     #else

@@ -1,3 +1,3 @@
-#version 450 compatibility  
-
+#version 450 compatibility
+#define NETHER
 #include "/program/shadowcomp_c.glsl"

@@ -25,7 +25,6 @@ varying vec3 sunColor, skyColor;
 
 
 #ifdef FSH
-
 const bool shadowtex0Mipmap = false;
 const bool shadowtex1Mipmap = false;
 const bool shadowcolor0Mipmap = false;
@@ -130,6 +129,19 @@ void main() {
 
 	sunColor = getSunColor();
 	skyColor = getSkyColor();
+
+	#ifdef END
+		sunWorldDir = normalize(vec3(0.0, 1.0, tan(-sunPathRotation * PI / 180.0)));
+		moonWorldDir = sunWorldDir;
+		lightWorldDir = sunWorldDir;
+
+		sunViewDir = normalize((gbufferModelView * vec4(sunWorldDir, 0.0)).xyz);
+		moonViewDir = sunViewDir;
+		lightViewDir = sunViewDir;
+
+		sunColor = endColor * 1.5;
+		skyColor = endColor * 0.2 + vec3(0.2);
+	#endif
 
 	#ifdef NETHER
 		skyColor = vec3(0.5, 0.4, 0.9) * 0.4;

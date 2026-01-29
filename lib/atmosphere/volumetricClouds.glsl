@@ -140,7 +140,7 @@ vec3 sunLuminance(vec3 pos, float VoL, float iVoL, float extinction){
     attenuation += 0.15 * upAttenuation * isNoonS;
 
     float phase = GetDirectScatterProbability(VoL, 0.2, 0.75, 0.25);
-    float phase1 = GetDirectScatterProbability(iVoL, 0.2, 0.0, 0.0) * 0.4;
+    float phase1 = GetDirectScatterProbability(iVoL, 0.2, 0.0, 0.0) * 0.5;
     phase = max(phase, phase1);
 
     float inScatter = GetInScatterProbability(height_fraction, density, attenuation, VoL);
@@ -192,8 +192,8 @@ void cloudRayMarching(vec3 startPos, vec3 worldPos, inout vec4 intScattTrans, in
     float dither = temporalBayer64(gl_FragCoord.xy);
     startPos += worldDir * coarseStep * dither;
 
-    // vec3 hitPos = startPos;
-    // bool isHit = false;
+    vec3 hitPos = startPos;
+    bool isHit = false;
 
     const float COARSE_DETECT_THRESHOLD = 0.01; // 低质量噪声判断云的阈值（可调）
     const float MIN_DENSITY = 1e-4;             // 视为有效云密度的最小值（保留原阈值）
@@ -228,10 +228,10 @@ void cloudRayMarching(vec3 startPos, vec3 worldPos, inout vec4 intScattTrans, in
                 float ext = sampleCloudDensity(pos, false);
 
                 if(ext > MIN_DENSITY){
-                    // if(!isHit){
-                    //     hitPos = pos;
-                    //     isHit = true;
-                    // }
+                    if(!isHit){
+                        hitPos = pos;
+                        isHit = true;
+                    }
                     float opticalDepth = smallStep * ext;
                     float transmittance = GetAttenuationProbability(opticalDepth);
                     vec3 luminance = sunLuminance(pos, VoL, iVoL, ext);
@@ -255,9 +255,9 @@ void cloudRayMarching(vec3 startPos, vec3 worldPos, inout vec4 intScattTrans, in
         }
     }
 
-    intScattTrans.rgb *= 5.5 * (1.0 - 0.65 * isNight) * (1.0 + 0.25 * sunRiseSetS);
+    intScattTrans.rgb *= 5.5 * (1.0 - 0.65 * isNight) * (1.0 + 0.3 * sunRiseSetS);
 
-    // cloudHitLength = length(hitPos - oriStartPos);
+    cloudHitLength = length(hitPos - oriStartPos);
     // if(isHit){
     //     intScattTrans.rgb *= Transmittance1(earthPos, earthPos + worldDir * cloudHitLength, 3.0);
     // }

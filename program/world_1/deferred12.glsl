@@ -92,16 +92,16 @@ void main() {
 #ifdef VSH
 
 void main() {
-	sunViewDir = normalize(sunPosition);
-	moonViewDir = normalize(moonPosition);
-	lightViewDir = normalize(shadowLightPosition);
+	sunWorldDir = normalize(vec3(0.0, 1.0, tan(-sunPathRotation * PI / 180.0)));
+    moonWorldDir = sunWorldDir;
+    lightWorldDir = sunWorldDir;
 
-	sunWorldDir = normalize(viewPosToWorldPos(vec4(sunPosition, 0.0)).xyz);
-    moonWorldDir = normalize(viewPosToWorldPos(vec4(moonPosition, 0.0)).xyz);
-    lightWorldDir = normalize(viewPosToWorldPos(vec4(shadowLightPosition, 0.0)).xyz);
+	sunViewDir = normalize((gbufferModelView * vec4(sunWorldDir, 0.0)).xyz);
+	moonViewDir = sunViewDir;
+	lightViewDir = sunViewDir;
 
-	sunColor = getSunColor();
-	skyColor = getSkyColor();
+	sunColor = endColor * 1.5;
+	skyColor = endColor * 0.2 + vec3(0.2);
 
 	gl_Position = ftransform();
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;

@@ -108,6 +108,19 @@ void main() {
 	sunColor = getSunColor();
 	skyColor = getSkyColor();
 
+	#ifdef END
+		sunWorldDir = normalize(vec3(0.0, 1.0, tan(-sunPathRotation * PI / 180.0)));
+		moonWorldDir = sunWorldDir;
+		lightWorldDir = sunWorldDir;
+
+		sunViewDir = normalize((gbufferModelView * vec4(sunWorldDir, 0.0)).xyz);
+		moonViewDir = sunViewDir;
+		lightViewDir = sunViewDir;
+
+		sunColor = endColor * 1.5;
+		skyColor = endColor * 0.2 + vec3(0.2);
+	#endif
+
 	gl_Position = ftransform();
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
 }

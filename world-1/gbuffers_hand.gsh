@@ -2,5 +2,6 @@
 
 #define GSH
 #define GBF
+#define NETHER
 
 #include "/program/gbuffers_hand.glsl"

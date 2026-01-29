@@ -81,7 +81,8 @@ void main() {
 
 		RTShadow = screenSpaceShadow(viewPos1.xyz, normalV, shadow);
 		float mixFactor = remapSaturate(worldDis1, shadowDistance * 0.33, shadowDistance * 0.66, 1.0, 0.0);
-		RTShadow = 0.9 * mix(RTShadow, 1.0, saturate(sssWrap) * mixFactor * (1.0 - SSS_RT_SHADOW_VISIBILITY));
+		RTShadow = remapSaturate(worldDis1, shadowDistance * 0.9, shadowDistance, 1.0, 0.9) * 
+				mix(RTShadow, 1.0, saturate(sssWrap) * mixFactor * (1.0 - SSS_RT_SHADOW_VISIBILITY));
 
 		CT4.r = pack2x8To16(shadow, RTShadow);
 	}

@@ -1,7 +1,7 @@
 #version 450 compatibility  
 
 #define VSH
-#define SHD
 #define END
 
-#include "/program/shadow.glsl"
+
+#include "/program/world_1/deferred9.glsl"

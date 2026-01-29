@@ -112,6 +112,16 @@ void main() {
 	isNight = saturate(dot(moonWorldDir, upWorldDir) * NIGHT_DURATION);
 	sunRiseSet = saturate(1 - isNoon - isNight);
 
+	#ifdef END
+		sunWorldDir = normalize(vec3(0.0, 1.0, tan(-sunPathRotation * PI / 180.0)));
+		moonWorldDir = sunWorldDir;
+		lightWorldDir = sunWorldDir;
+
+		sunViewDir = normalize((gbufferModelView * vec4(sunWorldDir, 0.0)).xyz);
+		moonViewDir = sunViewDir;
+		lightViewDir = sunViewDir;
+	#endif
+
 	isNoonS = saturate(dot(sunWorldDir, upWorldDir) * NOON_DURATION_SLOW);
 	isNightS = saturate(dot(moonWorldDir, upWorldDir) * NIGHT_DURATION_SLOW);
 	sunRiseSetS = saturate(1 - isNoonS - isNightS);

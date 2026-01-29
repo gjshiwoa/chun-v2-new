@@ -210,7 +210,9 @@ void main() {
 			vec3 BRDF = reflectPBR(viewDir, waveViewNormal, sunViewDir, params);
 			float lightmapMask = remapSaturate(lightmap.y, 0.5, 1.0, 0.0, 1.0) * shade;
 			// color.rgb *= 1.0 + 1.0 *  sunColor * BRDF * pow(saturate(dot(waveViewNormal, lightViewDir)), 1.0) * lightmapMask * sunRiseSetS;
-			color.rgb += drawCelestial(reflectWorldDir, 1.0, false) * lightmapMask * WATER_REFLECT_HIGH_LIGHT_INTENSITY * 0.5 * float(!ssrTargetSampled);
+			#ifndef END
+				color.rgb += drawCelestial(reflectWorldDir, 1.0, false) * lightmapMask * WATER_REFLECT_HIGH_LIGHT_INTENSITY * 0.5 * float(!ssrTargetSampled);
+			#endif
 			// vec3 waveWorldNormal_diffuse = normalize(vec3(waveWorldNormal.x, waveWorldNormal.y * 0.333, waveWorldNormal.z));
 			// color.rgb *= 1.0 + 0.075 * sunColor * vec3(pow(saturate(dot(waveWorldNormal_diffuse, lightWorldDir)), 1.0)) * lightmap.y * lightmapMask * WATER_REFLECT_HIGH_LIGHT_INTENSITY;
 		#endif

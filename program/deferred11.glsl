@@ -56,10 +56,14 @@ void main() {
 		atmosphericScattering += AtmosphericScattering(worldDir * d_p2a, worldDirO, moonWorldDir, IncomingLight_N, 1.0, int(ATMOSPHERE_SCATTERING_SAMPLES * 0.5)) * 0.2 * SKY_BASE_COLOR_BRIGHTNESS_N;
 		vec3 skyBaseColor = atmosphericScattering[0] + atmosphericScattering[1];
 		skyBaseColor *= SKY_BASE_COLOR_BRIGHTNESS;
+		float skyMixFac = remapSaturate(dot(worldDirO, upWorldDir), 0.0, 0.33, 1.0, 0.0);
+		vec3 skyMixCol = mix(sunColor, skyColor, 0.9);
+		skyBaseColor = mix(skyBaseColor, skyMixCol, skyMixFac * sunRiseSetS);
+		skyBaseColor *= mix(vec3(1.0), vec3(1.25, 0.9, 1.0), sunRiseSetS);
 
 		vec4 intScattTrans = vec4(vec3(0.0), 1.0);
 		float cloudHitLength = 0.0;
-		vec3 color = skyBaseColor;
+		vec3 color = BLACK;
 		#ifdef VOLUMETRIC_CLOUDS
 			cloudRayMarching(camera, worldDir * d, intScattTrans, cloudHitLength);
 		#endif
@@ -74,9 +78,17 @@ void main() {
 		cloudScattering = max(cloudScattering, vec3(0.0));
 		color.rgb = color.rgb * cloudTransmittance + cloudScattering;
 
-		if(cloudTransmittance < 0.9999){
-			color.rgb = mix(skyBaseColor + celestial, color.rgb, 
-					mix(saturate(pow(getLuminance(cloudScattering), 1.0)), exp(-cloudHitLength / CLOUD_FADE_DISTANCE) * 0.90, 0.66));
+		float VoL = saturate(dot(worldDir, sunWorldDir));
+		float phase = saturate(hgPhase1(VoL, 0.66 - 0.56 * rainStrength));
+		if(cloudTransmittance < 1.0){
+			color.rgb = 
+				mix((skyBaseColor + celestial), color.rgb, 
+					saturate(
+						pow(exp(-cloudHitLength / ((1.0 - 0.66 * sunRiseSetS) * CLOUD_FADE_DISTANCE * (1.0 + 1.0 * phase * sunRiseSetS))), 
+								remapSaturate(1.0 - saturate(getLuminance(cloudScattering - 0.5) + 0.05)
+											, 0.0, 1.0, 1.0, 2.0))
+					)
+				);
 		}
 
 		#if defined DISTANT_HORIZONS && !defined END && !defined NETHER
@@ -121,9 +133,9 @@ void main() {
 	isNight = saturate(dot(moonWorldDir, upWorldDir) * NIGHT_DURATION);
 	sunRiseSet = saturate(1 - isNoon - isNight);
 
-	float isNoonS = saturate(dot(sunWorldDir, upWorldDir) * NOON_DURATION_SLOW);
-	float isNightS = saturate(dot(moonWorldDir, upWorldDir) * NIGHT_DURATION_SLOW);
-	float sunRiseSetS = saturate(1 - isNoonS - isNightS);
+	isNoonS = saturate(dot(sunWorldDir, upWorldDir) * NOON_DURATION_SLOW);
+	isNightS = saturate(dot(moonWorldDir, upWorldDir) * NIGHT_DURATION_SLOW);
+	sunRiseSetS = saturate(1 - isNoonS - isNightS);
 
 	sunColor = getSunColor();
 	skyColor = getSkyColor();
