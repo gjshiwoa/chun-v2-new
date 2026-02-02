@@ -23,7 +23,7 @@
 
 1.  **核心理论**：本光影是本人在学习《Games202 - 高质量实时渲染》课程时编写的练习作品，课程链接：
     *   [Games202 - 高质量实时渲染](https://sites.cs.ucsb.edu/~lingqi/teaching/games202.html)
-2.  **技术文档**：有关算法的思路均已在代码中详细注释。编写过程中查阅了以下资料：
+2.  **技术文档**：有关算法、思路的来源均已在代码中详细注释。编写过程中查阅了以下资料：
     *   [LearnOpenGL](https://learnopengl-cn.github.io)
     *   [Iris文档](https://shaders.properties/)
     *   [Optifine光影开发文档](https://optifine.readthedocs.io/shaders_dev.html)
