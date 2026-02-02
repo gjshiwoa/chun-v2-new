@@ -1,70 +1,122 @@
-# 【春 v2】内测预览版使用须知
+# 春 v2 - 说明文档
 
-尊敬的内测用户，感谢您参与本次本光影着色器（shader）的内测！
-本版本为练习用的内测（预览）版本，目前光影效果仍在制作完善中。
-以下是使用过程中的重要注意事项，请您仔细阅读并遵守：
+感谢下载使用我的光影作品！
 
-## 一、使用限制
-1. 本 shader 仅在指定群聊内发布，属于内部测试版本，请勿将 shader 文件外传至群外。
-2. 未经本人（ZY - PANDA（中影））明确书面许可，禁止以任何形式挪用、修改、分发本 shader 中的代码。
+## 授权与使用条款
 
-## 二、参考内容
-1. 本光影是本人在学习《Games202 - 高质量实时渲染》课程时编写的练习作品，课程链接为：
-    - [https://sites.cs.ucsb.edu/~lingqi/teaching/games202.html](https://sites.cs.ucsb.edu/~lingqi/teaching/games202.html)
-2. 光影思路、代码等参考内容均已在具体代码中详细注释。同时也参考了以下资料：
-    - [https://learnopengl-cn.github.io](https://learnopengl-cn.github.io)
-    - [https://optifine.readthedocs.io/shaders_dev.html](https://optifine.readthedocs.io/shaders_dev.html)
-    - [https://pastebin.com/aB5MJ7aN](https://pastebin.com/aB5MJ7aN)
-    - [https://cdn.discordapp.com/attachments/237199950235041794/825483993951633438/base.zip](https://cdn.discordapp.com/attachments/237199950235041794/825483993951633438/base.zip)
-    - [https://cdn.discordapp.com/attachments/960320448594329630/960695935837548695/base150.zip](https://cdn.discordapp.com/attachments/960320448594329630/960695935837548695/base150.zip)
-3. 还主要参考了两位大佬的光影编写教程：
-    - [https://blog.csdn.net/weixin_44176696/category_10388318.html](https://blog.csdn.net/weixin_44176696/category_10388318.html)
-    - [http://blog.hakugyokurou.net/?p=1364](http://blog.hakugyokurou.net/?p=1364)
-4. 部分代码思路主要参考了多个 AI 工具，包括 Claude、Deepseek、ChatGPT、Gemini、Doubao、GLM 和 Qwen 等。
-5. 文件管理方式参考自 BSL shader。
+本作品采用 **CC BY-NC-SA 4.0 (需署名-非商业性使用-相同方式共享)** 国际许可协议。
+协议全文链接：https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh
 
-## 三、反馈建议
-1. 若发现代码侵权或代码侵犯您的版权，请通过 QQ 2767334552 与本人联系。
-2. 如果您在使用过程中遇到任何问题、有优化建议或发现代码存在异常，请联系我，或在群内反馈，您的反馈将对本 shader 的完善起到重要作用。
+**简单来说，你可以：**
+*   **畅玩**：在你的单人或多人游戏中使用。
+*   **分享**：录制视频、截图分享到社交平台（非常欢迎！请注明光影使用的是本作品，建议附带原作品发布链接）。
+*   **魔改**：你可以查看源码，甚至修改它制作成你自己的版本（Edit版）。
 
-再次感谢您的支持与配合！
+**但你需要遵守以下规则：**
+1.  **必须署名**：无论你是在哪里分享或发布修改版，都必须显著标明原作者是 **中影 / ZYPanDa**。
+2.  **严禁商用**：你不能把这个光影（或你修改后的版本）拿去卖钱，也不能放在通过付费墙或广告链接（如 Adf.ly）才能下载的地方。这意味着你不能将其作为收费整合包的卖点。
+3.  **相同方式共享**：如果你发布了修改版，你的版本也必须使用同样的 CC BY-NC-SA 4.0 协议开源（不能闭源或者是改为私有）。
 
-编写人：ZY - PANDA（中影）
-发布日期：2025.01.28
+---
 
+## 参考内容与致谢
 
+1.  **核心理论**：本光影是本人在学习《Games202 - 高质量实时渲染》课程时编写的练习作品，课程链接：
+    *   [Games202 - 高质量实时渲染](https://sites.cs.ucsb.edu/~lingqi/teaching/games202.html)
+2.  **技术文档**：有关算法的思路均已在代码中详细注释。编写过程中查阅了以下资料：
+    *   [LearnOpenGL](https://learnopengl-cn.github.io)
+    *   [Iris文档](https://shaders.properties/)
+    *   [Optifine光影开发文档](https://optifine.readthedocs.io/shaders_dev.html)
+    *   [MGC光影包开发教程](https://docs.minegraph.cn/shadertutorial.html)
+3.  **教程致谢**：主要参考了以下两位前辈的光影编写教程：
+    *   AKGWSB - [从零开始编写Minecraft光影包](https://blog.csdn.net/weixin_44176696/category_10388318.html)
+    *   szszss - [如何编写Shadersmod光影包](http://blog.hakugyokurou.net/?p=1364)
+4.  **工具声明**：光影编写过程中使用了 GPT、Claude、Gemini、DeepSeek 等 AI 工具辅助学习、提供思路及生成部分代码片段。
+5.  **架构参考**：文件命名规范与文件夹管理方式参考了 BSL Shader。
 
+---
 
-# 【Chun v2】Internal Beta Preview - User Guide
+## 联系与反馈
 
-Dear Beta Tester, thank you for participating in the internal beta test of this shader!
-This version is a practice-oriented internal beta (preview) version, and the shader effects are still under development and improvement.
-The following are important precautions for using this version. Please read and adhere to them carefully:
+由于个人能力有限，代码中难免会有 Bug 或疏忽。
 
-## I. Usage Restrictions
-1.  This shader is only released within the designated group chat and is an internal test version. Please do not distribute the shader files outside the group.
-2.  Without the express permission of the author (ZY - PANDA (中影)), it is forbidden to misappropriate, modify, or distribute the code in this shader in any form.
+*   **版权声明**：我非常尊重知识产权。如果在代码中无意包含了不合规的片段，或者您认为我的作品侵犯了您的权益，请务必第一时间联系我，核实后我会立即整改或删除。
+*   **举报违规**：如果你发现有人违反上述协议（比如盗卖我的光影），也欢迎告诉我。
+*   **意见反馈**：欢迎任何建议、Bug 反馈或单纯的聊天！
 
-## II. Reference Materials
-1.  This shader is a practice project written by the author while studying the "Games202 - High-Quality Real-Time Rendering" course. The course link is:
-    -   [https://sites.cs.ucsb.edu/~lingqi/teaching/games202.html](https://sites.cs.ucsb.edu/~lingqi/teaching/games202.html)
-2.  The shader ideas, code, and other reference materials are annotated in detail within the code itself. The following resources were also referenced:
-    -   [https://learnopengl-cn.github.io](https://learnopengl-cn.github.io)
-    -   [https://optifine.readthedocs.io/shaders_dev.html](https://optifine.readthedocs.io/shaders_dev.html)
-    -   [https://pastebin.com/aB5MJ7aN](https://pastebin.com/aB5MJ7aN)
-    -   [https://cdn.discordapp.com/attachments/237199950235041794/825483993951633438/base.zip](https://cdn.discordapp.com/attachments/237199950235041794/825483993951633438/base.zip)
-    -   [https://cdn.discordapp.com/attachments/960320448594329630/960695935837548695/base150.zip](https://cdn.discordapp.com/attachments/960320448594329630/960695935837548695/base150.zip)
-3.  Significant reference was also made to the shader writing tutorials of the following two experts:
-    -   [https://blog.csdn.net/weixin_44176696/category_10388318.html](https://blog.csdn.net/weixin_44176696/category_10388318.html)
-    -   [http://blog.hakugyokurou.net/?p=1364](http://blog.hakugyokurou.net/?p=1364)
-4.  Some of the code logic is primarily inspired by AI tools such as Claude, Deepseek, ChatGPT, Gemini, Doubao, GLM and Qwen, among others.
-5.  The file management method is referenced from BSL shader.
+**你可以通过以下方式找到我：**
+*   **Bilibili主页**：[中影ZY](https://space.bilibili.com/87622349)
+*   **QQ**：2767334552
+*   **QQ交流群**：650101489 (密码：w8gf)
+*   **爱发电**：[ZY-PANDA](https://afdian.com/a/zypanda) (仅限自愿赞助，本作品完全免费下载)
 
-## III. Feedback and Suggestions
-1.  If you find any code infringement or code that infringes upon your copyright, please contact the author via QQ 2767334552.
-2.  If you encounter any problems during use, have optimization suggestions, or find any anomalies in the code, please contact the author or provide feedback within the group. Your feedback will play an important role in improving this shader.
+**作品官方发布链接（分享时请使用）：**
+*   [GitHub 开源库](https://github.com/gjshiwoa/chun-v2-new)
+*   [MGC - 春 v2](https://www.minegraph.cn/shaderpacks/62)
+*   [Modrinth - Spring v2](https://modrinth.com/shader/chun-v2)
+*   [CurseForge - Spring v2](https://www.curseforge.com/minecraft/shaders/spring-v2-chun-v2)
 
-Thank you again for your support and cooperation!
+---
+Copyright © 2024 ZYPanDa. All rights reserved.
+---
 
-Author: ZY - PANDA (中影)
-Release Date: 2025.01.28
+# Spring v2 - Documentation
+
+Thank you for downloading and using my shaderpack!
+
+## License and Terms of Use
+
+This work is licensed under the **CC BY-NC-SA 4.0 (Attribution-NonCommercial-ShareAlike 4.0 International)** license.
+Full License Text: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+**In short, You CAN:**
+*   **Play**: Use it in your single-player or multi-player games.
+*   **Share**: Record videos, take screenshots, and share them on social media (Highly welcomed! Please credit the shader name, and providing a link to the original post is appreciated).
+*   **Modify**: You can view the source code and even modify it to create your own version (Edits).
+
+**But you MUST follow these rules:**
+1.  **Attribution**: Wherever you share or release a modified version, you must clearly state that the original author is **中影 / ZYPanDa**.
+2.  **Strictly NO Commercial Use**: You cannot sell this shader (or your modified version), nor can you place it behind a paywall or advertising links (e.g., Adf.ly). This means you cannot use it as a selling point for paid modpacks.
+3.  **ShareAlike**: If you release a modified version, your version must also be open-sourced under the same CC BY-NC-SA 4.0 license (You cannot close the source or make it private).
+
+---
+
+## References & Credits
+
+1.  **Core Theory**: This shader is a practice work created while studying the course "Games202 - High Quality Real-Time Rendering".
+    *   Course Link: [Games202 - High Quality Real-Time Rendering](https://sites.cs.ucsb.edu/~lingqi/teaching/games202.html)
+2.  **Technical Documentation**: Algorithm logic is detailed in the code comments. The following materials were consulted during development:
+    *   [LearnOpenGL](https://learnopengl.com/)
+    *   [Iris Docs](https://shaders.properties/)
+    *   [Optifine Shader Documentation](https://optifine.readthedocs.io/shaders_dev.html)
+    *   [MGC Shader Tutorial](https://docs.minegraph.cn/shadertutorial.html)
+3.  **Tutorial Credits**: Huge thanks to the tutorials provided by these predecessors:
+    *   AKGWSB - [Writing Minecraft Shaderpacks from Scratch](https://blog.csdn.net/weixin_44176696/category_10388318.html)
+    *   szszss - [How to Write Shadersmod Packs](http://blog.hakugyokurou.net/?p=1364)
+4.  **AI Tools Declaration**: AI tools including GPT, Claude, Gemini, and DeepSeek were used to assist in learning, brainstorming, and generating code snippets during the development process.
+5.  **Structure Reference**: File naming conventions and folder structure reference BSL Shaders.
+
+---
+
+## Contact & Feedback
+
+Due to limited personal capability, there may be bugs or oversights in the code.
+
+*   **Copyright Notice**: I respect intellectual property rights. If the code unintentionally contains non-compliant segments, or if you believe my work infringes on your rights, please contact me immediately. I will verify and rectify or remove it promptly.
+*   **Report Violations**: If you find anyone violating the above terms (e.g., reselling my shader), please let me know.
+*   **Feedback**: Suggestions, bug reports, or casual chats are all welcome!
+
+**You can find me here:**
+*   **Bilibili**: [中影ZY](https://space.bilibili.com/87622349)
+*   **QQ**: 2767334552
+*   **QQ Group**: 650101489 (Password: w8gf)
+*   **Afdian**: [ZY-PANDA](https://afdian.com/a/zypanda) (Voluntary donations only; this work is free to download).
+
+**Official Download Links (Please use these when sharing):**
+*   [GitHub Repository](https://github.com/gjshiwoa/chun-v2-new)
+*   [MGC - 春 v2 (Chinese Community)](https://www.minegraph.cn/shaderpacks/62)
+*   [Modrinth - Spring v2](https://modrinth.com/shader/chun-v2)
+*   [CurseForge - Spring v2](https://www.curseforge.com/minecraft/shaders/spring-v2-chun-v2)
+
+---
+Copyright © 2024 ZYPanDa. All rights reserved.
