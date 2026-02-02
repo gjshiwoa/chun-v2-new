@@ -57,7 +57,7 @@
 *   [CurseForge - Spring v2](https://www.curseforge.com/minecraft/shaders/spring-v2-chun-v2)
 
 ---
-Copyright © 2024 ZYPanDa. All rights reserved.
+Copyright © 2024-2026 ZYPanDa. All rights reserved.
 
 ---
 
@@ -120,4 +120,4 @@ Due to limited personal capability, there may be bugs or oversights in the code.
 *   [CurseForge - Spring v2](https://www.curseforge.com/minecraft/shaders/spring-v2-chun-v2)
 
 ---
-Copyright © 2024 ZYPanDa. All rights reserved.
+Copyright © 2024-2026 ZYPanDa. All rights reserved.
