@@ -1,0 +1,10 @@
+{
+    "version": 1,
+    "uniforms": 
+    [
+        "cameraPosition"
+    ],
+    "samplers": {},
+    "opaqueDrawBuffers": [0,4,5],
+    "translucentDrawBuffers": [0]
+}
