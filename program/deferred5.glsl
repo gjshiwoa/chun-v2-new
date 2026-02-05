@@ -44,7 +44,7 @@ void main() {
 			viewPos1 = screenPosToViewPos(vec4(unTAAJitter(texcoord), depth1, 1.0));	
 		}
 	#else 
-		bool isTerrain = skyB < 0.5;
+		bool isTerrain = texture(depthtex1, texcoord).r < 1.0;
 
 		float depth1 = texture(depthtex1, texcoord).r;
 		vec4 viewPos1 = screenPosToViewPos(vec4(unTAAJitter(texcoord), depth1, 1.0));	

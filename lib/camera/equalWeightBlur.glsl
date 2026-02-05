@@ -89,6 +89,13 @@ vec4 JointBilateralFiltering_hrr_Horizontal(){
         bool isSkyC = depthHrrC == 1.0 && dhDepthC == 1.0;
     #endif
 
+    #if defined VOXY && !defined NETHER && !defined END
+        ivec2 uvC = ivec2(pix * 2.0 - vec2(0.0, 1.0) * viewSize);
+        float depthHrrC = texelFetch(depthtex0, uvC, 0).r;
+        float vxDepthC = texelFetch(vxDepthTexTrans, uvC, 0).r;
+        bool isTerrC = depthHrrC < 1.0 && vxDepthC < 1.0;
+    #endif
+
     vec4 curGD = texelFetch(colortex6, pix, 0);
     // vec3  normal0 = unpackNormal(curGD.r);
     float z0      = linearizeDepth(curGD.g);
@@ -124,6 +131,16 @@ vec4 JointBilateralFiltering_hrr_Horizontal(){
                     w *= 0.01;
                 }
             #endif
+
+            #if defined VOXY && !defined NETHER && !defined END
+                ivec2 uv = ivec2(p * 2.0 - vec2(0.0, 1.0) * viewSize);
+                float depthHrr = texelFetch(depthtex0, uv, 0).r;
+                float vxDepth = texelFetch(vxDepthTexTrans, uv, 0).r;
+                bool isTerr = depthHrr < 1.0 && vxDepth < 1.0;
+                if(isTerrC != isTerr){
+                    w *= 0.01;
+                }
+            #endif
         }
         vec4 col = texelFetch(colortex3, p, 0);
         cSum += col * w;
@@ -143,6 +160,13 @@ vec4 JointBilateralFiltering_hrr_Vertical(){
         float depthHrrC = texelFetch(depthtex0, uvC, 0).r;
         float dhDepthC = texelFetch(dhDepthTex0, uvC, 0).r;
         bool isSkyC = depthHrrC == 1.0 && dhDepthC == 1.0;
+    #endif
+
+    #if defined VOXY && !defined NETHER && !defined END
+        ivec2 uvC = ivec2(pix * 2.0 - vec2(0.0, 1.0) * viewSize);
+        float depthHrrC = texelFetch(depthtex0, uvC, 0).r;
+        float vxDepthC = texelFetch(vxDepthTexTrans, uvC, 0).r;
+        bool isTerrC = depthHrrC < 1.0 && vxDepthC < 1.0;
     #endif
 
     vec4 curGD = texelFetch(colortex6, pix, 0);
@@ -177,6 +201,16 @@ vec4 JointBilateralFiltering_hrr_Vertical(){
                 float dhDepth = texelFetch(dhDepthTex0, uv, 0).r;
                 bool isSky = depthHrr == 1.0 && dhDepth == 1.0;
                 if(isSkyC != isSky){
+                    w *= 0.01;
+                }
+            #endif
+
+            #if defined VOXY && !defined NETHER && !defined END
+                ivec2 uv = ivec2(p * 2.0 - vec2(0.0, 1.0) * viewSize);
+                float depthHrr = texelFetch(depthtex0, uv, 0).r;
+                float vxDepth = texelFetch(vxDepthTexTrans, uv, 0).r;
+                bool isTerr = depthHrr < 1.0 && vxDepth < 1.0;
+                if(isTerrC != isTerr){
                     w *= 0.01;
                 }
             #endif

@@ -25,7 +25,7 @@ void main() {
 	color.rgb *= 1.0 + lightmap.x;
 	if(isEyeInWater == 1) color.rgb *= 0.5;
 
-/* DRAWBUFFERS:0 */
+/* RENDERTARGETS: 0 */
 	gl_FragData[0] = vec4(color.rgb, color.a);
 }
 

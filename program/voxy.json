@@ -1,10 +1,55 @@
 {
     "version": 1,
+
+    "excludeLodsFromVanillaDepth": false,
+
+    "blending": {
+		-1: "off"
+	},
+
     "uniforms": 
     [
-        "cameraPosition"
+        "cameraPosition",
+        "viewSize",
+        "invViewSize",
+
+        "vxModelView",
+        "vxProj",
+        "vxProjInv",
+        "vxViewProjInv",
+
+        "gbufferModelView",
+        "gbufferModelViewInverse",
+
+        "frameCounter",
+        "frameTimeCounter",
+        "framemod8",
+        "isEyeInWater"
+        
     ],
-    "samplers": {},
-    "opaqueDrawBuffers": [0,4,5],
-    "translucentDrawBuffers": [0]
+
+    "samplers": {
+        "depthtex1":"sampler2D",
+        "noisetex":"sampler2D"
+    },
+
+    "opaqueDrawBuffers": [0,4,5,9],
+
+    "translucentDrawBuffers": [16,17,18],
+
+    "taaOffset":"
+    {
+        const vec2 Halton_2_3[8] = vec2[](
+            vec2(0.0f, -1.0f / 3.0f),
+            vec2(-1.0f / 2.0f, 1.0f / 3.0f),
+            vec2(1.0f / 2.0f, -7.0f / 9.0f),
+            vec2(-3.0f / 4.0f, -1.0f / 9.0f),
+            vec2(1.0f / 4.0f, 5.0f / 9.0f),
+            vec2(-1.0f / 4.0f, -5.0f / 9.0f),
+            vec2(3.0f / 4.0f, 1.0f / 9.0f),
+            vec2(-7.0f / 8.0f, 7.0f / 9.0f)
+        );
+        return Halton_2_3[frameCounter % 8] * invViewSize;
+    }
+    "
 }

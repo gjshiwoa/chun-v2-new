@@ -26,8 +26,14 @@ float screenSpaceShadow(vec3 viewPos, vec3 normal, float shadowMappingResult){
     float jitter = temporalBayer64(gl_FragCoord.xy);
     startPos += remapSaturate(dist, 5.0, shadowDistance, 0.01, 0.1) * rayDir;
     startPos += remapSaturate(dist, 5.0, shadowDistance, 0.01, 0.1) * normal;
+    if(dist > far * 3.0) startPos += 0.3 * (1.0 + saturate(dist - far * 3.0)) * normal;
 
     float shadow = 0.0;
+
+    #ifdef VOXY 
+        bool vxWaterC = abs(texture(colortex16, texcoord).a - 0.97) < 0.01;
+    #endif
+
     for (int i = 0; i < int(N_SAMPLE); ++i) {
         cumDist += curStep;
         float adjustedDist = cumDist - jitter * curStep;
@@ -49,6 +55,11 @@ float screenSpaceShadow(vec3 viewPos, vec3 normal, float shadowMappingResult){
             }
         #else
             z_sample = texture(depthtex1, p_screen.xy).r;
+        #endif
+
+        #ifdef VOXY 
+            bool vxWater = abs(texture(colortex16, p_screen.xy).a - 0.97) < 0.01;
+            if(vxWater != vxWaterC) return 1.0;
         #endif
 
         vec4 posSample = screenPosToViewPos(vec4(p_screen.xy, z_sample, 1.0));

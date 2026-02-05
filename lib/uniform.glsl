@@ -38,6 +38,11 @@ uniform sampler2D colortex9;
 uniform sampler2D colortex10;
 uniform sampler2D colortex11;
 
+uniform sampler2D colortex16;
+uniform sampler2D colortex17;
+uniform sampler2D colortex18;
+uniform sampler2D colortex19;
+
 uniform sampler2DShadow shadowtex0;
 uniform sampler2D shadowtex1;
 uniform sampler2D shadowcolor0;
@@ -114,6 +119,15 @@ uniform float dhFarPlane;
 uniform mat4 dhProjection;
 uniform mat4 dhProjectionInverse;
 uniform mat4 dhPreviousProjection;
+
+uniform int vxRenderDistance;
+uniform sampler2D vxDepthTexOpaque;
+uniform sampler2D vxDepthTexTrans;
+uniform mat4 vxModelView;
+uniform mat4 vxProj;
+uniform mat4 vxProjInv;
+uniform mat4 vxViewProjInv;
+
 
 
 uniform int frameCounter;

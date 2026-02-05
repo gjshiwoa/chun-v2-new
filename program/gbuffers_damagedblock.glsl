@@ -30,16 +30,30 @@ void main() {
 	vec4 specularTex = texture(specular, texcoord);
 
 #ifdef PATH_TRACING
-/* DRAWBUFFERS:0459 */
+#ifdef VOXY
+/* RENDERTARGETS: 0,4,5,9,19 */
+#else
+/* RENDERTARGETS: 0,4,5,9 */
+#endif
 	gl_FragData[0] = vec4(color.rgb, color.a);
 	gl_FragData[1] = vec4(pack2x8To16(1.0, 0.0), 0.0, pack4x8To2x16(specularTex));
 	gl_FragData[2] = vec4(normalEncode(N), lmcoord);
 	gl_FragData[3] = vec4(0.0, 0.0, normalEncode(N));
+#ifdef VOXY
+	gl_FragData[4] = vec4(1.0, 0.0, 0.0, 1.0);
+#endif
 #else
-/* DRAWBUFFERS:045 */
+#ifdef VOXY
+/* RENDERTARGETS: 0,4,5,19 */
+#else
+/* RENDERTARGETS: 0,4,5 */
+#endif
 	gl_FragData[0] = vec4(color.rgb, color.a);
 	gl_FragData[1] = vec4(pack2x8To16(1.0, 0.0), 0.0, pack4x8To2x16(specularTex));
 	gl_FragData[2] = vec4(normalEncode(N), lmcoord);
+#ifdef VOXY
+	gl_FragData[3] = vec4(1.0, 0.0, 0.0, 1.0);
+#endif
 #endif
 }
 

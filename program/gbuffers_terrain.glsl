@@ -116,15 +116,18 @@ void main() {
                 float noiseSample = texture(colortex8, mcPos.xz * 0.01).r;
                 float smoothedNoise = pow(smoothstep(0.0, 0.75, noiseSample), 0.5);
                 float noiseFactor = upFace ? smoothedNoise : 0.95;
-                wetFactor *= noiseFactor * float(biome_precipitation == 1);
+                wetFactor *= noiseFactor;
             #endif
-			wetFactor *= float(biome_precipitation == 1);
+			
         }
 			
 		#ifdef RIPPLE
 			float worldDis = length(viewPos);
-			if(upFace && worldDis < RIPPLE_DISTANCE && isRain && wetFactor > 0.0001) 
-				N1 = normalize(mat3(gbufferModelView) * RippleNormalWS(mcPos.xz, worldDis, wetFactor));
+			if(upFace && worldDis < RIPPLE_DISTANCE && isRain && wetFactor > 0.0001) {
+				vec3 rpnWS = RippleNormalWS(mcPos.xz, worldDis, wetFactor);
+				rpnWS = mix(vec3(0.0, 1.0, 0.0), rpnWS, saturate(biome_precipitation));
+				N1 = normalize(mat3(gbufferModelView) * rpnWS);
+			}
 		#endif
 	#endif
 
@@ -159,6 +162,7 @@ void main() {
 	}
 	normalFinal = normalize(normalFinal);
 	specularTex = saturate(specularTex);
+	// color.rgb = vec3(biome_precipitation);
 
 	// vec2 noiseCoord = mcPos.xz;
 	// noiseCoord = rotate2D(noiseCoord, 0.45);
@@ -168,16 +172,34 @@ void main() {
     // color.rgb = vec3(textureBicubic(noisetex, noiseCoord, noiseTextureResolution).g);
 
 #ifdef PATH_TRACING
-/* DRAWBUFFERS:0459 */
+
+#ifdef VOXY
+/* RENDERTARGETS: 0,4,5,9,19 */
+#else
+/* RENDERTARGETS: 0,4,5,9 */
+#endif
 	gl_FragData[0] = vec4(color.rgb, color.a);
 	gl_FragData[1] = vec4(pack2x8To16(parallaxShadow, 0.0), pack2x8To16(blockID/ID_SCALE, 0.0), pack4x8To2x16(specularTex));
 	gl_FragData[2] = vec4(normalEncode(normalFinal), lmcoord);
 	gl_FragData[3] = vec4(0.0, 0.0, normalEncode(N));
+#ifdef VOXY
+	gl_FragData[4] = vec4(1.0, 0.0, 0.0, 1.0);
+#endif
+
 #else
-/* DRAWBUFFERS:045 */
+
+#ifdef VOXY
+/* RENDERTARGETS: 0,4,5,19 */
+#else
+/* RENDERTARGETS: 0,4,5 */
+#endif
 	gl_FragData[0] = vec4(color.rgb, color.a);
 	gl_FragData[1] = vec4(pack2x8To16(parallaxShadow, 0.0), pack2x8To16(blockID/ID_SCALE, 0.0), pack4x8To2x16(specularTex));
 	gl_FragData[2] = vec4(normalEncode(normalFinal), lmcoord);
+#ifdef VOXY
+	gl_FragData[3] = vec4(1.0, 0.0, 0.0, 1.0);
+#endif
+
 #endif
 }
  
@@ -268,7 +290,7 @@ attribute vec4 at_midBlock;
 #include "/lib/wavingPlants.glsl"
 
 void main() {
-	v_blockID = IDMapping();
+	v_blockID = IDMapping(mc_Entity.x);
 	v_lmcoord  = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
 	#if defined PATH_TRACING || defined COLORED_LIGHT
 		v_lmcoord.x = ((at_midBlock.a - 1.0)) / 15.0;

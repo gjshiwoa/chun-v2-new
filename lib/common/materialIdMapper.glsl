@@ -1,7 +1,5 @@
-#if defined VSH && (defined GBF || defined SHD)
-
-float IDMapping(){
-    switch(int(mc_Entity.x)){
+float IDMapping(float id){
+    switch(int(round(id + 0.01))){
         case 31:            return PLANTS_SHORT;
         case 10175:         return PLANTS_TALL_L;
         case 11175:         return PLANTS_TALL_U;
@@ -15,6 +13,8 @@ float IDMapping(){
         default:            return 0.0;
     }
 }
+
+#if defined VSH && (defined GBF || defined SHD)
 
 float IDMappingEntity(){
     switch(entityId){

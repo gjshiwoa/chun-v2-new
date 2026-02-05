@@ -14,7 +14,7 @@ varying vec4 glcolor;
 void main() {
 	vec4 color = glcolor;
 
-/* DRAWBUFFERS:0 */
+/* RENDERTARGETS: 0 */
 	gl_FragData[0] = vec4(color.rgb, 1.0);
 }
 

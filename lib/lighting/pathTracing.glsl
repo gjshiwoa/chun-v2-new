@@ -657,7 +657,7 @@ vec4 JointBilateralFiltering_PT_Vertical(){
         ivec2 offset = ivec2(0.0, dy);
         ivec2 p = pix + offset;
 
-        if (outScreen(vec2(p) * 2.0 * invViewSize + vec2(1.0, 1.0) * invViewSize)) continue;
+        if (outScreen(vec2(p) * 2.0 * invViewSize)) continue;
 
         vec2 gd = texelFetch(colortex6, p, 0).rg;
         vec3  n  = unpackNormal(gd.r);

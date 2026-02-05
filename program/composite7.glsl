@@ -36,7 +36,7 @@ void main() {
 	#ifdef NETHER
 		nowColor = pow(nowColor, vec3(1.0)) * 1.5;
 	#elif defined END
-		nowColor = pow(nowColor, vec3(1.0)) * 1.0;
+		nowColor = pow(nowColor, vec3(1.1)) * 1.25;
 	#else
 		nowColor = nowColor * (1.0 - 0.15 * isNight);
 

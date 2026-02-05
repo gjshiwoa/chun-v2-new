@@ -3,7 +3,7 @@
 void main() {
     discard;
 
-/* DRAWBUFFERS:0 */
+/* RENDERTARGETS: 0 */
 	gl_FragData[0] = vec4(0.0);
 }
 

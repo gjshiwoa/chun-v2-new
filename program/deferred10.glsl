@@ -156,7 +156,7 @@ void main() {
 
 		vec3 gi_PT = vec3(0.0);
 		#if defined PATH_TRACING || defined COLORED_LIGHT
-			gi_PT = getGI_PT(depth1, normalW).rgb * BRDF_D * PI;
+			gi_PT = getGI_PT(depth1, normalW).rgb * BRDF_D * 2.5;
 		#endif
 
 		vec3 artificial = vec3(0.0);
@@ -221,6 +221,8 @@ void main() {
 		// color.rgb = vec3(shadow);
 		// color.rgb = gi_PT;
 		// color.rgb = RightLitDiff * 1.0;
+		// color.rgb = specularMap.rgb;
+		
 
 	}else{
 		float d_p2a = RaySphereIntersection(earthPos, worldDir, vec3(0.0), earth_r + atmosphere_h).y;
@@ -294,7 +296,7 @@ void main() {
 	// color.rgb = toLinearR(texelFetch(customimg0, ivec3(relWorldToVoxelCoord(worldPos1.xyz - 0.1 * normalW)), 0).rgb);
 	
 	CT4.rg = pack4x8To2x16(vec4(albedo, ao));
-
+	// color.rgb = vec3(texture(vxDepthTexTrans, texcoord).r < 1.0);
 /* DRAWBUFFERS:0249 */
 	gl_FragData[0] = color;
 	gl_FragData[1] = CT2;

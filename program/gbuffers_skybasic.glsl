@@ -15,7 +15,7 @@ void main() {
 	discard;
 	vec4 color = vec4(BLACK, 1.0);
 
-/* DRAWBUFFERS:0 */
+/* RENDERTARGETS: 0 */
 	gl_FragData[0] = color;
 }
 

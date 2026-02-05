@@ -238,6 +238,9 @@ vec4 volumtricFog(vec3 startPos, vec3 worldPos){
     #if defined DISTANT_HORIZONS && !defined NETHER && !defined END
         fogMaxDistance = dhRenderDistance;
     #endif
+    #ifdef VOXY
+        fogMaxDistance = vxRenderDistance * 16.0;
+    #endif
     stepDis.y = min(stepDis.y, fogMaxDistance);
     if(stepDis.y < 0.0001 || stepDis.x > fogMaxDistance){
         return intScattTrans;
@@ -335,7 +338,7 @@ vec4 temporal_fog(vec4 color_c){
         // float normalWeight = saturate(dot(normal_c, unpackNormal(pre.r)));
 
         if(isEyeInWater == 0){
-            depthWeight = mix(1.0, depthWeight, mix(1.0, c.a, rainStrength));
+            depthWeight = mix(1.0, depthWeight, mix(1.0, c.a, saturate(rainStrength + sunRiseSetS)));
             // normalWeight = mix(normalWeight, 1.0, c.a);
         }
 

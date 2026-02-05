@@ -20,7 +20,7 @@ vec2 SSRT(vec3 viewPos, vec3 reflectViewDir, vec3 normalTex, out vec3 outMissPos
     #ifdef GBF
         startPos += normalTex * 0.2;
     #else
-        startPos += normalTex * clamp(worldDis / 60.0, 0.01, 0.2);
+        startPos += normalTex * clamp(worldDis / 60.0, 0.01, 1.0);
     #endif
 
     float jitter = temporalBayer64(gl_FragCoord.xy);

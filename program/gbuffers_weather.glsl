@@ -30,7 +30,7 @@ void main() {
 #endif
 	color = max(vec4(0.0), color);
 
-/* DRAWBUFFERS:0 */
+/* RENDERTARGETS: 0 */
 	gl_FragData[0] = vec4(color.rgb, color.a);
 }
 

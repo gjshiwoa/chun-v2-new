@@ -94,7 +94,7 @@ void main() {
 		#if defined DISTANT_HORIZONS && !defined END && !defined NETHER
 			float fogDis = dhRenderDistance;
 		#else
-			float fogDis = far;
+			float fogDis = vxRenderDistance * 16.0;
 		#endif
 
 		vec4 fogColor = vec4(0.0, 0.0, 0.0, 1.0);

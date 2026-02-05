@@ -56,7 +56,14 @@ void main() {
 			}
 		#endif
 
+		
+
 		float isTerrainHrr = depthHrr < 1.0 || dhTerrainHrr > 0.5 ? 1.0 : 0.0;
+
+		#ifdef VOXY
+			float vxDepth = texture(vxDepthTexOpaque, hrrUV_c).r;
+			isTerrainHrr = isTerrainHrr > 0.5 || vxDepth < 1.0 ? 1.0 : 0.0;
+		#endif
 
 
 		vec4 hrrWorldPos = viewPosToWorldPos(hrrViewPos);

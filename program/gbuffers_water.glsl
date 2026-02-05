@@ -115,7 +115,7 @@ void main() {
 			worldPos1 -= vec4(0.0, 2.0, 0.0, 0.0);
 		#endif
 		float worldDis1 = length(worldPos1.xyz);
-		vec3 worldDir = normalize(worldPos1.xyz);
+		vec3 worldDir1 = normalize(worldPos1.xyz);
 		// vec4 fWorldPos1 = vec4(min(worldDis1, far) * worldDir, 1.0);
 
 		
@@ -335,7 +335,7 @@ void main() {
 	// color.rgb = texture(colortex8, fragCoord.xy).rgb;
 
 
-/* DRAWBUFFERS:0 */
+/* RENDERTARGETS: 0 */
 	gl_FragData[0] = color;
 }
 

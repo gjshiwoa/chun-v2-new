@@ -27,7 +27,7 @@ void main() {
 	color.rgb += nightVision * texColor.rgb * NIGHT_VISION_BRIGHTNESS / PI;
 #endif
 
-/* DRAWBUFFERS:05 */
+/* RENDERTARGETS: 0,5 */
 	gl_FragData[0] = vec4(color.rgb, color.a);
 	gl_FragData[1] = vec4(normalEncode(normalize(upPosition)), lmcoord);
 }

@@ -18,6 +18,12 @@ vec4 screenPosToViewPos(vec4 screenPos){
     }
 #endif
 
+vec4 screenPosToViewPosVX(vec4 screenPos){
+    vec4 NDCPos = vec4(screenPos.xyz * 2.0 - 1.0, 1.0);
+    vec4 clipPos = vxProjInv * NDCPos;
+    return vec4(clipPos.xyz / clipPos.w, 1.0);
+}
+
 vec4 viewPosToWorldPos(vec4 viewPos){
     return gbufferModelViewInverse * viewPos;
 }

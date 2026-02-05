@@ -185,7 +185,7 @@ void main(){
     midTexCoord = mc_midTexCoord.xy;
 
 
-    float blockID = IDMapping();
+    float blockID = IDMapping(mc_Entity.x);
     float translucencyID = IDMappingT();
 
     worldPos = shadowModelViewInverse * shadowProjectionInverse * ftransform();
