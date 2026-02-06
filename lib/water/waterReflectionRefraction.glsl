@@ -34,7 +34,11 @@ vec2 SSRT(vec3 viewPos, vec3 reflectViewDir, vec3 normalTex, out vec3 outMissPos
 
     vec3 curTestPos = startPos;
 
-    for (int i = 0; i < int(REFLECTION_SAMPLES); ++i){
+    float N_SAMPLES = REFLECTION_SAMPLES;
+    #if defined VOXY || defined DISTANT_HORIZONS
+        N_SAMPLES *= 1.5;
+    #endif
+    for (int i = 0; i < int(N_SAMPLES); ++i){
         cumUnjittered += curStep;
         float adjustedDist = cumUnjittered - jitter * curStep;
         curTestPos = startPos + reflectViewDir * adjustedDist;

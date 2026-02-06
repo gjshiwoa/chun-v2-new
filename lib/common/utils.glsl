@@ -166,17 +166,18 @@ vec4 saturate(vec4 color) {
 
 
 
+
+// 来自 滑稽菌 的 Lunar Drips
+vec2 offsetCoord(vec2 coord, vec4 v_tcrange) {
+    return mod(coord - v_tcrange.xy, v_tcrange.zw) + v_tcrange.xy;
+}
+
+// 来自 BSL
+vec2 offsetCoord1(vec2 coord, vec4 vTexCoordAM){
+    return fract(coord) * vTexCoordAM.pq + vTexCoordAM.st;
+}
+
 #ifndef VOXY
-    // 来自 滑稽菌 的 Lunar Drips
-    vec2 offsetCoord(vec2 coord, vec4 v_tcrange) {
-        return mod(coord - v_tcrange.xy, v_tcrange.zw) + v_tcrange.xy;
-    }
-
-    // 来自 BSL
-    vec2 offsetCoord1(vec2 coord, vec4 vTexCoordAM){
-        return fract(coord) * vTexCoordAM.pq + vTexCoordAM.st;
-    }
-
     vec2 GetParallaxCoord(vec2 offsetNormalized, vec2 uv, int textureResolution) {
         vec2 tileSizeNormalized = vec2(float(textureResolution)) / vec2(atlasSize);
         vec2 tileStart = floor(uv / tileSizeNormalized) * tileSizeNormalized;

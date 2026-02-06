@@ -67,7 +67,7 @@ vec3 coloredLight(vec3 worldPos, vec3 normalV, vec3 normalW){
             ivec3 vp = relWorldToVoxelCoord(wp);
             vec4 sampleCol = texelFetch(customimg0, vp.xyz, 0);
             if(sampleCol.a < 0.96){
-                Li = toLinearR(sampleCol.rgb * sampleCol.a) * 1.0;
+                Li = toLinearR(sampleCol.rgb * sampleCol.a) * 1.2;
                 break;
             }
         }
@@ -430,6 +430,9 @@ vec3 pathTracing(vec3 viewPos, vec3 worldPos, vec3 normalV, vec3 normalW){
     buildTBN(normalV, tangent, bitangent);
     mat3 TBN = mat3(tangent, bitangent, normalV);
 
+    vec4 CT5 = texelFetch(colortex5, ivec2(gl_FragCoord.xy * 2.0), 0);
+    vec2 mcLightmap = CT5.ba;
+
     vec3 color = vec3(0.0);
     #if PATH_TRACING_QUALITY == 0
         const int DIR_SAMPLES = 1;
@@ -474,7 +477,7 @@ vec3 pathTracing(vec3 viewPos, vec3 worldPos, vec3 normalV, vec3 normalW){
             vec4 hitSpecular = unpack2x16To4x8(CT4.ba);
             float selfLit = hitSpecular.a < 254.1 / 255.0 ? hitSpecular.a : 0.0;
             float hitMCLM = CT5.b;
-            Li += toLinearR(hitCol * max(selfLit, hitMCLM)) * 2.0;
+            Li += toLinearR(hitCol * max(selfLit, hitMCLM)) * 2.4;
         } else {
             vec3 roRel = viewPosToWorldPos(vec4(missPos, 1.0)).xyz;
             vec3 hitPosRel;
@@ -496,9 +499,6 @@ vec3 pathTracing(vec3 viewPos, vec3 worldPos, vec3 normalV, vec3 normalW){
                     clamp(directionToOctahedral(refWorldDir) * 0.5, 0.0, 0.5 - 1.0 / 512.0)
                 ).rgb;
 
-                vec4 CT5 = texelFetch(colortex5, ivec2(gl_FragCoord.xy * 2.0), 0);
-                vec2 mcLightmap = CT5.ba;
-
                 float xFade = remapSaturate(abs(worldPos.x), 100.0, 128.0, 1.0, 0.33 * mcLightmap.y);
                 float zFade = remapSaturate(abs(worldPos.z), 100.0, 128.0, 1.0, 0.33 * mcLightmap.y);
                 float yFade = remapSaturate(abs(worldPos.y),  40.0,  64.0, 1.0, 0.33 * mcLightmap.y);
@@ -507,7 +507,12 @@ vec3 pathTracing(vec3 viewPos, vec3 worldPos, vec3 normalV, vec3 normalW){
                 float UoR = dot(refWorldDir, upWorldDir);
                 float dFade = worldPos.y < -32.0 ? remapSaturate(UoR, -0.33, 0.0, 0.0, 1.0) : 1.0;
 
-                Li = skyColor * max(fade * dFade, 0.0);
+                float mask = 1.0;
+                #ifdef STRICT_LEAK_PREVENTION
+                    mask = pow(remapSaturate(mcLightmap.y, 0.075, 0.125, 0.0, 1.0), 2.0);
+                #endif
+
+                Li = skyColor * saturate(max(fade * dFade, 0.0) * mask);
             } else {
                 vec3 shadowPos = getShadowPos(vec4(hitPosRel, 1.0)).xyz;
                 float hitShadow = texture(shadowtex0, shadowPos).r;
@@ -520,7 +525,7 @@ vec3 pathTracing(vec3 viewPos, vec3 worldPos, vec3 normalV, vec3 normalW){
                 Li = DIRECT_LUMINANCE * sunColor * hitShadow * hitDiffuse * hitLoN;
 
                 vec4 hitVoxelCol = texelFetch(customimg0, hitVoxel, 0);
-                Li += toLinearR(hitVoxelCol.rgb * hitVoxelCol.a) * 1.0;
+                Li += toLinearR(hitVoxelCol.rgb * hitVoxelCol.a) * 1.2;
             }
         }
         color += Li * (cosTheta / pdf);

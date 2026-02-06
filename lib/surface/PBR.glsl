@@ -181,7 +181,7 @@ mat2x3 CalculatePBR(vec3 viewDir, vec3 N, vec3 L, vec3 albedo, MaterialParams pa
 vec3 reflectDiffuse(vec3 viewDir, vec3 N, vec3 albedo, MaterialParams params){
     vec3 V = -normalize(viewDir);
     
-    vec3 F0 = mix(vec3(0.04), vec3(0.96), params.metalness);
+    vec3 F0 = mix(vec3(0.04), vec3(0.9), params.metalness);
     vec3 kS = fresnelSchlickRoughness(saturate(dot(V, N)), F0, params.roughness);
     vec3 kD = vec3(1.0) - kS;
     
@@ -253,7 +253,7 @@ vec3 getScatteredReflection(vec3 reflectDir, vec3 normal, float roughness, float
 
     return dot(scatteredDir, normal) > 0.0 
         ? normalize(scatteredDir)
-        : reflect(scatteredDir, normal);
+        : reflectDir;
 }
 
 mat3 buildTangentBasis(vec3 N) {

@@ -190,7 +190,7 @@ vec4 fogLuminance(inout vec4 intScattTrans, vec3 pos, vec3 oriStartPos, float st
 
         float stepSize_l = 10.0;
         float lightPathOpticalDepth = sampleFogDensity(pos + lightWorldDir * stepSize_l, true);
-        float attenuation_lightPath = GetAttenuationProbability_Fog(lightPathOpticalDepth * fogSigmaE * stepSize_l * 10.0, 0.3, 0.4);
+        float attenuation_lightPath = GetAttenuationProbability_Fog(lightPathOpticalDepth * fogSigmaE * stepSize_l * 7.5, 0.3, 0.4);
         attenuation = min(attenuation, attenuation_lightPath);
     #endif
 

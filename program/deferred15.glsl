@@ -86,11 +86,10 @@ void main() {
 
 	// vec3 worldDir = normalize(mat3(gbufferModelViewInverse) * viewPos1.xyz);
 	// color.rgb = texture(colortex7, clamp(0.5 * directionToOctahedral(worldDir), 0.0, 0.5 - 1.0 / 512.0)).rgb;
-	// color.rgb = vec3(texture(colortex1, texcoord * 0.5 + vec2(0.5, 0.0)).rgb);
+	// color.rgb = vec3(texture(colortex3, texcoord * 0.5 + vec2(0.5)).rgb);
 	// color.rgb = texture(colortex3, texcoord).rgb;
 
-
-
+	// color.rgb = normalize(normalDecode(texelFetch(colortex9, ivec2(gl_FragCoord.xy * 2.0 - viewSize), 0).ba));
 
 /* DRAWBUFFERS:0456 */
 	gl_FragData[0] = color;

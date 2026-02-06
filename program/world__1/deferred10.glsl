@@ -133,10 +133,12 @@ void main() {
 	vec2 prePos = getPrePos(worldPos1R).xy;
 	vec2 velocity = texcoord - prePos;
 
+	vec4 CT9 = texelFetch(colortex9, ivec2(gl_FragCoord.xy), 0);
+
 /* DRAWBUFFERS:049 */
 	gl_FragData[0] = color;
 	gl_FragData[1] = CT4;
-	gl_FragData[2] = vec4(velocity, 0.0, 0.0);
+	gl_FragData[2] = vec4(velocity, CT9.ba);
 }
 
 #endif

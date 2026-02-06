@@ -27,10 +27,11 @@ void main() {
 	vec4 color = glcolor;
 	vec4 specularTex = vec4(BLACK, 1.0);
 
-/* DRAWBUFFERS:045 */
+/* DRAWBUFFERS:0459 */
 	gl_FragData[0] = vec4(color.rgb, color.a);
 	gl_FragData[1] = vec4(pack2x8To16(1.0, 0.0), pack2x8To16(vec2(blockID / ID_SCALE, 0.0)), pack4x8To2x16(specularTex));
 	gl_FragData[2] = vec4(normalEncode(N), lmcoord);
+	gl_FragData[3] = vec4(0.0, 0.0, normalEncode(N));
 }
 
 #endif

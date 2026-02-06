@@ -1,3 +1,5 @@
+#define VOXY_WATER
+
 varying vec2 texcoord;
 
 varying vec3 sunWorldDir, moonWorldDir, lightWorldDir;

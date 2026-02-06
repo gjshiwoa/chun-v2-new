@@ -296,12 +296,13 @@ void main() {
 	// color.rgb = toLinearR(texelFetch(customimg0, ivec3(relWorldToVoxelCoord(worldPos1.xyz - 0.1 * normalW)), 0).rgb);
 	
 	CT4.rg = pack4x8To2x16(vec4(albedo, ao));
-	// color.rgb = vec3(texture(vxDepthTexTrans, texcoord).r < 1.0);
+	vec4 CT9 = texelFetch(colortex9, ivec2(gl_FragCoord.xy), 0);
+
 /* DRAWBUFFERS:0249 */
 	gl_FragData[0] = color;
 	gl_FragData[1] = CT2;
 	gl_FragData[2] = CT4;
-	gl_FragData[3] = vec4(velocity, 0.0, 1.0);
+	gl_FragData[3] = vec4(velocity, CT9.ba);
 }
 
 #endif
