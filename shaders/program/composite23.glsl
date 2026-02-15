@@ -44,7 +44,7 @@ void main() {
 		color.rgb = vignette(color.rgb);
 	#endif
 
-	color.rgb = simpleFilter(color.rgb, filterSlope, filterOffset, filterPower, FLITER_SATURATE);
+	color.rgb = simpleFilter(color.rgb, filterSlope, filterOffset, filterPower, FILTER_SATURATE);
 	
 	// vec3 q_albedo = textureLod(shadowcolor0, texcoord, 0.0).rgb;
     //     toLinear(q_albedo);

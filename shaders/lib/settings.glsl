@@ -87,11 +87,11 @@ const int noiseTextureResolution = 64;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // #define PARALLAX_MAPPING
 #define PARALLAX_TYPE 0             // [0 1]
-#define PARALLAX_SAMPPLES 30.0      // [15.0 30.0 45.0 60.0 75.0 90.0 120.0 150.0 180.0]
+#define PARALLAX_SAMPLES 30.0      // [15.0 30.0 45.0 60.0 75.0 90.0 120.0 150.0 180.0]
 #define PARALLAX_HEIGHT 0.25        // [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0]
 #define PARALLAX_DISTANCE 30.0      // [5.0 10.0 15.0 20.0 25.0 30.0 40.0 50.0 60.0]
 #define PARALLAX_SHADOW
-#define PARALLAX_SHADOW_SAMPPLES 8.0   // [4.0 8.0 12.0 16.0 20.0 24.0 28.0 32.0]
+#define PARALLAX_SHADOW_SAMPLES 8.0   // [4.0 8.0 12.0 16.0 20.0 24.0 28.0 32.0]
 #define PARALLAX_SHADOW_SOFTENING 1.0   // [0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0 2.5 3.0 3.5 4.0 5.0]
 #define PARALLAX_NORMAL_MIX_WEIGHT 0.5   // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 #define PARALLAX_FORCE_NORMAL_VERTICAL
@@ -105,7 +105,7 @@ const int noiseTextureResolution = 64;
 // #define PBR_REFLECTION_BLUR
 #define TRANSLUCENT_ROUGHNESS 0.9  // [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95]
 #define TRANSLUCENT_F0 0.5         // [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95]
-// #define TRANSLUCENT_USE_REASOURCESPACK_PBR
+// #define TRANSLUCENT_USE_RESOURCESPACK_PBR
 
 
 
@@ -463,7 +463,7 @@ const vec3 waterFogColor = vec3(WATER_FOG_COLOR_RED, WATER_FOG_COLOR_GREEN, WATE
 
 
 #define UNDERWATER_ADD_BLOOM 0.12  // [0.005 0.0075 0.01 0.0125 0.015 0.0175 0.02 0.0225 0.025 0.0275 0.03 0.035 0.04 0.045 0.05 0.055 0.06 0.065 0.07 0.075 0.08]
-#define UNDERWATER_CANTRAST 1.5     // [0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+#define UNDERWATER_CONTRAST 1.5     // [0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 #define UNDERWATER_BRI 1.5          // [0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 2.25 2.5 2.75 3.0 3.25 3.5 3.75 4.0]
 
 
@@ -476,7 +476,7 @@ const vec3 waterFogColor = vec3(WATER_FOG_COLOR_RED, WATER_FOG_COLOR_GREEN, WATE
 #define REFLECTION_STEP_SIZE 0.25   // [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 1.0 2.0 3.0]
 #define REFLECTION_SAMPLES 20       // [10 15 20 25 30 35 40 45 50]
 #define REFLECTION_STEP_GROWTH_BASE 1.4   // [1.0 1.2 1.4 1.6 1.8 2.0 2.2 2.4 2.6 2.8 3.0 4.0 5.0]
-#define REFLECTION_FRESNAL_POWER 5.0    // [0.1 1.0 2.0 3.0 4.0 5.0]
+#define REFLECTION_FRESNEL_POWER 5.0    // [0.1 1.0 2.0 3.0 4.0 5.0]
 #define WATER_F0 0.02               // [0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 #define WATER_REFLECT_HIGH_LIGHT
 #define WATER_REFLECT_HIGH_LIGHT_INTENSITY 1.0  // [0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0 2.5 3.0 3.5 4.0 5.0]
@@ -552,7 +552,7 @@ const vec3 filterSlope = vec3(FILTER_SLOPE_RED, FILTER_SLOPE_GREEN, FILTER_SLOPE
 const vec3 filterOffset = vec3(1.0, 1.0, 1.0) * FILTER_WHITE;
 #define FILTER_CONTRAST 1.0     // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.55 1.6 1.65 1.7 1.75 1.8 1.85 1.9 1.95 2.0]
 const vec3 filterPower = vec3(1.0, 1.0, 1.0) * FILTER_CONTRAST;
-#define FLITER_SATURATE 1.0     // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.55 1.6 1.65 1.7 1.75 1.8 1.85 1.9 1.95 2.0]
+#define FILTER_SATURATE 1.0     // [0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.55 1.6 1.65 1.7 1.75 1.8 1.85 1.9 1.95 2.0]
 
 
 

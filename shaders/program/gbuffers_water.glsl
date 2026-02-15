@@ -171,7 +171,7 @@ void main() {
 		bool ssrTargetSampled = false;
 		
 		float cosTheta = dot(-worldDir, waveWorldNormal);
-		float fresnel = mix(pow(1.0 - saturate(cosTheta), REFLECTION_FRESNAL_POWER), 1.0, WATER_F0);
+		float fresnel = mix(pow(1.0 - saturate(cosTheta), REFLECTION_FRESNEL_POWER), 1.0, WATER_F0);
 
 		#ifdef WATER_REFLECTION
 			vec3 reflectColor = reflection(
@@ -232,14 +232,14 @@ void main() {
 
 		MaterialParams materialParams = MapMaterialParams(specularMap);
 
-		#ifdef TRANSLUCENT_USE_REASOURCESPACK_PBR
+		#ifdef TRANSLUCENT_USE_RESOURCESPACK_PBR
 			if(dot(specularMap.rgb, vec3(1.0)) < 0.001){
 		#endif
 				materialParams.smoothness = TRANSLUCENT_ROUGHNESS;
 				float perceptual_roughness = 1.0 - materialParams.smoothness;
 				materialParams.roughness = perceptual_roughness * perceptual_roughness;
 				materialParams.metalness = TRANSLUCENT_F0;
-		#ifdef TRANSLUCENT_USE_REASOURCESPACK_PBR
+		#ifdef TRANSLUCENT_USE_RESOURCESPACK_PBR
 			}
 		#endif
 		#ifdef PBR_REFLECTIVITY

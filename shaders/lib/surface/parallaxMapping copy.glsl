@@ -11,7 +11,7 @@ vec2 parallaxMapping(vec3 viewVector, vec2 texGradX, vec2 texGradY, out vec3 par
     // const float slicesMin = 60.0;
     // const float slicesMax = 60.0;
     // float slicesNum = ceil(lerp(slicesMax, slicesMin, abs(dot(vec3(0, 0, 1), viewVector))));
-    float slicesNum = PARALLAX_SAMPPLES;
+    float slicesNum = PARALLAX_SAMPLES;
 
     float dHeight = 1.0 / slicesNum;
     vec2 dUV = vec2(textureResolution)/vec2(atlasSize) * PARALLAX_HEIGHT * (viewVector.xy / viewVector.z) / slicesNum;
@@ -56,7 +56,7 @@ float ParallaxShadow(vec3 parallaxOffset, vec3 viewDirTS, vec3 lightDirTS, vec2 
 
     if(parallaxHeight < 0.99){  
         const float shadowSoftening = PARALLAX_SHADOW_SOFTENING;
-        float slicesNum = PARALLAX_SHADOW_SAMPPLES;
+        float slicesNum = PARALLAX_SHADOW_SAMPLES;
         
         float dDist = 1.0 / slicesNum;
         float dHeight = (1.0 - parallaxHeight) / slicesNum;

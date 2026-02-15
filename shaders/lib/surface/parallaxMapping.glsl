@@ -114,7 +114,7 @@ vec3 computeNormalFromHeight(vec2 parallaxUV) {
 // https://miusjun13qu.feishu.cn/docx/G17IdiCyhoEd7XxBqJOcb3J1nie
 
 vec2 parallaxMapping(vec3 viewVector, inout vec3 parallaxOffset, inout vec3 normalTS){
-    int slicesNum = int(PARALLAX_SAMPPLES);
+    int slicesNum = int(PARALLAX_SAMPLES);
     float dHeight = 1.0 / float(slicesNum);
     vec2 dUVLocal = PARALLAX_HEIGHT * (viewVector.xy / viewVector.z) / float(slicesNum);
 
@@ -396,7 +396,7 @@ float traceParallaxShadow(vec3 parallaxOffset, vec3 lightDirTS, float shadowSoft
     float parallaxHeight = parallaxOffset.z;
     if (parallaxHeight >= 254.5 / 255.0) return 1.0;
 
-    const int SAMPLES = int(PARALLAX_SHADOW_SAMPPLES);
+    const int SAMPLES = int(PARALLAX_SHADOW_SAMPLES);
     float slicesNum = float(SAMPLES);
     float dDist   = 1.0 / slicesNum;
     float dHeight = (1.0 - parallaxHeight) / slicesNum;

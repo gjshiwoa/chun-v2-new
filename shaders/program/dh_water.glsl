@@ -103,7 +103,7 @@ void main() {
 		bool ssrTargetSampled = false;
 		
 		float cosTheta = dot(-worldDir, waveWorldNormal);
-		float fresnel = mix(pow(1.0 - saturate(cosTheta), REFLECTION_FRESNAL_POWER), 1.0, WATER_F0);
+		float fresnel = mix(pow(1.0 - saturate(cosTheta), REFLECTION_FRESNEL_POWER), 1.0, WATER_F0);
 
 		#ifdef WATER_REFLECTION
 			vec3 reflectColor = reflection(

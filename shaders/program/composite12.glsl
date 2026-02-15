@@ -43,7 +43,7 @@ void main() {
 		nowColor = nowColor * (1.0 - 0.15 * isNight);
 
 		if(isEyeInWater == 1){
-			nowColor.rgb = pow(nowColor.rgb, vec3(UNDERWATER_CANTRAST)) * UNDERWATER_BRI;
+			nowColor.rgb = pow(nowColor.rgb, vec3(UNDERWATER_CONTRAST)) * UNDERWATER_BRI;
 		}
 	#endif
 

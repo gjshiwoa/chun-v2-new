@@ -123,3 +123,5 @@ void main() {
 
 #ifdef SHADOWMAP_EXCLUDE_ENTITIES
 #endif
+#ifdef HELD_BLOCK_DYNAMIC_LIGHT
+#endif
