@@ -51,10 +51,10 @@
 *   **爱发电**：[ZY-PANDA](https://afdian.com/a/zypanda) (仅限自愿赞助，本作品完全免费下载)
 
 **作品官方发布链接（分享时请使用）：**
-*   [GitHub 开源库](https://github.com/gjshiwoa/chun-v2-new)
+*   [GitHub 开源库](https://github.com/gjshiwoa/spring-shaders)
 *   [MGC - 春 v2](https://www.minegraph.cn/shaderpacks/62)
-*   [Modrinth - Spring v2](https://modrinth.com/shader/chun-v2)
-*   [CurseForge - Spring v2](https://www.curseforge.com/minecraft/shaders/spring-v2-chun-v2)
+*   [Modrinth - Spring Shaders](https://modrinth.com/shader/spring-shaders)
+*   [CurseForge - Spring Shaders](https://www.curseforge.com/minecraft/shaders/spring-shaders)
 
 ---
 Copyright © 2024-2026 ZYPanDa. All rights reserved.
@@ -114,10 +114,10 @@ Due to limited personal capability, there may be bugs or oversights in the code.
 *   **Afdian**: [ZY-PANDA](https://afdian.com/a/zypanda) (Voluntary donations only; this work is free to download).
 
 **Official Download Links (Please use these when sharing):**
-*   [GitHub Repository](https://github.com/gjshiwoa/chun-v2-new)
+*   [GitHub Repository](https://github.com/gjshiwoa/spring-shaders)
 *   [MGC - 春 v2 (Chinese Community)](https://www.minegraph.cn/shaderpacks/62)
-*   [Modrinth - Spring v2](https://modrinth.com/shader/chun-v2)
-*   [CurseForge - Spring v2](https://www.curseforge.com/minecraft/shaders/spring-v2-chun-v2)
+*   [Modrinth - Spring Shaders](https://modrinth.com/shader/spring-shaders)
+*   [CurseForge - Spring Shaders](https://www.curseforge.com/minecraft/shaders/spring-shaders)
 
 ---
 Copyright © 2024-2026 ZYPanDa. All rights reserved.
