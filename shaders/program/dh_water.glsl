@@ -204,6 +204,17 @@ void main() {
 	sunColor = texelFetch(gaux4, sunColorUV, 0).rgb;
 	skyColor = texelFetch(gaux4, skyColorUV, 0).rgb;
 
+	#ifdef END
+		sunColor = mix(vec3(1.0), endColor, 0.8) * 2.0;
+		skyColor = endColor * 0.0;
+		// lightColor *= 3.0;
+	#endif
+	#ifdef NETHER
+		sunColor = mix(vec3(1.0), netherColor, 0.3) * 5.0;
+		skyColor = netherColor * 0.0;
+		// lightColor = netherColor * 1.0;
+	#endif
+
 	glcolor = gl_Color;
 }
 
