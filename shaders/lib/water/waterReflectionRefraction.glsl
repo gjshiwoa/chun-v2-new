@@ -345,6 +345,20 @@ vec3 getReflectColor(float depth, vec3 normal){
 
     float z = linearizeDepth(depth);
 
+    vec4 centerData = texelFetch(colortex6, ivec2(uv - 0.5 * viewSize), 0);
+    float centerWeight = max(0.0f, mix(1.0, dot(unpackNormal(centerData.r), normal), 2.0));
+    float centerZ = linearizeDepth(centerData.g);
+    centerWeight *= saturate(1.0 - abs(centerZ - z) * 2.0);
+    w_max = centerWeight;
+
+    if(centerWeight > 0.9){
+        #ifdef PBR_REFLECTION_BLUR
+            return texelFetch(colortex1, ivec2(uv), 0).rgb;
+        #else
+            return texelFetch(colortex3, ivec2(uv), 0).rgb;
+        #endif
+    }
+
     for(int i = 0; i < 5; i++){
         float weight = 1.0;
         ivec2 offset = ivec2(offsetUV5[i]);

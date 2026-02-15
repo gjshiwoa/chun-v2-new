@@ -5,7 +5,7 @@ varying vec4 glcolor;
 
 // varying float blockID;
 
-varying mat3 tbnMatrix, T_tbnMatrix;
+varying mat3 tbnMatrix;
 
 varying vec3 N;
 
@@ -83,7 +83,7 @@ void main() {
 	vec3 B = normalize(gl_NormalMatrix * cross(at_tangent.xyz, gl_Normal.xyz) * at_tangent.w);
 	vec3 T = normalize(gl_NormalMatrix * at_tangent.xyz);
 	tbnMatrix = mat3(T, B, N);
-	T_tbnMatrix = transpose(tbnMatrix);
+	// T_tbnMatrix = transpose(tbnMatrix);
 
 
 

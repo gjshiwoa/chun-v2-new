@@ -16,7 +16,7 @@ flat in int textureResolution;
 in vec2 texcoord;
 in vec2 lmcoord;
 in vec4 glcolor;
-in mat3 tbnMatrix;
+// in mat3 tbnMatrix;
 in vec4 viewPos;
 in vec3 N;
 in vec3 mcPos;
@@ -75,10 +75,13 @@ void main() {
 		#endif
 	#endif
 
+
+	bool useAniso = abs(blockID - NO_ANISO) > 0.5;
+	if (!useAniso) parallaxUV = texcoord;
+
 	vec4 texColor;
-	if(abs(blockID - NO_ANISO) < 0.5) parallaxUV = texcoord;
 	#ifdef ANISOTROPIC_FILTERING
-		if(abs(blockID - NO_ANISO) > 0.5){
+		if (useAniso) {
 			#if ANISOTROPIC_FILTERING_MODE == 0
 				texColor = textureAniso2(tex, parallaxUV, texcoord);
 			#else
@@ -91,10 +94,10 @@ void main() {
 		#ifdef PARALLAX_MAPPING
 			texColor = textureGrad(tex, parallaxUV, texGradX, texGradY);
 		#else
-			texColor = texture(tex,parallaxUV);
+			texColor = texture(tex, parallaxUV);
 		#endif
 	#endif
-	if(texColor.a < 0.05) discard;
+	if (texColor.a < 0.05) discard;
 	vec4 color = texColor * glcolor;
 
 
@@ -110,20 +113,17 @@ void main() {
 	bool isRain = rainStrength > 0.001;
 
 	#ifdef RAINY_GROUND_WET_ENABLE
-		if(isRain){
-            wetFactor = smoothstep(0.88, 0.95, lmcoord.y) * rainStrength;
-            #ifdef RAINY_GROUND_WET_NOISE
-                float noiseSample = texture(colortex8, mcPos.xz * 0.01).r;
-                float smoothedNoise = pow(smoothstep(0.0, 0.75, noiseSample), 0.5);
-                float noiseFactor = upFace ? smoothedNoise : 0.95;
-                wetFactor *= noiseFactor;
-            #endif
-			
-        }
-			
+		if (isRain) {
+			wetFactor = smoothstep(0.88, 0.95, lmcoord.y) * rainStrength;
+			#ifdef RAINY_GROUND_WET_NOISE
+				float noiseSample = texture(colortex8, mcPos.xz * 0.01).r;
+				wetFactor *= upFace ? pow(smoothstep(0.0, 0.75, noiseSample), 0.5) : 0.95;
+			#endif
+		}
+
 		#ifdef RIPPLE
 			float worldDis = length(viewPos);
-			if(upFace && worldDis < RIPPLE_DISTANCE && isRain && wetFactor > 0.0001) {
+			if (upFace && worldDis < RIPPLE_DISTANCE && isRain && wetFactor > 0.0001) {
 				vec3 rpnWS = RippleNormalWS(mcPos.xz, worldDis, wetFactor);
 				rpnWS = mix(vec3(0.0, 1.0, 0.0), rpnWS, saturate(biome_precipitation));
 				N1 = normalize(mat3(gbufferModelView) * rpnWS);
@@ -137,12 +137,9 @@ void main() {
 		#if PARALLAX_TYPE == 0
 			normalFinal = mix(normalFinal, heightBasedNormal, PARALLAX_NORMAL_MIX_WEIGHT);
 		#else
-			normalFinal = mix(normalFinal, N1, 
-						saturate(max(PARALLAX_NORMAL_MIX_WEIGHT, wetFactor * float(upFace))));
-
+			normalFinal = mix(normalFinal, N1, saturate(max(PARALLAX_NORMAL_MIX_WEIGHT, wetFactor * float(upFace))));
 			#ifdef PARALLAX_FORCE_NORMAL_VERTICAL
-				float verticalness = dot(normalFH, vec3(0.0, 0.0, 1.0));
-				normalFinal = verticalness > 0.95 ? normalFinal : (heightBasedNormal);
+				normalFinal = dot(normalFH, vec3(0.0, 0.0, 1.0)) > 0.95 ? normalFinal : heightBasedNormal;
 			#else
 				normalFinal = heightBasedNormal;
 			#endif
@@ -150,7 +147,7 @@ void main() {
 	#endif
 
 	vec4 specularTex = saturate(textureGrad(specular, parallaxUV, texGradX, texGradY));
-	if(isRain && wetFactor > 0.0001){
+	if (isRain && wetFactor > 0.0001) {
 		#if !defined(PARALLAX_MAPPING) || PARALLAX_TYPE == 0
 			normalFinal = mix(normalFinal, N1, saturate(wetFactor * float(upFace) * (1.0 - specularTex.g)));
 		#endif
@@ -219,7 +216,7 @@ layout(triangle_strip, max_vertices = 3) out;
 in vec2 v_lmcoord[];
 in vec2 v_texcoord[];
 in vec4 v_glcolor[];
-in mat3 v_tbnMatrix[];
+// in mat3 v_tbnMatrix[];
 in vec4 v_viewPos[];
 in vec3 v_N[];
 in vec3 v_mcPos[];
@@ -230,7 +227,7 @@ flat in float v_blockID[];
 out vec2 lmcoord;
 out vec2 texcoord;
 out vec4 glcolor;
-out mat3 tbnMatrix;
+// out mat3 tbnMatrix;
 out vec4 viewPos;
 out vec3 N;
 out vec3 mcPos;
@@ -253,7 +250,7 @@ void main() {
 		lmcoord = v_lmcoord[i];
 		texcoord = v_texcoord[i];
 		glcolor = v_glcolor[i];
-		tbnMatrix = v_tbnMatrix[i];
+		// tbnMatrix = v_tbnMatrix[i];
 		viewPos = v_viewPos[i];
 		N = v_N[i];
 		mcPos = v_mcPos[i];
@@ -274,7 +271,7 @@ void main() {
 #ifdef VSH
 out vec2 v_lmcoord, v_texcoord;
 out vec4 v_glcolor;
-out mat3 v_tbnMatrix;
+// out mat3 v_tbnMatrix;
 out vec4 v_viewPos;
 out vec3 v_N;
 out vec3 v_mcPos;
@@ -307,12 +304,12 @@ void main() {
 	v_texCoordAM.st  = min(v_texcoord, midCoord - texMinMidCoord);
 	v_texCoordLocal.xy    = sign(texMinMidCoord) * 0.5 + 0.5;
 
-	const float inf = uintBitsToFloat(0x7f800000u);
-	float handedness = clamp(at_tangent.w * inf, -1.0, 1.0);
+	// const float inf = uintBitsToFloat(0x7f800000u);
+	// float handedness = clamp(at_tangent.w * inf, -1.0, 1.0);
 	v_N = gl_NormalMatrix * normalize(gl_Normal);
-	vec3 T = gl_NormalMatrix * normalize(at_tangent.xyz);
-	vec3 B = cross(T, v_N) * handedness;
-	v_tbnMatrix = mat3(T, B, v_N);
+	// vec3 T = gl_NormalMatrix * normalize(at_tangent.xyz);
+	// vec3 B = cross(T, v_N) * handedness;
+	// v_tbnMatrix = mat3(T, B, v_N);
 
 	v_viewPos = gl_ModelViewMatrix * gl_Vertex;
 	vec4 vWorldPos = viewPosToWorldPos(v_viewPos);
