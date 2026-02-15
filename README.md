@@ -31,7 +31,7 @@
 3.  **教程致谢**：主要参考了以下两位前辈的光影编写教程：
     *   AKGWSB - [从零开始编写Minecraft光影包](https://blog.csdn.net/weixin_44176696/category_10388318.html)
     *   szszss - [如何编写Shadersmod光影包](http://blog.hakugyokurou.net/?p=1364)
-4.  **工具声明**：光影编写过程中使用了 GPT、Claude、Gemini、DeepSeek、Kimi 等 AI 工具辅助学习、提供思路及生成部分代码片段。
+4.  **工具声明**：光影编写过程中使用了 GPT、Claude、Gemini、DeepSeek、Kimi、GLM 等 AI 工具辅助学习、提供思路及生成部分代码片段。
 5.  **架构参考**：文件命名规范与文件夹管理方式参考了 BSL Shader。
 
 ---
@@ -94,7 +94,7 @@ Full License Text: https://creativecommons.org/licenses/by-nc-sa/4.0/
 3.  **Tutorial Credits**: Huge thanks to the tutorials provided by these predecessors:
     *   AKGWSB - [Writing Minecraft Shaderpacks from Scratch](https://blog.csdn.net/weixin_44176696/category_10388318.html)
     *   szszss - [How to Write Shadersmod Packs](http://blog.hakugyokurou.net/?p=1364)
-4.  **AI Tools Declaration**: AI tools including GPT, Claude, Gemini, DeepSeek, and Kimi were used to assist in learning, brainstorming, and generating code snippets during the development process.
+4.  **AI Tools Declaration**: AI tools including GPT, Claude, Gemini, DeepSeek, Kimi, and GLM were used to assist in learning, brainstorming, and generating code snippets during the development process.
 5.  **Structure Reference**: File naming conventions and folder structure reference BSL Shaders.
 
 ---
